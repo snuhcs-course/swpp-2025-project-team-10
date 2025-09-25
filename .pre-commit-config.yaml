@@ -1,0 +1,179 @@
+# Pre-commit hooks configuration
+# See https://pre-commit.com for more information
+
+repos:
+  # General hooks for all files
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: \.md$
+      - id: end-of-file-fixer
+      - id: check-yaml
+        args: ['--unsafe']
+      - id: check-toml
+      - id: check-json
+      - id: check-added-large-files
+        args: ['--maxkb=10000']  # 10MB limit
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+
+  # Python formatting and linting
+  - repo: https://github.com/psf/black
+    rev: 23.9.1
+    hooks:
+      - id: black
+        language_version: python3
+        files: ^(backend|ai-model)/.*\.py$
+        args: [--line-length=88]
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
+        files: ^(backend|ai-model)/.*\.py$
+        args: [--profile=black, --line-length=88]
+
+  - repo: https://github.com/pycqa/flake8
+    rev: 6.1.0
+    hooks:
+      - id: flake8
+        files: ^(backend|ai-model)/.*\.py$
+        args: [--max-line-length=88, --extend-ignore=E203,E501,W503]
+        additional_dependencies:
+          - flake8-docstrings
+          - flake8-import-order
+
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.5.1
+    hooks:
+      - id: mypy
+        files: ^(backend|ai-model)/.*\.py$
+        additional_dependencies: [types-all]
+        args: [--ignore-missing-imports, --disallow-untyped-defs]
+
+  # Security scanning
+  - repo: https://github.com/PyCQA/bandit
+    rev: 1.7.5
+    hooks:
+      - id: bandit
+        files: ^(backend|ai-model)/.*\.py$
+        args: [-r, --skip=B101,B601]
+        exclude: ^(backend|ai-model)/tests/.*$
+
+  # Kotlin formatting and linting
+  - repo: https://github.com/pinterest/ktlint
+    rev: 0.50.0
+    hooks:
+      - id: ktlint
+        files: ^frontend/.*\.(kt|kts)$
+        args: [--format]
+
+  # Markdown linting
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.37.0
+    hooks:
+      - id: markdownlint
+        files: \.md$
+        args: [--fix]
+
+  # YAML formatting
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.0.3
+    hooks:
+      - id: prettier
+        files: \.(yaml|yml|json)$
+        args: [--write]
+
+  # Custom hooks for project-specific checks
+  - repo: local
+    hooks:
+      # Python test runner
+      - id: python-tests
+        name: Run Python tests
+        entry: bash -c 'cd backend && python -m pytest tests/ --tb=short -q'
+        language: system
+        files: ^(backend|ai-model)/.*\.py$
+        pass_filenames: false
+        stages: [push]  # Only run on push, not on every commit
+
+      # Python security check
+      - id: python-safety-check
+        name: Python security check
+        entry: bash -c 'pip-audit --desc --format=text'
+        language: system
+        files: ^(backend|ai-model)/.*\.py$
+        pass_filenames: false
+        stages: [push]
+
+      # Check for secrets
+      - id: check-secrets
+        name: Check for secrets
+        entry: bash -c 'grep -r -i -E "(password|secret|key|token|api_key)" --include="*.py" --include="*.kt" --include="*.yaml" --include="*.json" --exclude-dir=".git" --exclude-dir="venv" --exclude-dir="node_modules" . || true'
+        language: system
+        pass_filenames: false
+        stages: [commit]
+
+      # Ensure code formatters are available
+      - id: check-formatters
+        name: Check code formatters are available
+        entry: bash -c 'command -v black >/dev/null 2>&1 && command -v isort >/dev/null 2>&1 && echo "✅ Python formatters available" || (echo "❌ Python formatters not found. Run: pip install black isort" && exit 1)'
+        language: system
+        pass_filenames: false
+        always_run: true
+
+      # Custom Python formatter (fallback)
+      - id: custom-python-format
+        name: Custom Python formatter
+        entry: python scripts/formatters/format_python.py
+        language: system
+        files: ^(backend|ai-model)/.*\.py$
+        pass_filenames: false
+        stages: [manual]  # Only run when explicitly called
+
+      # Custom Kotlin formatter (fallback)
+      - id: custom-kotlin-format
+        name: Custom Kotlin formatter
+        entry: bash scripts/formatters/format_kotlin.sh
+        language: system
+        files: ^frontend/.*\.(kt|kts)$
+        pass_filenames: false
+        stages: [manual]  # Only run when explicitly called
+
+# Configuration for specific hooks
+default_language_version:
+  python: python3
+
+# Exclude patterns
+exclude: |
+  (?x)^(
+    .*\.min\.(js|css)$|
+    .*\.map$|
+    .*/migrations/.*$|
+    .*/node_modules/.*$|
+    .*/venv/.*$|
+    .*/\.venv/.*$|
+    .*/__pycache__/.*$|
+    .*/build/.*$|
+    .*/dist/.*$|
+    .*\.egg-info/.*$|
+    .*/\.git/.*$|
+    .*/\.pytest_cache/.*$|
+    .*/\.mypy_cache/.*$|
+    .*\.pyc$|
+    .*\.pyo$|
+    .*\.pyd$|
+    .*\.so$|
+    .*\.dll$
+  )$
+
+# Minimum pre-commit version
+minimum_pre_commit_version: 3.0.0
+
+# Fail fast - stop running hooks after first failure
+fail_fast: false
+
+# Default stages for hooks
+default_stages: [commit, push]
