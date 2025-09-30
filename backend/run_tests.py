@@ -1,0 +1,95 @@
+#!/usr/bin/env python
+"""
+Simple test runner for the Book Bartering Social Network backend.
+This script provides easy access to all test utilities.
+"""
+
+import os
+import sys
+import subprocess
+from pathlib import Path
+
+def run_command(command, description):
+    """Run a command and display results."""
+    print(f"\n{'='*60}")
+    print(f"Running: {description}")
+    print(f"Command: {command}")
+    print(f"{'='*60}")
+    
+    try:
+        # Change to backend directory
+        backend_dir = Path(__file__).parent
+        os.chdir(backend_dir)
+        
+        # Activate virtual environment and run command
+        if os.name == 'nt':  # Windows
+            venv_activate = r".\venv\Scripts\Activate.ps1"
+            full_command = f"powershell -Command \"{venv_activate}; {command}\""
+        else:  # Unix/Linux/Mac
+            venv_activate = "./venv/bin/activate"
+            full_command = f"source {venv_activate} && {command}"
+        
+        result = subprocess.run(full_command, shell=True, capture_output=True, text=True)
+        
+        if result.returncode == 0:
+            print("SUCCESS!")
+            print(result.stdout)
+        else:
+            print("FAILED!")
+            print("STDOUT:", result.stdout)
+            print("STDERR:", result.stderr)
+            
+    except Exception as e:
+        print(f"Error running command: {e}")
+
+def show_menu():
+    """Show the test menu."""
+    print("\nBook Bartering Backend - Test Runner")
+    print("="*50)
+    print("1. Quick API Integration Test (Recommended)")
+    print("2. Authentication Debug Test")
+    print("3. Server Test (Django Client)")
+    print("4. Server Test (Live HTTP)")
+    print("5. Show Available URLs")
+    print("6. Run Django Checks")
+    print("7. Run Database Migrations")
+    print("8. Create Superuser")
+    print("9. Start Development Server")
+    print("0. Exit")
+
+def main():
+    """Main function."""
+    while True:
+        show_menu()
+        choice = input("\nEnter your choice (0-9): ").strip()
+        
+        if choice == "0":
+            print("Goodbye!")
+            break
+        elif choice == "1":
+            run_command("python tests/test_api_integration.py", "API Integration Test")
+        elif choice == "2":
+            run_command("python tests/test_auth_debug.py", "Authentication Debug Test")
+        elif choice == "3":
+            run_command("python tests/test_server.py test", "Server Test (Django Client)")
+        elif choice == "4":
+            run_command("python tests/test_server.py test-live", "Server Test (Live HTTP)")
+        elif choice == "5":
+            run_command("python tests/test_server.py urls", "Show Available URLs")
+        elif choice == "6":
+            run_command("python manage.py check", "Django System Check")
+        elif choice == "7":
+            run_command("python manage.py makemigrations && python manage.py migrate", "Database Migrations")
+        elif choice == "8":
+            run_command("python manage.py createsuperuser", "Create Superuser")
+        elif choice == "9":
+            print("\nStarting development server...")
+            print("Server will be available at: http://127.0.0.1:8000/")
+            print("Admin interface: http://127.0.0.1:8000/admin/")
+            print("Press Ctrl+C to stop the server")
+            run_command("python manage.py runserver", "Development Server")
+        else:
+            print("Invalid choice. Please try again.")
+
+if __name__ == '__main__':
+    main()
