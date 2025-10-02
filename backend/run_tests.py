@@ -23,10 +23,10 @@ def run_command(command, description):
         
         # Activate virtual environment and run command
         if os.name == 'nt':  # Windows
-            venv_activate = r".\venv\Scripts\Activate.ps1"
+            venv_activate = r".\.venv\Scripts\Activate.ps1"
             full_command = f"powershell -Command \"{venv_activate}; {command}\""
         else:  # Unix/Linux/Mac
-            venv_activate = "./venv/bin/activate"
+            venv_activate = "./.venv/bin/activate"
             full_command = f"source {venv_activate} && {command}"
         
         result = subprocess.run(full_command, shell=True, capture_output=True, text=True)
