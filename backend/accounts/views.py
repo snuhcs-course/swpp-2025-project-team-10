@@ -3,7 +3,7 @@ Views for the accounts app.
 Handles user authentication, registration, and profile management.
 """
 
-from rest_framework import status, generics, permissions
+from rest_framework import status, permissions
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -25,8 +25,7 @@ from .serializers import (
     PasswordResetConfirmSerializer,
     SocialAuthSerializer,
     GoogleAuthSerializer,
-    GoogleAuthResponseSerializer,
-    UserPreferencesSerializer,
+    KakaoAuthSerializer,
     ProfileUpdateSerializer
 )
 from .models import UserPreferences
@@ -64,7 +63,7 @@ class CustomTokenObtainPairView(TokenObtainPairView):
                 'message': 'Login successful'
             }, status=status.HTTP_200_OK)
 
-        except Exception as e:
+        except Exception:
             return Response({
                 'ok': False,
                 'message': 'Invalid credentials'
@@ -146,7 +145,7 @@ class PasswordResetRequestView(APIView):
                     recipient_list=[email],
                     fail_silently=False,
                 )
-            except Exception as e:
+            except Exception:
                 # In development, just log the code
                 print(f"Password reset code for {email}: {reset_code}")
 
@@ -269,7 +268,7 @@ class SocialAuthView(APIView):
 
             if user_info:
                 # Get or create user
-                user, created = self.get_or_create_social_user(provider, user_info)
+                user, _ = self.get_or_create_social_user(provider, user_info)
 
                 # Generate JWT tokens
                 from rest_framework_simplejwt.tokens import RefreshToken
@@ -323,7 +322,7 @@ class SocialAuthView(APIView):
 
         return None
 
-    def get_or_create_social_user(self, provider, user_info):
+    def get_or_create_social_user(self, _provider, user_info):
         """Get or create user from social provider info."""
         from django.db import IntegrityError, transaction
 
@@ -435,7 +434,7 @@ class GoogleLoginView(APIView):
 
             if user_info:
                 # Get or create user
-                user, created = self.get_or_create_google_user(user_info)
+                user, _ = self.get_or_create_google_user(user_info)
 
                 # Generate JWT tokens
                 from rest_framework_simplejwt.tokens import RefreshToken
@@ -497,7 +496,6 @@ class GoogleLoginView(APIView):
         from django.db import IntegrityError, transaction
 
         email = user_info.get('email')
-        google_id = user_info.get('google_id')
 
         if not email:
             raise ValueError("Email is required from Google")
@@ -566,6 +564,151 @@ class GoogleSignupView(APIView):
         if response.status_code == 200:
             data = response.data.copy()
             data['message'] = 'Google signup successful'
+            return Response(data, status=status.HTTP_200_OK)
+
+        return response
+
+
+class KakaoLoginView(APIView):
+    """
+    Kakao access token authentication for login.
+    Matches frontend expectations for /auth/login/kakao endpoint.
+    """
+    permission_classes = [permissions.AllowAny]
+
+    @extend_schema(
+        summary="Kakao Login",
+        description="Authenticate user with Kakao access token",
+        request=KakaoAuthSerializer,
+        responses={
+            200: OpenApiResponse(description="Kakao login successful"),
+            400: OpenApiResponse(description="Kakao login failed"),
+        }
+    )
+    def post(self, request):
+        serializer = KakaoAuthSerializer(data=request.data)
+
+        if serializer.is_valid():
+            access_token = serializer.validated_data['accessToken']
+
+            # Validate Kakao access token and get user info
+            user_info = self.validate_kakao_token(access_token)
+
+            if user_info:
+                # Get or create user
+                user, _ = self.get_or_create_kakao_user(user_info)
+
+                # Generate JWT tokens
+                from rest_framework_simplejwt.tokens import RefreshToken
+                refresh = RefreshToken.for_user(user)
+
+                return Response({
+                    'ok': True,
+                    'accessToken': str(refresh.access_token),
+                    'refreshToken': str(refresh),
+                    'message': 'Kakao login successful'
+                }, status=status.HTTP_200_OK)
+
+            return Response({
+                'ok': False,
+                'accessToken': None,
+                'refreshToken': None,
+                'message': 'Invalid Kakao access token'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({
+            'ok': False,
+            'accessToken': None,
+            'refreshToken': None,
+            'message': 'Invalid request data'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    def validate_kakao_token(self, access_token):
+        """Validate Kakao access token by calling Kakao API."""
+        try:
+            response = requests.get(
+                'https://kapi.kakao.com/v2/user/me',
+                headers={'Authorization': f'Bearer {access_token}'},
+                timeout=10
+            )
+
+            if response.status_code == 200:
+                data = response.json()
+                kakao_account = data.get('kakao_account', {})
+                profile = kakao_account.get('profile', {})
+
+                return {
+                    'email': kakao_account.get('email'),
+                    'name': profile.get('nickname', ''),
+                    'kakao_id': str(data.get('id')),
+                    'profile_image': profile.get('profile_image_url', ''),
+                    'email_verified': kakao_account.get('is_email_verified', False)
+                }
+        except Exception as e:
+            print(f"Kakao token validation error: {e}")
+
+        return None
+
+    def get_or_create_kakao_user(self, user_info):
+        """Get or create user from Kakao user info."""
+        email = user_info.get('email')
+
+        if not email:
+            raise ValueError("Email is required from Kakao")
+
+        # Try to get existing user by email
+        try:
+            user = User.objects.get(email=email)
+            return user, False
+        except User.DoesNotExist:
+            pass
+
+        # Create new user
+        username = email.split('@')[0]
+
+        # Handle username conflicts
+        base_username = username
+        counter = 1
+        while User.objects.filter(username=username).exists():
+            username = f"{base_username}_{counter}"
+            counter += 1
+
+        user = User.objects.create_user(
+            username=username,
+            email=email,
+            first_name=user_info.get('name', ''),
+            password=User.objects.make_random_password()
+        )
+
+        return user, True
+
+
+class KakaoSignupView(APIView):
+    """
+    Kakao signup view (reuses login logic).
+    Matches frontend expectations for /auth/signup/kakao endpoint.
+    """
+    permission_classes = [permissions.AllowAny]
+
+    @extend_schema(
+        summary="Kakao Signup",
+        description="Register user with Kakao access token",
+        request=KakaoAuthSerializer,
+        responses={
+            200: OpenApiResponse(description="Kakao signup successful"),
+            400: OpenApiResponse(description="Kakao signup failed"),
+        }
+    )
+    def post(self, request):
+        # For Kakao auth, login and signup are essentially the same
+        # We'll reuse the login logic but with different messaging
+        login_view = KakaoLoginView()
+        response = login_view.post(request)
+
+        # Modify the message for signup context
+        if response.status_code == 200:
+            data = response.data.copy()
+            data['message'] = 'Kakao signup successful'
             return Response(data, status=status.HTTP_200_OK)
 
         return response
