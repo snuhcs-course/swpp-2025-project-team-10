@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".feature.auth.LoginActivity">
+
+    <TextView
+        android:id="@+id/AppNameText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="서로서로도서관"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_marginTop="120dp"
+        android:layout_marginBottom="100dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/EmailText"/>
+
+    <EditText
+        android:id="@+id/EmailText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="이메일"
+        android:inputType="textEmailAddress"
+        android:autofillHints="username"
+        android:layout_marginHorizontal="48dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/AppNameText"
+        app:layout_constraintBottom_toTopOf="@id/PasswordText"
+        app:layout_constraintVertical_chainStyle="packed" />
+
+    <EditText
+        android:id="@+id/PasswordText"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="비밀번호"
+        android:inputType="textPassword"
+        android:autofillHints="password"
+        android:layout_marginHorizontal="48dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/EmailText"
+        app:layout_constraintBottom_toTopOf="@id/LogInButton"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/LogInButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#1E1E1E"
+        android:text="로그인"
+        android:layout_marginHorizontal="48dp"
+        app:cornerRadius="4dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/PasswordText"
+        app:layout_constraintBottom_toTopOf="@id/ForgotPasswordButton" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/ForgotPasswordButton"
+        style="@style/Widget.Material3.Button.TextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="비밀번호를 잊으셨나요?"
+        android:textSize="12sp"
+        android:textColor="#9E9E9E"
+        android:minHeight="0dp"
+        android:minWidth="0dp"
+        android:padding="0dp"
+        android:background="@android:color/transparent"
+        app:layout_constraintStart_toStartOf="@id/LogInButton"
+        app:layout_constraintEnd_toEndOf="@id/LogInButton"
+        app:layout_constraintTop_toBottomOf="@id/LogInButton"
+        app:layout_constraintHorizontal_bias="1"/>
+
+    <View
+        android:id="@+id/DivideLeft"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="#E0E0E0"
+        android:layout_marginEnd="10dp"
+        app:layout_constraintStart_toStartOf="@id/LogInButton"
+        app:layout_constraintEnd_toStartOf="@id/DivideText"
+        app:layout_constraintTop_toTopOf="@id/DivideText"
+        app:layout_constraintBottom_toBottomOf="@id/DivideText" />
+
+    <TextView
+        android:id="@+id/DivideText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="또는"
+        android:textSize="8sp"
+        android:textColor="#9E9E9E"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/ForgotPasswordButton"
+        app:layout_constraintBottom_toTopOf="@id/GoogleLoginButton"/>
+
+    <View
+        android:id="@+id/DivideRight"
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="#E0E0E0"
+        android:layout_marginStart="10dp"
+        app:layout_constraintStart_toEndOf="@id/DivideText"
+        app:layout_constraintEnd_toEndOf="@id/LogInButton"
+        app:layout_constraintTop_toTopOf="@id/DivideText"
+        app:layout_constraintBottom_toBottomOf="@id/DivideText" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/GoogleLoginButton"
+        style="@style/Widget.Material3.Button.ElevatedButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:backgroundTint="@android:color/white"
+        android:text="Google을 사용하여 로그인"
+        android:textColor="#6E6E6E"
+        android:layout_marginTop="32dp"
+        app:cornerRadius="4dp"
+        app:layout_constraintStart_toStartOf="@id/LogInButton"
+        app:layout_constraintEnd_toEndOf="@id/LogInButton"
+        app:layout_constraintTop_toBottomOf="@id/ForgotPasswordButton"
+        app:icon="@drawable/google_icon"
+        app:iconTint="@null"
+        app:iconGravity="start" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/KakaoLoginButton"
+        style="@style/Widget.Material3.Button.ElevatedButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:backgroundTint="#FFE812"
+        android:text="카카오톡을 사용하여 로그인"
+        android:textColor="#6E6E6E"
+        app:cornerRadius="4dp"
+        app:layout_constraintStart_toStartOf="@id/LogInButton"
+        app:layout_constraintEnd_toEndOf="@id/LogInButton"
+        app:layout_constraintTop_toBottomOf="@id/GoogleLoginButton"
+        app:icon="@drawable/kakaotalk_icon"
+        app:iconTint="@null"
+        app:iconGravity="start" />
+
+    <TextView
+        android:id="@+id/SignUpText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="계정이 없으신가요?"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/SignUpButton"
+        app:layout_constraintTop_toTopOf="@id/SignUpButton"
+        app:layout_constraintBottom_toBottomOf="@id/SignUpButton"
+        app:layout_constraintHorizontal_chainStyle="packed"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/SignUpButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="가입하기"
+        android:textSize="12sp"
+        android:textColor="#6DB2F6"
+        android:minHeight="0dp"
+        android:minWidth="0dp"
+        android:backgroundTint="@android:color/transparent"
+        android:paddingVertical="1dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginBottom="30dp"
+        android:padding="0dp"
+        app:layout_constraintStart_toEndOf="@id/SignUpText"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

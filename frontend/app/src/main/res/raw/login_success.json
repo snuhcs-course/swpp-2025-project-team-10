@@ -1,0 +1,6 @@
+{
+  "ok": true,
+  "token": "ACCESS_VALID",
+  "refresh": "REFRESH_VALID",
+  "message": "Login successful"
+}
