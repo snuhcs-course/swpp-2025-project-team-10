@@ -1,267 +1,409 @@
-# SWPP AI Application
+# 서로서로도서관 (Library Together)
 
-An intelligent mobile application powered by AI models, built for the SNU Software Practice (SWPP) course.
+A book bartering social network mobile application built for the SNU Software Practice (SWPP) course.
 
 ![Build Status](https://github.com/snuhcs-course/swpp-2025-project-team-10/workflows/CI/badge.svg)
-![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)
-![Kotlin](https://img.shields.io/badge/kotlin-1.9%2B-orange)
-![License](https://img.shields.io/badge/license-MIT-green)
+![Python Version](https://img.shields.io/badge/python-3.11-blue)
+![Kotlin](https://img.shields.io/badge/kotlin-2.0-orange)
+![Django](https://img.shields.io/badge/django-5.2.7-green)
 
 [▶️ Watch Demo (iter1_demo.mov)](./sources/iter1_demo.mov)
 
+## 📖 About
+
+**서로서로도서관 (Library Together)** is a social networking platform that enables users to:
+- Exchange books with other users through a bartering system
+- Build a community around book sharing and reading
+- Discover new books and connect with fellow readers
+- Manage personal book collections
+- Track reading history and preferences
+
 ## 🚀 Quick Start
+
+### Backend Setup
 
 ```bash
 # Clone the repository
 git clone https://github.com/snuhcs-course/swpp-2025-project-team-10.git
-cd swpp-2025-project-team-**10**
+cd swpp-2025-project-team-10
 
-# Set up development environment
-./scripts/setup/setup_dev_environment.sh
+# Navigate to backend directory
+cd backend
 
-# Activate virtual environment
-source .venv/bin/activate
+# Create and activate virtual environment
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
 
-# Start development
-make dev
+# Install dependencies
+pip install -r requirements.txt
+
+# Run migrations
+python manage.py migrate
+
+# Start development server
+python manage.py runserver 0.0.0.0:8000
+```
+
+### Frontend Setup
+
+```bash
+# Open Android Studio
+# File -> Open -> Select the 'frontend' directory
+
+# Or build from command line
+cd frontend
+./gradlew assembleDebug
+
+# Install on connected device
+adb install app/build/outputs/apk/debug/app-debug.apk
 ```
 
 ## 📱 Features
 
-- **AI-Powered Intelligence**: Advanced machine learning models for intelligent predictions
-- **Cross-Platform Mobile App**: Native Android application built with Kotlin
-- **Real-time Processing**: Fast API backend with real-time data processing
-- **Scalable Architecture**: Microservices-based design for scalability
-- **Developer-Friendly**: Comprehensive tooling and documentation
+- **User Authentication**: Email/password, Google Sign-In, and Kakao login
+- **Book Management**: Add, edit, and manage personal book collections
+- **Bartering System**: Propose and accept book exchange offers
+- **Social Features**: Follow users, view profiles, and interact with the community
+- **Real-time Notifications**: Get notified about barter requests and messages
+- **Search & Discovery**: Find books and users based on preferences
 
 ## 🏗️ Architecture
 
 ```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Frontend      │    │    Backend      │    │   AI Model     │
-│   (Kotlin)      │◄──►│   (FastAPI)     │◄──►│   (PyTorch)     │
-│                 │    │                 │    │                 │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-         │                       │                       │
-         │                       │                       │
-         ▼                       ▼                       ▼
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Mobile UI     │    │   PostgreSQL    │    │   Model Store   │
-│                 │    │   Database      │    │                 │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+┌─────────────────┐    ┌─────────────────┐
+│   Frontend      │    │    Backend      │
+│   (Kotlin)      │◄──►│   (Django)      │
+│   Android App   │    │   REST API      │
+└─────────────────┘    └─────────────────┘
+         │                       │
+         │                       │
+         ▼                       ▼
+┌─────────────────┐    ┌─────────────────┐
+│   Jetpack       │    │    SQLite       │
+│   Compose UI    │    │    Database     │
+└─────────────────┘    └─────────────────┘
 ```
 
 ## 🛠️ Technology Stack
 
 ### Backend
-- **Python 3.8+** with FastAPI framework
-- **PostgreSQL** for data persistence
-- **Redis** for caching and message queuing
-- **Celery** for background task processing
-- **SQLAlchemy** for ORM
+- **Python 3.11** with Django 5.2.7
+- **Django REST Framework** for API
+- **SQLite** for development database (PostgreSQL for production)
+- **djangorestframework-simplejwt** for JWT authentication
+- **django-cors-headers** for CORS support
+- **drf-spectacular** for API documentation
 
 ### Frontend
-- **Kotlin** for Android development
-- **Android SDK** (API level 21+)
+- **Kotlin 2.0** for Android development
+- **Android SDK** (API level 34, min 26)
 - **Jetpack Compose** for modern UI
 - **Retrofit** for API communication
-
-### AI/ML
-- **PyTorch** for deep learning models
-- **Transformers** for NLP capabilities
-- **NumPy & Pandas** for data processing
-- **Jupyter** for model development
+- **OkHttp** for HTTP client
+- **Credential Manager** for Google Sign-In
+- **Kakao SDK** for Kakao login
 
 ### DevOps
-- **Docker** for containerization
 - **GitHub Actions** for CI/CD
-- **Nginx** for reverse proxy
-- **Prometheus & Grafana** for monitoring
+- **Android Emulator** for testing
+- **ADB** for device management
 
 ## 📋 Prerequisites
 
-- **Python 3.8+**
-- **Java 11+** (for Android development)
-- **Android Studio** with Android SDK
-- **PostgreSQL 12+**
+- **Python 3.11+**
+- **Java 17+** (for Android development)
+- **Android Studio** Hedgehog or later
+- **Android SDK** (API 34)
 - **Git**
-- **Docker** (optional, for containerized deployment)
 
 ## 🚀 Getting Started
 
-### 1. Choose Your Workspace (VS Code Users)
-
-We provide role-specific VS Code workspace configurations:
+### 1. Backend Setup (Django)
 
 ```bash
-# For backend/Python developers
-code workspace/backend.code-workspace
-
-# For frontend/Android developers
-code workspace/frontend.code-workspace
-```
-
-See [workspace/README.md](workspace/README.md) for details.
-
-### 2. Environment Setup
-
-```bash
-# Clone repository
-git clone https://github.com/snuhcs-course/swpp-2025-project-team-10.git
-cd swpp-2025-project-team-10
-
-# Run automated setup
-./scripts/setup/setup_dev_environment.sh
-```
-
-### 3. Configuration
-
-```bash
-# Copy environment files
-cp backend/.env.example backend/.env
-cp ai-model/.env.example ai-model/.env
-
-# Edit configuration files with your settings
-nano backend/.env
-nano ai-model/.env
-```
-
-### 4. Database Setup
-
-```bash
-# Create database
-createdb swpp_ai_app_dev
-
-# Run migrations
+# Navigate to backend directory
 cd backend
-alembic upgrade head
+
+# Create virtual environment
+python -m venv .venv
+
+# Activate virtual environment
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run database migrations
+python manage.py migrate
+
+# Create a superuser (optional, for admin access)
+python manage.py createsuperuser
+
+# Start development server
+python manage.py runserver 0.0.0.0:8000
 ```
 
-### 5. Start Development
+**Note:** The project currently uses SQLite for development. PostgreSQL configuration is available but commented out in `settings.py`.
+
+### 2. Frontend Setup (Android)
+
+#### Option A: Using Android Studio (Recommended)
+
+1. Open Android Studio
+2. Select **File → Open**
+3. Navigate to and select the `frontend` directory
+4. Wait for Gradle sync to complete
+5. Connect an Android device or start an emulator
+6. Click **Run** (▶️) button
+
+#### Option B: Command Line
 
 ```bash
-# Start backend
-make run-backend
+# Navigate to frontend directory
+cd frontend
 
-# Build and install mobile app
-make run-frontend
+# Build debug APK
+./gradlew assembleDebug
+
+# Install on connected device
+adb install app/build/outputs/apk/debug/app-debug.apk
+
+# Or install and launch
+adb install -r app/build/outputs/apk/debug/app-debug.apk
+adb shell am start -n com.example.librarytogether/.feature.auth.LoginActivity
 ```
+
+### 3. Testing on Physical Device
+
+For best results, test on a physical Android device:
+
+```bash
+# Enable USB debugging on your device
+# Connect device via USB
+
+# Verify device is connected
+adb devices
+
+# Update backend URL in RetrofitClient.kt
+# Change BASE_URL to your computer's IP address
+# Example: "http://192.168.1.100:8000/"
+
+# Make sure your device and computer are on the same network
+# Allow Python through firewall if needed
+```
+
+### 4. Configuration
+
+The project uses default configurations for development. No `.env` file is required for basic setup.
+
+**Backend Configuration** (`backend/core/settings.py`):
+- Database: SQLite (default) - `db.sqlite3`
+- Debug mode: Enabled
+- CORS: Allowed for all origins in development
+- Allowed hosts: Configured for localhost and local network IPs
+
+**Frontend Configuration** (`frontend/app/src/main/java/com/example/librarytogether/network/RetrofitClient.kt`):
+- Base URL: `http://10.0.2.2:8000/` (for emulator)
+- For physical device: Change to your computer's IP (e.g., `http://192.168.1.100:8000/`)
+- Timeout: 15s connect, 20s read/write
 
 ## 📖 Documentation
 
 Comprehensive documentation is available in the `docs/` directory:
 
-- **[Development Setup](docs/development/SETUP.md)** - Complete setup guide
-- **[Coding Conventions](docs/development/CONVENTIONS.md)** - Code standards and best practices
-- **[Git Workflow](docs/development/GIT_WORKFLOW.md)** - Branching strategy and workflow
-- **[Testing Guide](docs/development/TESTING.md)** - Testing practices and guidelines
-- **[API Documentation](docs/api/)** - Backend and AI model APIs
-- **[Deployment Guide](docs/deployment/)** - Production deployment instructions
+- **[Backend API Documentation](backend/docs/API_DOCUMENTATION.md)** - REST API endpoints and usage
+- **[Backend Architecture](backend/docs/ARCHITECTURE.md)** - Backend design and structure
+- **[Design Documentation Guide](docs/DESIGN_DOCUMENTATION_GUIDE.md)** - Project design guidelines
+- **[Workflow Guide](docs/WORKFLOW_IMPLEMENTATION_GUIDE.md)** - Development workflow
 
 ## 🧪 Testing
 
-```bash
-# Run all tests
-make test
+### Backend Tests
 
-# Run specific test suites
-make test-python    # Python backend and AI model tests
-make test-kotlin    # Kotlin frontend tests
+```bash
+# Navigate to backend directory
+cd backend
+
+# Activate virtual environment
+source .venv/bin/activate
+
+# Run all tests
+python manage.py test
+
+# Run specific app tests
+python manage.py test accounts
+python manage.py test books
+python manage.py test barter
 
 # Run with coverage
-make test-coverage
+coverage run --source='.' manage.py test
+coverage report
+coverage html  # Generate HTML report in htmlcov/
 ```
 
-## 🎨 Code Quality
-
-We maintain high code quality standards with automated formatting and linting:
+### Frontend Tests
 
 ```bash
-# Format all code
-make format
+# Navigate to frontend directory
+cd frontend
 
-# Check code quality
-make lint
+# Run unit tests
+./gradlew test
 
-# Run security checks
-make security-check
+# Run instrumented tests (requires emulator or device)
+./gradlew connectedAndroidTest
 ```
 
-### Pre-commit Hooks
+## 🎯 API Endpoints
 
-Pre-commit hooks automatically run code formatters and checks:
+### Authentication
+- `POST /auth/login/` - User login
+- `POST /auth/signup/` - User registration
+- `POST /auth/token/refresh/` - Refresh JWT token
+- `POST /auth/login/google/` - Google Sign-In
+- `POST /auth/signup/google/` - Google Sign-Up
+- `POST /auth/login/kakao/` - Kakao login
+- `POST /auth/signup/kakao/` - Kakao signup
 
-- **Python**: Black, isort, flake8, mypy, bandit
-- **Kotlin**: ktlint, detekt
-- **General**: trailing whitespace, file endings, merge conflicts
+### Password Reset
+- `POST /auth/forgot/start/` - Request password reset
+- `POST /auth/forgot/verify/` - Verify reset code
+- `POST /auth/forgot/reset/` - Reset password
 
-## 🚀 Deployment
+### User Profile
+- `GET /auth/profile/` - Get user profile
+- `PUT /auth/profile/update/` - Update user profile
 
-### Development
+See [API Documentation](backend/docs/API_DOCUMENTATION.md) for complete API reference.
+
+## 🔧 Troubleshooting
+
+### Backend Issues
+
+**Database migrations fail:**
 ```bash
-# Start all services locally
-make dev
+# Delete database and start fresh
+rm backend/db.sqlite3
+python manage.py migrate
 ```
 
-### Docker
+**Port 8000 already in use:**
 ```bash
-# Build and run with Docker Compose
-make docker-build
-make docker-run
+# Find and kill process using port 8000
+lsof -ti:8000 | xargs kill -9
+
+# Or use a different port
+python manage.py runserver 8080
 ```
 
-### Production
-See [Deployment Guide](docs/deployment/DEPLOYMENT.md) for production deployment instructions.
+**Module not found errors:**
+```bash
+# Ensure virtual environment is activated
+source backend/.venv/bin/activate
+
+# Reinstall dependencies
+pip install -r backend/requirements.txt
+```
+
+### Frontend Issues
+
+**Gradle sync fails:**
+- Ensure Java 17+ is installed
+- Check internet connection for dependency downloads
+- Try: File → Invalidate Caches → Invalidate and Restart
+
+**App cannot connect to backend:**
+- Check backend is running: `curl http://localhost:8000/`
+- For emulator: Use `http://10.0.2.2:8000/`
+- For physical device: Use your computer's IP address
+- Ensure firewall allows Python connections
+- Verify device and computer are on same network
+
+**Build errors:**
+```bash
+# Clean and rebuild
+cd frontend
+./gradlew clean
+./gradlew assembleDebug
+```
 
 ## 🤝 Contributing
 
 We follow a structured development workflow:
 
-1. **Read the documentation**: Start with [CONVENTIONS.md](docs/development/CONVENTIONS.md)
-2. **Create feature branch**: `git checkout -b feature/your-feature-name`
-3. **Follow coding standards**: Use provided formatters and linters
-4. **Write tests**: Maintain test coverage above 80%
-5. **Create pull request**: Follow the PR template
-6. **Code review**: Get approval from team members
-7. **Merge to dev**: Integration testing in dev branch
-8. **Deploy to main**: Production deployment from main branch
+1. **Create feature branch**: `git checkout -b feature/your-feature-name`
+2. **Follow coding standards**:
+   - Python: 79 characters line length
+   - Kotlin: Follow Kotlin recommended standards
+3. **Write tests**: Maintain test coverage
+4. **Create pull request**: Target the `dev` branch
+5. **Code review**: Get approval from team members
+6. **Merge to dev**: Integration testing in dev branch
+7. **Deploy to main**: Production deployment from main branch
 
 ### Branch Strategy
+
 - `main`: Production-ready code
 - `dev`: Integration branch for features
 - `feature/*`: New features and enhancements
 - `bugfix/*`: Bug fixes
 - `hotfix/*`: Critical production fixes
 
+### Coding Standards
+
+- **Python**: 79 characters line length (PEP 8)
+- **Kotlin**: Follow Kotlin recommended line length
+- **Frontend**: Follow respective language standards
+
 ## 📊 Project Status
 
-- ✅ Project structure and tooling setup
-- ✅ Development environment configuration
-- ✅ Code quality tools and pre-commit hooks
-- ✅ Documentation and conventions
-- 🚧 Backend API development
-- 🚧 AI model implementation
-- 🚧 Frontend mobile application
-- ⏳ Integration testing
+- ✅ Project structure and setup
+- ✅ Backend API (Django REST Framework)
+- ✅ User authentication (Email, Google, Kakao)
+- ✅ Frontend mobile application (Android/Kotlin)
+- ✅ Book management system
+- ✅ User profiles
+- 🚧 Bartering system
+- 🚧 Social features (follow, messaging)
+- 🚧 Notifications
 - ⏳ Production deployment
+
+## 🎓 SWPP Course Requirements
+
+This project fulfills the requirements for the SNU Software Practice (SWPP) course:
+
+- **Design Documentation**: Available on GitHub Wiki
+  - Document revision history
+  - System architecture diagrams
+  - Class diagrams (frontend/backend)
+  - ER diagrams for database
+  - Testing plan with coverage goals
+  - 5 user acceptance test stories
+
+- **Testing Requirements** (Starting Iteration 3):
+  - Coverage goals reported by architectural component
+  - Example: M/V/VM separately for MVVM architecture
 
 ## 📞 Support
 
-- **Documentation**: Check the `docs/` directory first
+- **Documentation**: Check the `docs/` directory and GitHub Wiki
 - **Issues**: Create a GitHub issue with detailed information
-- **Discussions**: Use GitHub Discussions for questions
 - **Team**: Contact the development team for urgent matters
 
 ## 📄 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is developed for educational purposes as part of the SNU SWPP course.
 
 ## 🙏 Acknowledgments
 
-- **SNU SWPP Course** for the project framework
+- **SNU SWPP Course** for the project framework and guidance
+- **Django & Django REST Framework** for the robust backend framework
+- **Android & Jetpack Compose** for modern mobile development
 - **Open Source Libraries** used throughout the project
-- **Team Members** for their contributions and collaboration
+- **Team 10 Members** for their contributions and collaboration
 
 ---
 
-**Happy Coding!** 🎉
+**서로서로도서관 - 책으로 연결되는 우리들의 이야기** 📚
+
+*Built with ❤️ for SWPP 2025*
