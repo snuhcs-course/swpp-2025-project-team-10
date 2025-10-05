@@ -15,7 +15,9 @@ object MockConfig {
 }
 
 object RetrofitClient {
-    private const val BASE_URL = "http://10.0.2.2:8000/"
+    // Use 192.0.0.2 for physical device on same network
+    // Use 10.0.2.2 for emulator
+    private const val BASE_URL = "http://192.0.0.2:8000/"
 
     @Volatile
     private var retrofit: Retrofit? = null

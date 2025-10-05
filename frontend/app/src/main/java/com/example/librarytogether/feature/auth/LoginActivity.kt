@@ -18,6 +18,7 @@ import com.example.librarytogether.network.AuthManager
 import com.example.librarytogether.network.RetrofitClient
 import com.google.android.material.button.MaterialButton
 import kotlinx.coroutines.launch
+import android.util.Log
 
 // androidx.credentials import
 import androidx.credentials.Credential
@@ -107,9 +108,11 @@ class LoginActivity : AppCompatActivity() {
                             access = body.accessToken,
                             refresh = body.refreshToken
                         )
+                        Toast.makeText(this@LoginActivity, "로그인 성공!", Toast.LENGTH_SHORT).show()
                         email.setText("")
                         password.setText("")
 
+                        // TODO: Navigate to HomeActivity when implemented
                         // startActivity(Intent(this, HomeActivity::class.java))
                         // finish()
                     }
@@ -118,11 +121,12 @@ class LoginActivity : AppCompatActivity() {
                     }
                 }
                 else {
-                    Toast.makeText(this@LoginActivity, "서버 응답 없음", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@LoginActivity, "서버 응답 없음: ${resp.message()}", Toast.LENGTH_SHORT).show()
                 }
             }
             catch (e: Exception) {
-                Toast.makeText(this@LoginActivity, "네트워크 에러", Toast.LENGTH_SHORT).show()
+                Log.e("LoginActivity", "Login error: ${e.message}")
+                Toast.makeText(this@LoginActivity, "네트워크 에러: ${e.message}", Toast.LENGTH_LONG).show()
             }
             finally {
                 btnLogin.isEnabled = true
@@ -171,9 +175,10 @@ class LoginActivity : AppCompatActivity() {
                             )
                             Toast.makeText(
                                 this@LoginActivity,
-                                "구글 로그인 성공! ${googleCred.displayName}님",
-                                Toast.LENGTH_SHORT
+                                "구글 로그인 성공! ${googleCred.displayName}님 환영합니다",
+                                Toast.LENGTH_LONG
                             ).show()
+                            // TODO: Navigate to HomeActivity when implemented
                             // startActivity(Intent(this@LoginActivity, HomeActivity::class.java))
                             // finish()
                         } else {
@@ -227,7 +232,8 @@ class LoginActivity : AppCompatActivity() {
                             access = body.accessToken,
                             refresh = body.refreshToken
                         )
-                        Toast.makeText(this@LoginActivity, "카카오 로그인 성공!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@LoginActivity, "카카오 로그인 성공! 환영합니다", Toast.LENGTH_LONG).show()
+                        // TODO: Navigate to HomeActivity when implemented
                         // startActivity(Intent(this@LoginActivity, HomeActivity::class.java))
                         // finish()
                     } else {

@@ -26,11 +26,33 @@ data class LoginRequest(
     val password: String
 )
 
+data class UserInfo(
+    val id: Int,
+    val username: String,
+    val email: String,
+    val first_name: String? = null,
+    val last_name: String? = null,
+    val bio: String? = null,
+    val location: String? = null,
+    val birth_date: String? = null,
+    val profile_picture: String? = null,
+    val phone_number: String? = null,
+    val is_profile_public: Boolean? = null,
+    val allow_direct_messages: Boolean? = null,
+    val reputation_score: Int? = null,
+    val successful_trades: Int? = null,
+    val follower_count: Int? = null,
+    val following_count: Int? = null,
+    val books_count: Int? = null,
+    val created_at: String? = null,
+    val last_active: String? = null
+)
+
 data class LoginResponse(
     val ok: Boolean,
     val accessToken: String,
     val refreshToken: String,
-    val user: String? = null,
+    val user: UserInfo? = null,
     val message: String? = null
 )
 
@@ -51,6 +73,9 @@ data class SignUpRequest(
 
 data class SignUpResponse(
     val ok: Boolean,
+    val message: String? = null,
+    val user: UserInfo? = null,
+    val errors: Map<String, List<String>>? = null
 )
 
 data class ForgotPasswordRequest(

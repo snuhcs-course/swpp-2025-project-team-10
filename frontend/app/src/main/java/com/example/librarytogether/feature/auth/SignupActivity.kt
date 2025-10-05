@@ -99,27 +99,49 @@ class SignupActivity : AppCompatActivity() {
                 if (resp.isSuccessful) {
                     val body = resp.body()
                     if (body?.ok == true) {
+                        Toast.makeText(this@SignupActivity, "회원가입 성공! 로그인해주세요.", Toast.LENGTH_LONG).show()
                         // Reset input fields(입력 초기화)
                         userName.setText("")
                         email.setText("")
                         password.setText("")
 
-                        // startActivity(Intent(this, HomeActivity::class.java))
-                        // finish()
+                        // TODO: Navigate to HomeActivity when implemented
+                        // For now, return to login screen after successful signup
+                        finish()
                     }
                     else {
-                        Toast.makeText(this@SignupActivity, "모든 필드를 올바르게 입력하세요", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@SignupActivity, "회원가입 실패: ${body?.message ?: "알 수 없는 오류"}", Toast.LENGTH_SHORT).show()
                     }
                 }
                 else {
-                    Toast.makeText(this@SignupActivity, "서버 응답 없음", Toast.LENGTH_SHORT).show()
+                    // Handle error response - show specific error message
+                    val errorMessage = when (resp.code()) {
+                        400 -> {
+                            // Try to parse error body for specific validation errors
+                            try {
+                                val errorBody = resp.errorBody()?.string()
+                                if (errorBody?.contains("already exists") == true) {
+                                    "이미 사용 중인 아이디 또는 이메일입니다"
+                                } else if (errorBody?.contains("Password") == true) {
+                                    "비밀번호가 요구사항을 충족하지 않습니다"
+                                } else {
+                                    "입력 정보를 확인해주세요"
+                                }
+                            } catch (e: Exception) {
+                                "입력 정보를 확인해주세요"
+                            }
+                        }
+                        500 -> "서버 오류가 발생했습니다"
+                        else -> "회원가입 실패: ${resp.message()}"
+                    }
+                    Toast.makeText(this@SignupActivity, errorMessage, Toast.LENGTH_LONG).show()
                 }
             }
             catch (e: Exception) {
-                Toast.makeText(this@SignupActivity, "네트워크 에러", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@SignupActivity, "네트워크 에러: ${e.message}", Toast.LENGTH_SHORT).show()
             }
             finally {
-                btnLogin.isEnabled = true
+                btnSignUp.isEnabled = true
             }
         }
     }
@@ -157,8 +179,9 @@ class SignupActivity : AppCompatActivity() {
                             Toast.makeText(
                                 this@SignupActivity,
                                 "구글 계정 회원가입 성공! ${googleCred.displayName}님 환영합니다",
-                                Toast.LENGTH_SHORT
+                                Toast.LENGTH_LONG
                             ).show()
+                            // TODO: Navigate to HomeActivity when implemented
                             // startActivity(Intent(this@SignupActivity, HomeActivity::class.java))
                             // finish()
                         } else {
@@ -167,7 +190,7 @@ class SignupActivity : AppCompatActivity() {
                     }
                 }
             } catch (e: Exception) {
-                Toast.makeText(this@SignupActivity, "네트워크/로그인 에러", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@SignupActivity, "네트워크/로그인 에러: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -206,7 +229,8 @@ class SignupActivity : AppCompatActivity() {
                             access = body.accessToken,
                             refresh = body.refreshToken
                         )
-                        Toast.makeText(this@SignupActivity, "카카오 회원가입 성공!", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this@SignupActivity, "카카오 회원가입 성공! 환영합니다", Toast.LENGTH_LONG).show()
+                        // TODO: Navigate to HomeActivity when implemented
                         // startActivity(Intent(this@SignupActivity, HomeActivity::class.java))
                         // finish()
                     } else {
@@ -214,7 +238,7 @@ class SignupActivity : AppCompatActivity() {
                     }
                 }
             } catch (e: Exception) {
-                Toast.makeText(this@SignupActivity, "네트워크 에러", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this@SignupActivity, "네트워크 에러: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }
