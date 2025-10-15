@@ -12,6 +12,7 @@ import com.bumptech.glide.Glide
 import com.example.librarytogether.R
 import com.example.librarytogether.databinding.FeedPostBinding
 import com.example.librarytogether.feature.home.data.Post
+import com.example.librarytogether.util.TimeUtils
 import com.google.android.material.tabs.TabLayoutMediator
 
 data class FeedClicks(
@@ -91,6 +92,7 @@ class FeedAdapter(
                 .placeholder(R.drawable.person_icon)
                 .circleCrop()
                 .into(ivProfileImage)
+            tvTime.text = TimeUtils.relativeTime(itemView.context, post.createdAt)
 
             pageCallback?.let { vpImages.unregisterOnPageChangeCallback(it) }
             pageCallback = null

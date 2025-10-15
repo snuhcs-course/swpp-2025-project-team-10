@@ -10,7 +10,7 @@ android {
 
     defaultConfig {
         applicationId = "com.example.librarytogether"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -41,6 +41,7 @@ android {
 
 dependencies {
 
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
     kapt ("com.github.bumptech.glide:compiler:4.16.0")
     implementation ("com.github.bumptech.glide:glide:4.16.0")
     implementation ("androidx.viewpager2:viewpager2:1.1.0")
