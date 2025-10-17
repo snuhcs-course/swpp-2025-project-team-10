@@ -19,6 +19,7 @@ import com.example.librarytogether.feature.library.LibraryViewModel
 import com.example.librarytogether.network.RetrofitClient
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.tabs.TabLayout
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.HiltAndroidApp
 
@@ -44,10 +45,9 @@ class LibraryFragment : Fragment(R.layout.fragment_library) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        if (binding.contentTabs.checkedButtonId == View.NO_ID) { binding.contentTabs.check(R.id.tabReviews) }
-
         setupRecyclerView()
         setupClickListeners()
+        setupTabs()
         observeViewModel()
 
     }
@@ -60,14 +60,54 @@ class LibraryFragment : Fragment(R.layout.fragment_library) {
         }
     }
 
+    private fun setupTabs() {
+        binding.contentTabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+                when (tab?.position) {
+                    0 -> {
+                        binding.rvReviews.visibility = View.VISIBLE
+                        binding.rvBooks.visibility = View.GONE
+                        binding.profileContainer.visibility = View.GONE
+                        binding.fabAdd.show()
+                    }
+                    1 -> {
+                        binding.rvReviews.visibility = View.GONE
+                        binding.rvBooks.visibility = View.VISIBLE
+                        binding.profileContainer.visibility = View.GONE
+                        binding.fabAdd.show()
+                    }
+                    2 -> {
+                        binding.rvReviews.visibility = View.GONE
+                        binding.rvBooks.visibility = View.GONE
+                        binding.profileContainer.visibility = View.VISIBLE
+                        binding.fabAdd.hide()
+                    }
+                }
+            }
+
+            override fun onTabUnselected(tab: TabLayout.Tab?) {
+            }
+
+            override fun onTabReselected(tab: TabLayout.Tab?) {
+            }
+        })
+
+        binding.rvReviews.visibility = View.VISIBLE
+        binding.rvBooks.visibility = View.GONE
+        binding.profileContainer.visibility = View.GONE
+        binding.fabAdd.show()
+    }
+
     private fun setupClickListeners() {
         binding.fabAdd.setOnClickListener {
-            when (binding.contentTabs.checkedButtonId) {
-                R.id.tabReviews   -> {
+            when (binding.contentTabs.selectedTabPosition) {
+                0 -> {
                     WriteReviewSheet().show(childFragmentManager, "WriteReviewSheet")
                 }
-                R.id.tabBookshelf -> { /* TODO: 책 추가 화면 */ }
-                R.id.tabProfile -> {}
+                1 -> {
+                }
+                2 -> {
+                }
             }
         }
     }

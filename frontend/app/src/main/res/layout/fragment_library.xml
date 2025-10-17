@@ -54,39 +54,35 @@
         app:layout_constraintEnd_toEndOf="parent"
         tools:text="서로 서로 책을 교환해 보아요." />
 
-    <com.google.android.material.button.MaterialButtonToggleGroup
+    <com.google.android.material.tabs.TabLayout
         android:id="@+id/contentTabs"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:minWidth="0dp"
-        app:singleSelection="true"
-        app:selectionRequired="true"
+        app:tabGravity="fill"
+        app:tabMode="fixed"
+        app:tabIndicatorColor="@color/grey"
+        app:tabIndicatorFullWidth="true"
+        app:tabSelectedTextColor="@color/black"
         app:layout_constraintTop_toBottomOf="@id/ivProfileImage"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/tabReviews"
-            style="@style/Widget.Material3.Button.OutlinedButton"
+        <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="40dp"
             android:text="서평"/>
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/tabBookshelf"
-            style="@style/Widget.Material3.Button.OutlinedButton"
+        <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="40dp"
             android:text="책장"/>
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/tabProfile"
-            style="@style/Widget.Material3.Button.OutlinedButton"
+        <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
             android:layout_height="40dp"
             android:text="프로필"/>
-    </com.google.android.material.button.MaterialButtonToggleGroup>
+    </com.google.android.material.tabs.TabLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvReviews"
@@ -173,6 +169,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
+        app:backgroundTint="@color/light_grey"
         app:srcCompat="@drawable/plus_icon"
         app:tint="@color/white"
         app:layout_constraintEnd_toEndOf="parent"
