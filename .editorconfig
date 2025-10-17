@@ -1,0 +1,65 @@
+# EditorConfig is awesome: https://EditorConfig.org
+
+# Top-most EditorConfig file
+root = true
+
+# Unix-style newlines with a newline ending every file
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Python files - PEP 8 standard (79 characters)
+[*.py]
+indent_style = space
+indent_size = 4
+max_line_length = 79
+
+# Kotlin files - Kotlin official style guide (120 characters)
+[*.{kt,kts}]
+indent_style = space
+indent_size = 4
+max_line_length = 120
+ij_kotlin_code_style_defaults = KOTLIN_OFFICIAL
+
+# Java files (if used)
+[*.java]
+indent_style = space
+indent_size = 4
+max_line_length = 120
+
+# XML files (Android layouts, manifests)
+[*.xml]
+indent_style = space
+indent_size = 4
+
+# Gradle files
+[*.gradle]
+indent_style = space
+indent_size = 4
+
+# JSON files
+[*.json]
+indent_style = space
+indent_size = 2
+
+# YAML files
+[*.{yml,yaml}]
+indent_style = space
+indent_size = 2
+
+# Markdown files
+[*.md]
+trim_trailing_whitespace = false
+max_line_length = off
+
+# Shell scripts
+[*.sh]
+indent_style = space
+indent_size = 2
+
+# Makefile
+[Makefile]
+indent_style = tab
+

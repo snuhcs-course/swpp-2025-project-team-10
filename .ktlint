@@ -1,0 +1,15 @@
+# Ktlint configuration file
+# See: https://pinterest.github.io/ktlint/
+
+# Disable specific rules (if needed)
+disabled_rules=
+
+# Maximum line length (Kotlin official style guide)
+max_line_length=120
+
+# Indent size
+indent_size=4
+
+# Use Kotlin official code style
+kotlin_code_style=official
+
