@@ -26,7 +26,10 @@ class Migration(migrations.Migration):
                         verbose_name="ID",
                     ),
                 ),
-                ("password", models.CharField(max_length=128, verbose_name="password")),
+                (
+                    "password",
+                    models.CharField(max_length=128, verbose_name="password"),
+                ),
                 (
                     "last_login",
                     models.DateTimeField(
@@ -75,7 +78,8 @@ class Migration(migrations.Migration):
                 (
                     "date_joined",
                     models.DateTimeField(
-                        default=django.utils.timezone.now, verbose_name="date joined"
+                        default=django.utils.timezone.now,
+                        verbose_name="date joined",
                     ),
                 ),
                 ("email", models.EmailField(max_length=254, unique=True)),
@@ -92,7 +96,9 @@ class Migration(migrations.Migration):
                 (
                     "location",
                     models.CharField(
-                        blank=True, help_text="Your city or region", max_length=100
+                        blank=True,
+                        help_text="Your city or region",
+                        max_length=100,
                     ),
                 ),
                 ("birth_date", models.DateField(blank=True, null=True)),
@@ -182,7 +188,10 @@ class Migration(migrations.Migration):
                 ),
                 ("email_notifications", models.BooleanField(default=True)),
                 ("push_notifications", models.BooleanField(default=True)),
-                ("barter_request_notifications", models.BooleanField(default=True)),
+                (
+                    "barter_request_notifications",
+                    models.BooleanField(default=True),
+                ),
                 ("message_notifications", models.BooleanField(default=True)),
                 ("follow_notifications", models.BooleanField(default=True)),
                 ("show_email", models.BooleanField(default=False)),
@@ -198,7 +207,8 @@ class Migration(migrations.Migration):
                 (
                     "preferred_meeting_locations",
                     models.TextField(
-                        blank=True, help_text="Preferred locations for book exchanges"
+                        blank=True,
+                        help_text="Preferred locations for book exchanges",
                     ),
                 ),
                 ("created_at", models.DateTimeField(auto_now_add=True)),

@@ -137,22 +137,28 @@ python manage.py runserver
 
 1. **Clone the repository**
 ```bash
-git clone <repository-url>
+git clone https://github.com/snuhcs-course/swpp-2025-project-team-10
 cd backend
 ```
 
 2. **Create virtual environment**
 ```bash
-python -m venv venv
+uv venv
 # Windows
-.\venv\Scripts\Activate.ps1
+.\.venv\Scripts\Activate.ps1
 # Linux/Mac
-source venv/bin/activate
+source ./.venv/bin/activate
 ```
+
+or just kill current terminal and use new terminal would automatically activate the virtual environment. If doing so, do not forget to `cd backend` again.
 
 3. **Install dependencies**
 ```bash
-pip install -r requirements-dev.txt
+uv sync
+
+# for development
+uv sync --extra dev
+uv sync --all-extras
 ```
 
 4. **Environment configuration**
@@ -307,7 +313,7 @@ AWS_STORAGE_BUCKET_NAME=your-s3-bucket
 python run_tests.py
 
 # Or run individual tests
-.\venv\Scripts\Activate.ps1
+.\.venv\Scripts\Activate.ps1
 python tests/test_api_integration.py
 ```
 
@@ -362,4 +368,4 @@ coverage report
 
 ## 📄 License
 
-This project is licensed under the MIT License.
+N/A

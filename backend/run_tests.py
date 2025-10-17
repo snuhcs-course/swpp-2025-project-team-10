@@ -5,9 +5,9 @@ This script provides easy access to all test utilities.
 """
 
 import os
-import sys
 import subprocess
 from pathlib import Path
+
 
 def run_command(command, description):
     """Run a command and display results."""
@@ -15,12 +15,12 @@ def run_command(command, description):
     print(f"Running: {description}")
     print(f"Command: {command}")
     print(f"{'='*60}")
-    
+
     try:
         # Change to backend directory
         backend_dir = Path(__file__).parent
         os.chdir(backend_dir)
-        
+
         # Activate virtual environment and run command
         if os.name == 'nt':  # Windows
             venv_activate = r".\.venv\Scripts\Activate.ps1"
@@ -28,9 +28,9 @@ def run_command(command, description):
         else:  # Unix/Linux/Mac
             venv_activate = "./.venv/bin/activate"
             full_command = f"source {venv_activate} && {command}"
-        
+
         result = subprocess.run(full_command, shell=True, capture_output=True, text=True)
-        
+
         if result.returncode == 0:
             print("SUCCESS!")
             print(result.stdout)
@@ -38,7 +38,7 @@ def run_command(command, description):
             print("FAILED!")
             print("STDOUT:", result.stdout)
             print("STDERR:", result.stderr)
-            
+
     except Exception as e:
         print(f"Error running command: {e}")
 
@@ -62,7 +62,7 @@ def main():
     while True:
         show_menu()
         choice = input("\nEnter your choice (0-9): ").strip()
-        
+
         if choice == "0":
             print("Goodbye!")
             break

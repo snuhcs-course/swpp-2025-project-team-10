@@ -3,10 +3,11 @@ Unit tests for profile management views.
 Tests profile retrieval, update, and preferences.
 """
 
-from django.test import TestCase
 from django.contrib.auth import get_user_model
-from rest_framework.test import APIClient
+from django.test import TestCase
 from rest_framework import status
+from rest_framework.test import APIClient
+
 from accounts.models import UserPreferences
 
 User = get_user_model()
@@ -18,13 +19,13 @@ class ProfileViewTestCase(TestCase):
     def setUp(self):
         """Set up test data."""
         self.client = APIClient()
-        self.profile_url = '/auth/profile/'
+        self.profile_url = "/auth/profile/"
         self.user = User.objects.create_user(
-            username='testuser',
-            email='test@example.com',
-            password='testpass123',
-            first_name='Test',
-            last_name='User'
+            username="testuser",
+            email="test@example.com",
+            password="testpass123",
+            first_name="Test",
+            last_name="User",
         )
 
     def test_get_profile_authenticated(self):
@@ -33,8 +34,8 @@ class ProfileViewTestCase(TestCase):
         response = self.client.get(self.profile_url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['username'], 'testuser')
-        self.assertEqual(response.data['email'], 'test@example.com')
+        self.assertEqual(response.data["username"], "testuser")
+        self.assertEqual(response.data["email"], "test@example.com")
 
     def test_get_profile_unauthenticated(self):
         """Test getting profile when not authenticated."""
@@ -47,7 +48,13 @@ class ProfileViewTestCase(TestCase):
         self.client.force_authenticate(user=self.user)
         response = self.client.get(self.profile_url)
 
-        expected_fields = ['id', 'username', 'email', 'first_name', 'last_name']
+        expected_fields = [
+            "id",
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+        ]
         for field in expected_fields:
             self.assertIn(field, response.data)
 
@@ -58,51 +65,48 @@ class ProfileUpdateViewTestCase(TestCase):
     def setUp(self):
         """Set up test data."""
         self.client = APIClient()
-        self.update_url = '/auth/profile/update/'
+        self.update_url = "/auth/profile/update/"
         self.user = User.objects.create_user(
-            username='testuser',
-            email='test@example.com',
-            password='testpass123',
-            first_name='Test',
-            last_name='User'
+            username="testuser",
+            email="test@example.com",
+            password="testpass123",
+            first_name="Test",
+            last_name="User",
         )
 
     def test_update_profile_authenticated(self):
         """Test updating profile when authenticated."""
         self.client.force_authenticate(user=self.user)
 
-        data = {
-            'first_name': 'Updated',
-            'last_name': 'Name'
-        }
-        response = self.client.put(self.update_url, data, format='json')
+        data = {"first_name": "Updated", "last_name": "Name"}
+        response = self.client.put(self.update_url, data, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertTrue(response.data.get('ok'))
+        self.assertTrue(response.data.get("ok"))
 
         # Verify user was updated
         self.user.refresh_from_db()
-        self.assertEqual(self.user.first_name, 'Updated')
-        self.assertEqual(self.user.last_name, 'Name')
+        self.assertEqual(self.user.first_name, "Updated")
+        self.assertEqual(self.user.last_name, "Name")
 
     def test_update_profile_partial(self):
         """Test partial profile update."""
         self.client.force_authenticate(user=self.user)
 
-        data = {'first_name': 'Updated'}
-        response = self.client.patch(self.update_url, data, format='json')
+        data = {"first_name": "Updated"}
+        response = self.client.patch(self.update_url, data, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
         # Verify only first_name was updated
         self.user.refresh_from_db()
-        self.assertEqual(self.user.first_name, 'Updated')
-        self.assertEqual(self.user.last_name, 'User')  # Unchanged
+        self.assertEqual(self.user.first_name, "Updated")
+        self.assertEqual(self.user.last_name, "User")  # Unchanged
 
     def test_update_profile_unauthenticated(self):
         """Test updating profile when not authenticated."""
-        data = {'first_name': 'Updated'}
-        response = self.client.put(self.update_url, data, format='json')
+        data = {"first_name": "Updated"}
+        response = self.client.put(self.update_url, data, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
@@ -111,7 +115,7 @@ class ProfileUpdateViewTestCase(TestCase):
         self.client.force_authenticate(user=self.user)
 
         data = {}
-        response = self.client.put(self.update_url, data, format='json')
+        response = self.client.put(self.update_url, data, format="json")
 
         # Should still succeed (no changes)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -123,16 +127,14 @@ class UserPreferencesViewTestCase(TestCase):
     def setUp(self):
         """Set up test data."""
         self.client = APIClient()
-        self.preferences_url = '/auth/preferences/'
+        self.preferences_url = "/auth/preferences/"
         self.user = User.objects.create_user(
-            username='testuser',
-            email='test@example.com',
-            password='testpass123'
+            username="testuser",
+            email="test@example.com",
+            password="testpass123",
         )
         self.preferences = UserPreferences.objects.create(
-            user=self.user,
-            email_notifications=True,
-            push_notifications=False
+            user=self.user, email_notifications=True, push_notifications=False
         )
 
     def test_get_preferences_authenticated(self):
@@ -141,8 +143,8 @@ class UserPreferencesViewTestCase(TestCase):
         response = self.client.get(self.preferences_url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn('email_notifications', response.data)
-        self.assertIn('push_notifications', response.data)
+        self.assertIn("email_notifications", response.data)
+        self.assertIn("push_notifications", response.data)
 
     def test_get_preferences_unauthenticated(self):
         """Test getting preferences when not authenticated."""
@@ -154,15 +156,8 @@ class UserPreferencesViewTestCase(TestCase):
         """Test updating preferences when authenticated."""
         self.client.force_authenticate(user=self.user)
 
-        data = {
-            'email_notifications': False,
-            'push_notifications': True
-        }
-        response = self.client.put(
-            self.preferences_url,
-            data,
-            format='json'
-        )
+        data = {"email_notifications": False, "push_notifications": True}
+        response = self.client.put(self.preferences_url, data, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -175,12 +170,8 @@ class UserPreferencesViewTestCase(TestCase):
         """Test partial preferences update."""
         self.client.force_authenticate(user=self.user)
 
-        data = {'email_notifications': False}
-        response = self.client.patch(
-            self.preferences_url,
-            data,
-            format='json'
-        )
+        data = {"email_notifications": False}
+        response = self.client.patch(self.preferences_url, data, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -191,12 +182,8 @@ class UserPreferencesViewTestCase(TestCase):
 
     def test_update_preferences_unauthenticated(self):
         """Test updating preferences when not authenticated."""
-        data = {'email_notifications': False}
-        response = self.client.put(
-            self.preferences_url,
-            data,
-            format='json'
-        )
+        data = {"email_notifications": False}
+        response = self.client.put(self.preferences_url, data, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
@@ -204,22 +191,15 @@ class UserPreferencesViewTestCase(TestCase):
         """Test that preferences are created if they don't exist."""
         # Create user without preferences
         new_user = User.objects.create_user(
-            username='newuser',
-            email='newuser@example.com',
-            password='testpass123'
+            username="newuser",
+            email="newuser@example.com",
+            password="testpass123",
         )
 
         self.client.force_authenticate(user=new_user)
 
-        data = {
-            'email_notifications': True,
-            'push_notifications': True
-        }
-        response = self.client.put(
-            self.preferences_url,
-            data,
-            format='json'
-        )
+        data = {"email_notifications": True, "push_notifications": True}
+        response = self.client.put(self.preferences_url, data, format="json")
 
         # Should create preferences
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -228,4 +208,3 @@ class UserPreferencesViewTestCase(TestCase):
         preferences = UserPreferences.objects.get(user=new_user)
         self.assertTrue(preferences.email_notifications)
         self.assertTrue(preferences.push_notifications)
-

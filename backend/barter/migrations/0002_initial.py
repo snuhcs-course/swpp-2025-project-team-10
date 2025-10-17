@@ -20,14 +20,18 @@ class Migration(migrations.Migration):
             model_name="bartercounter",
             name="offered_books",
             field=models.ManyToManyField(
-                blank=True, related_name="counter_offered_books", to="books.book"
+                blank=True,
+                related_name="counter_offered_books",
+                to="books.book",
             ),
         ),
         migrations.AddField(
             model_name="bartercounter",
             name="requested_books",
             field=models.ManyToManyField(
-                blank=True, related_name="counter_requested_books", to="books.book"
+                blank=True,
+                related_name="counter_requested_books",
+                to="books.book",
             ),
         ),
         migrations.AddField(
@@ -125,7 +129,9 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name="barterrequest",
-            index=models.Index(fields=["status"], name="barter_bart_status_6cdc46_idx"),
+            index=models.Index(
+                fields=["status"], name="barter_bart_status_6cdc46_idx"
+            ),
         ),
         migrations.AddIndex(
             model_name="barterrequest",

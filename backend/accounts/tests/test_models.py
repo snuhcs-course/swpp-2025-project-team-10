@@ -3,8 +3,9 @@ Unit tests for accounts models.
 Tests User model and UserPreferences model.
 """
 
-from django.test import TestCase
 from django.contrib.auth import get_user_model
+from django.test import TestCase
+
 from accounts.models import UserPreferences
 
 User = get_user_model()
@@ -16,20 +17,20 @@ class UserModelTestCase(TestCase):
     def setUp(self):
         """Set up test data."""
         self.user_data = {
-            'username': 'testuser',
-            'email': 'test@example.com',
-            'password': 'testpass123',
-            'first_name': 'Test',
-            'last_name': 'User'
+            "username": "testuser",
+            "email": "test@example.com",
+            "password": "testpass123",
+            "first_name": "Test",
+            "last_name": "User",
         }
 
     def test_create_user(self):
         """Test creating a regular user."""
         user = User.objects.create_user(**self.user_data)
 
-        self.assertEqual(user.username, 'testuser')
-        self.assertEqual(user.email, 'test@example.com')
-        self.assertTrue(user.check_password('testpass123'))
+        self.assertEqual(user.username, "testuser")
+        self.assertEqual(user.email, "test@example.com")
+        self.assertTrue(user.check_password("testpass123"))
         self.assertTrue(user.is_active)
         self.assertFalse(user.is_staff)
         self.assertFalse(user.is_superuser)
@@ -37,12 +38,12 @@ class UserModelTestCase(TestCase):
     def test_create_superuser(self):
         """Test creating a superuser."""
         superuser = User.objects.create_superuser(
-            username='admin',
-            email='admin@example.com',
-            password='adminpass123'
+            username="admin",
+            email="admin@example.com",
+            password="adminpass123",
         )
 
-        self.assertEqual(superuser.username, 'admin')
+        self.assertEqual(superuser.username, "admin")
         self.assertTrue(superuser.is_active)
         self.assertTrue(superuser.is_staff)
         self.assertTrue(superuser.is_superuser)
@@ -50,7 +51,7 @@ class UserModelTestCase(TestCase):
     def test_user_string_representation(self):
         """Test user string representation."""
         user = User.objects.create_user(**self.user_data)
-        self.assertEqual(str(user), 'testuser')
+        self.assertEqual(str(user), "testuser")
 
     def test_user_email_unique(self):
         """Test that email must be unique."""
@@ -59,9 +60,9 @@ class UserModelTestCase(TestCase):
         # Try to create another user with same email
         with self.assertRaises(Exception):
             User.objects.create_user(
-                username='anotheruser',
-                email='test@example.com',
-                password='pass123'
+                username="anotheruser",
+                email="test@example.com",
+                password="pass123",
             )
 
     def test_user_username_unique(self):
@@ -71,9 +72,9 @@ class UserModelTestCase(TestCase):
         # Try to create another user with same username
         with self.assertRaises(Exception):
             User.objects.create_user(
-                username='testuser',
-                email='another@example.com',
-                password='pass123'
+                username="testuser",
+                email="another@example.com",
+                password="pass123",
             )
 
 
@@ -83,9 +84,9 @@ class UserPreferencesModelTestCase(TestCase):
     def setUp(self):
         """Set up test data."""
         self.user = User.objects.create_user(
-            username='testuser',
-            email='test@example.com',
-            password='testpass123'
+            username="testuser",
+            email="test@example.com",
+            password="testpass123",
         )
 
     def test_create_user_preferences(self):
@@ -94,13 +95,13 @@ class UserPreferencesModelTestCase(TestCase):
             user=self.user,
             email_notifications=True,
             push_notifications=False,
-            privacy_level='public'
+            privacy_level="public",
         )
 
         self.assertEqual(preferences.user, self.user)
         self.assertTrue(preferences.email_notifications)
         self.assertFalse(preferences.push_notifications)
-        self.assertEqual(preferences.privacy_level, 'public')
+        self.assertEqual(preferences.privacy_level, "public")
 
     def test_user_preferences_default_values(self):
         """Test default values for user preferences."""
@@ -134,4 +135,3 @@ class UserPreferencesModelTestCase(TestCase):
         # Check that preferences are also deleted
         with self.assertRaises(UserPreferences.DoesNotExist):
             UserPreferences.objects.get(id=preferences_id)
-
