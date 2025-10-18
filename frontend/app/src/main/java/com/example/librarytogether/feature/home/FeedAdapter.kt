@@ -1,9 +1,13 @@
 package com.example.librarytogether.feature.home
 
+import android.content.res.ColorStateList
 import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -16,6 +20,7 @@ import com.example.librarytogether.util.TimeUtils
 import com.google.android.material.tabs.TabLayoutMediator
 
 data class FeedClicks(
+    val onClickLike: (Post) -> Unit = {},
     val onClickReview: (Post) -> Unit = {},
     val onClickExchange: (Post) -> Unit = {},
     val onClickAdd: (Post) -> Unit = {},
@@ -68,10 +73,11 @@ class FeedAdapter(
                     if (p != RecyclerView.NO_POSITION) action(post)
                 }
 
-                btnBookReview?.safeClick(clicks.onClickReview)
-                btnExchange?.safeClick(clicks.onClickExchange)
-                btnAdd?.safeClick(clicks.onClickAdd)
-                btnMore?.safeClick(clicks.onClickMore)
+                btnLike.safeClick(clicks.onClickLike)
+                btnBookReview.safeClick(clicks.onClickReview)
+                btnExchange.safeClick(clicks.onClickExchange)
+                btnAdd.safeClick(clicks.onClickAdd)
+                btnMore.safeClick(clicks.onClickMore)
                 ivProfileImage.safeClick(clicks.onClickProfile)
                 tvPoster.safeClick(clicks.onClickUserName)
                 tvTitle.safeClick(clicks.onClickTitle)
@@ -101,6 +107,7 @@ class FeedAdapter(
 
             val images = post.imageUrls
             mcPostImage.isVisible = images.isNotEmpty()
+            val cs = ConstraintSet().apply { clone(contentFeed) }
 
             if (images.isNotEmpty()) {
                 vpImages.adapter = ImagePagerAdapter(images)
@@ -121,9 +128,23 @@ class FeedAdapter(
                         }
                     }
                 })
+                cs.clear(binding.actionBar.id, ConstraintSet.TOP)
+                cs.connect(binding.actionBar.id, ConstraintSet.TOP, binding.mcPostImage.id, ConstraintSet.BOTTOM)
+                cs.clear(binding.tvContent.id, ConstraintSet.TOP)
+                cs.connect(binding.tvContent.id, ConstraintSet.TOP, binding.actionBar.id, ConstraintSet.BOTTOM)
+                cs.clear(binding.tvTime.id, ConstraintSet.TOP)
+                cs.connect(binding.tvTime.id, ConstraintSet.TOP, binding.tvContent.id, ConstraintSet.BOTTOM)
+                cs.applyTo(contentFeed)
             } else {
                 dotsMediator?.detach()
                 dotsMediator = null
+                cs.clear(binding.actionBar.id, ConstraintSet.TOP)
+                cs.connect(binding.actionBar.id, ConstraintSet.TOP, binding.tvContent.id, ConstraintSet.BOTTOM)
+                cs.clear(binding.tvContent.id, ConstraintSet.TOP)
+                cs.connect(binding.tvContent.id, ConstraintSet.TOP, binding.mcPostImage.id, ConstraintSet.BOTTOM)
+                cs.clear(binding.tvTime.id, ConstraintSet.TOP)
+                cs.connect(binding.tvTime.id, ConstraintSet.TOP, binding.actionBar.id, ConstraintSet.BOTTOM)
+                cs.applyTo(contentFeed)
             }
 
             val isExpanded = expandedIds.contains(post.id)
@@ -135,6 +156,13 @@ class FeedAdapter(
                 tvContent.maxLines = MAX_LINES
                 tvContent.ellipsize = TextUtils.TruncateAt.END
             }
+
+            val likeIconColor = if (post.isLiked) {
+                ContextCompat.getColor(itemView.context, R.color.red)
+            } else {
+                ContextCompat.getColor(itemView.context, R.color.black)
+            }
+            binding.btnLike.iconTint = ColorStateList.valueOf(likeIconColor)
         }
     }
 }

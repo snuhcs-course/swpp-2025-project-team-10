@@ -10,4 +10,9 @@
         <item name="cornerSize">12dp</item>
     </style>
 
+    <style name="Shape.Round4" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">4dp</item>
+    </style>
+
 </resources>

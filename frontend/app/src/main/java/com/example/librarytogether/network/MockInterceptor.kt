@@ -70,6 +70,16 @@ class MockInterceptor(
             return makeResponse(req, 200, body)
         }
 
+        if (path.endsWith("/posts/12/like/") && method == "POST") {
+            val body = readJson(R.raw.like)
+            return makeResponse(req, 200, body)
+        }
+
+        if (path.endsWith("/library/reviews/") && method == "GET") {
+            val body = readJson(R.raw.my_feed)
+            return makeResponse(req, 200, body)
+        }
+
         val notMocked = """{ "success": false, "error": { "code": "NOT_MOCKED", "message": "모킹 없음: $path" } }"""
         return makeResponse(req, 404, notMocked)
     }

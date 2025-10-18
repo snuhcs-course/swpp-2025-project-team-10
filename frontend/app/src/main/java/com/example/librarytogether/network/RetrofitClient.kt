@@ -9,9 +9,9 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object MockConfig {
     // 필요할 때만 true로
-    const val USE_MOCK = false
+    const val USE_MOCK = true
     // JWT 흐름까지 테스트할 건지
-    const val TEST_JWT_FLOW = false
+    const val TEST_JWT_FLOW = true
 }
 
 object RetrofitClient {

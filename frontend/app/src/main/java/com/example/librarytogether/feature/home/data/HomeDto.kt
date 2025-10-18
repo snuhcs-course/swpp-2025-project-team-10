@@ -31,8 +31,13 @@ data class Post(
     val imageUrls: List<String> = emptyList(),
     val likeCount: Int = 0,
     val createdAt: String? = null,
+    val isLiked: Boolean = false
 )
 
 data class FeedResponse(
     val results: List<Post>
+)
+
+data class LikeResponse(
+    val post: Post
 )

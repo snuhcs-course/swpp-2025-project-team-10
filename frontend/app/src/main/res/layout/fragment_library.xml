@@ -1,6 +1,177 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:theme="@style/Theme.LibraryTogether"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:paddingHorizontal="16dp"
+    tools:context=".feature.home.LibraryFragment">
 
+    <TextView
+        android:id="@+id/tvAppName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="서로서로도서관"
+        android:textStyle="bold"
+        android:textSize="20sp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/ivProfileImage"
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:src="@drawable/person_icon"
+        app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.Circle"
+        app:layout_constraintTop_toBottomOf="@id/tvAppName"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/tvName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:textSize="18sp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        app:layout_constraintTop_toTopOf="@id/ivProfileImage"
+        app:layout_constraintStart_toEndOf="@id/ivProfileImage"
+        android:layout_marginStart="12dp"
+        tools:text="SeoRo" />
+
+    <TextView
+        android:id="@+id/tvBio"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        android:textSize="12sp"
+        android:maxLines="2"
+        android:ellipsize="end"
+        app:layout_constraintTop_toBottomOf="@id/tvName"
+        app:layout_constraintStart_toStartOf="@id/tvName"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:text="서로 서로 책을 교환해 보아요." />
+
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/contentTabs"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        app:tabGravity="fill"
+        app:tabMode="fixed"
+        app:tabIndicatorColor="@color/grey"
+        app:tabIndicatorFullWidth="true"
+        app:tabSelectedTextColor="@color/black"
+        app:layout_constraintTop_toBottomOf="@id/ivProfileImage"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:text="서평"/>
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:text="책장"/>
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:text="프로필"/>
+    </com.google.android.material.tabs.TabLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvReviews"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:clipToPadding="false"
+        android:paddingTop="8dp"
+        android:paddingBottom="16dp"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        app:layout_constraintTop_toBottomOf="@id/contentTabs"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:listitem="@layout/my_feed_post"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvBooks"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:clipToPadding="false"
+        android:paddingTop="8dp"
+        android:paddingBottom="16dp"
+        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        app:spanCount="3"
+        app:layout_constraintTop_toBottomOf="@id/contentTabs"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+<!--        tools:listitem="@layout/item_book_tile"/>-->
+
+    <ScrollView
+        android:id="@+id/profileContainer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/contentTabs"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="8dp"
+            android:paddingBottom="24dp">
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="이름">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    tools:text="SeoRo"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="소개">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/etBio"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:maxLines="4"
+                    tools:text="서로 서로 책을 교환해 보아요."/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSaveProfile"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="프로필 저장"
+                android:layout_marginTop="16dp"/>
+        </LinearLayout>
+    </ScrollView>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabAdd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        app:backgroundTint="@color/light_grey"
+        app:srcCompat="@drawable/plus_icon"
+        app:tint="@color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

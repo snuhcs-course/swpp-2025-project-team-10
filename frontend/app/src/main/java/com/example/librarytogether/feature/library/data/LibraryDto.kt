@@ -1,0 +1,28 @@
+package com.example.librarytogether.feature.library.data
+
+import com.example.librarytogether.feature.library.data.Review
+
+//data class ApiResponse<T>(
+//    val success: Boolean,
+//    val data: T? = null,
+//    val message: String? = null,
+//    val error: ApiError? = null,
+//    val pagination: Pagination? = null
+//)
+//
+//data class ApiError(
+//    val code: String,
+//    val message: String,
+//    val details: Map<String, Any>? = null
+//)
+//
+//data class Pagination(
+//    val page: Int,
+//    val size: Int,
+//    val total: Int,
+//    val total_pages: Int
+//)
+
+data class ReviewResponse(
+    val results: List<Review>
+)

@@ -28,4 +28,9 @@
         android:id="@+id/nav_library"
         android:name="com.example.librarytogether.feature.library.LibraryFragment"
         android:label="@string/nav_library" />
+
+    <fragment
+        android:id="@+id/write_review_fragment"
+        android:name="com.example.librarytogether.feature.library.WriteReviewSheet"
+        android:label="" />
 </navigation>

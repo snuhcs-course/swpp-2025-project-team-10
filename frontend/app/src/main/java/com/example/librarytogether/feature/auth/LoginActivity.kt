@@ -36,6 +36,7 @@ import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
 import com.kakao.sdk.user.UserApiClient
+import dagger.hilt.android.HiltAndroidApp
 
 // UUID
 import java.util.UUID

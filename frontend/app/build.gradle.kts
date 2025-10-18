@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.hilt)
 }
 
 android {
@@ -54,16 +55,20 @@ android {
 
 dependencies {
 
-    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
-    kapt ("com.github.bumptech.glide:compiler:4.16.0")
-    implementation ("com.github.bumptech.glide:glide:4.16.0")
-    implementation ("androidx.viewpager2:viewpager2:1.1.0")
-    implementation ("com.google.android.material:material:1.12.0")
-    implementation("com.squareup.retrofit2:retrofit:2.11.0")
-    implementation("com.google.code.gson:gson:2.8.9")
-    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
-    implementation("com.squareup.okhttp3:okhttp:4.10.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.compiler)
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation(libs.androidx.lifecycle.livedata.ktx)
+    coreLibraryDesugaring(libs.android.desugarJdkLibs)
+    kapt (libs.glide.compiler)
+    implementation (libs.glide)
+    implementation (libs.androidx.viewpager2)
+    implementation(libs.retrofit)
+    implementation(libs.gson)
+    implementation(libs.retrofit.converter.gson)
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging.interceptor)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)

@@ -19,6 +19,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
     private val feedAdapter by lazy { FeedAdapter(
         FeedClicks(
+            onClickLike =:: onClickLike,
             onClickReview =:: onClickReview,
             onClickExchange =:: onClickExchange,
             onClickAdd =:: onClickAdd,
@@ -96,6 +97,25 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun onClickLike(post: Post) {
+        lifecycleScope.launch {
+            try {
+                val response = service.likePost(post.id)
+                if (response.isSuccessful) {
+                    val updatedPost = response.body()?.post
+                    val updatedList = currentPosts.map {
+                        if (it.id == updatedPost?.id) updatedPost else it
+                    }
+                    currentPosts = updatedList
+                } else {
+                    Toast.makeText(requireContext(), "좋아요 처리에 실패.", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "네트워크 오류.", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun onClickReview(post: Post) {
