@@ -1,5 +1,3 @@
-import uuid
-
 from django.contrib.auth import get_user_model
 from django.db import models
 
@@ -19,7 +17,9 @@ class Post(models.Model):
         ("barter_success", "Successful Barter"),
     ]
 
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    # Using AutoField (integer) to match frontend expectations
+    # Frontend Post data class expects id: Int
+    id = models.AutoField(primary_key=True)
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="posts"
     )

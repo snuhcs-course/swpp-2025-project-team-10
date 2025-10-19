@@ -1,9 +1,8 @@
 {
-  "post":
-  {
-    "id": "12",
-    "userName": "hong",
-    "userProfile": "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f",
+  "post": {
+    "id": 12,
+    "posterName": "hong",
+    "posterProfile": "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f",
     "bookTitle": "노르웨이의 숲",
     "authorName": "무라카미 하루키",
     "content": "감정의 결이 섬세한 작품이었어요.",
@@ -15,5 +14,4 @@
     "createdAt": "2025-10-10T09:00:00Z",
     "isLiked": true
   }
-
 }
