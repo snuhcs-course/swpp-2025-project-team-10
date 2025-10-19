@@ -1,133 +1,120 @@
-"""
-Views for the books app.
-Handles book review API endpoints.
-"""
-
-from django.contrib.auth import get_user_model
-from drf_spectacular.utils import OpenApiResponse, extend_schema
-from rest_framework import generics, permissions, status
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
-from rest_framework.views import APIView
-
-from .models import BookReview, ReviewHelpfulVote
-from .serializers import (
-    CreateReviewSerializer,
-    ReviewLikeResponseSerializer,
-    ReviewSerializer,
-)
-
-User = get_user_model()
+from rest_framework import status
+from django.shortcuts import get_object_or_404
+from .models import Book, BookReview, BookWishlist
+from .serializers import BookSerializer, BookReviewSerializer, BookWishlistSerializer
 
 
-class UserReviewListCreateView(generics.ListCreateAPIView):
+# books
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def list_books(request):
+    """List all books."""
+    books = Book.objects.all().order_by('-created_at')
+    serializer = BookSerializer(books, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def add_book(request):
+    """Allow authenticated users to add a book."""
+    serializer = BookSerializer(data=request.data, context={'request': request})
+    if serializer.is_valid():
+        serializer.save(owner=request.user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def book_detail_by_title(request, title):
+    """Retrieve details of a single book by title."""
+    book = get_object_or_404(Book, title=title)
+    serializer = BookSerializer(book)
+    return Response(serializer.data)
+
+
+# reviews
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def list_reviews(request):
+    """List all reviews (optionally filter by book title)."""
+    title = request.query_params.get('bookTitle')
+    if title:
+        book = get_object_or_404(Book, title=title)
+        reviews = book.reviews.all().order_by('-created_at')
+    else:
+        reviews = BookReview.objects.all().order_by('-created_at')
+
+    serializer = BookReviewSerializer(reviews, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def add_review(request):
     """
-    API endpoint for listing and creating user's book reviews.
-
-    GET /library/reviews/ - List all reviews by the authenticated user
-    POST /library/reviews/ - Create a new review
+    Add a review for a specific book.
+    The frontend sends: bookTitle, authorName, content, imageUrls
     """
+    book_title = request.data.get('bookTitle')
+    if not book_title:
+        return Response({'error': 'bookTitle is required.'}, status=status.HTTP_400_BAD_REQUEST)
 
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_serializer_class(self):
-        """Return appropriate serializer based on request method."""
-        if self.request.method == "POST":
-            return CreateReviewSerializer
-        return ReviewSerializer
-
-    def get_queryset(self):
-        """Return only the authenticated user's reviews."""
-        return BookReview.objects.filter(
-            reviewer=self.request.user
-        ).select_related("reviewer")
-
-    @extend_schema(
-        summary="List User's Reviews",
-        description="Get all book reviews created by the authenticated user",
-        responses={
-            200: OpenApiResponse(
-                description="List of user's reviews",
-                response=ReviewSerializer(many=True),
-            ),
-        },
-    )
-    def get(self, request, *args, **kwargs):
-        """List all reviews by the authenticated user."""
-        queryset = self.get_queryset()
-        serializer = ReviewSerializer(
-            queryset, many=True, context={"request": request}
+    book = Book.objects.filter(title=book_title).first()
+    if not book:
+        # Automatically create a book entry if it doesn’t exist yet
+        book = Book.objects.create(
+            title=book_title,
+            author_name=request.data.get('authorName', 'Unknown'),
+            owner=request.user
         )
-        return Response({"results": serializer.data})
 
-    @extend_schema(
-        summary="Create New Review",
-        description="Create a new book review",
-        request=CreateReviewSerializer,
-        responses={
-            201: OpenApiResponse(
-                description="Review created successfully",
-                response=ReviewSerializer,
-            ),
-            400: OpenApiResponse(description="Invalid data"),
-        },
-    )
-    def post(self, request, *args, **kwargs):
-        """Create a new book review."""
-        serializer = CreateReviewSerializer(
-            data=request.data, context={"request": request}
-        )
-        if serializer.is_valid():
-            review = serializer.save()
-            return Response(
-                serializer.to_representation(review),
-                status=status.HTTP_201_CREATED,
-            )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    serializer = BookReviewSerializer(data=request.data)
+    if serializer.is_valid():
+        serializer.save(book=book, reviewer=request.user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ReviewLikeView(APIView):
-    """
-    API endpoint for liking/unliking a review.
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def mark_review_helpful(request, review_id):
+    """Mark a review as helpful or remove the vote."""
+    review = get_object_or_404(BookReview, id=review_id)
+    user = request.user
 
-    POST /library/reviews/{id}/like/ - Toggle like on a review
-    """
+    if review.helpful_votes.filter(id=user.id).exists():
+        review.helpful_votes.remove(user)
+        return Response({'message': 'Removed helpful vote.'})
+    else:
+        review.helpful_votes.add(user)
+        return Response({'message': 'Marked review as helpful.'})
 
-    permission_classes = [permissions.IsAuthenticated]
 
-    @extend_schema(
-        summary="Like/Unlike Review",
-        description="Toggle like on a book review. If already liked, "
-        "it will unlike. If not liked, it will like.",
-        responses={
-            200: OpenApiResponse(
-                description="Like toggled successfully",
-                response=ReviewLikeResponseSerializer,
-            ),
-            404: OpenApiResponse(description="Review not found"),
-        },
-    )
-    def post(self, request, pk):
-        """Toggle like on a review."""
-        try:
-            review = BookReview.objects.select_related("reviewer").get(pk=pk)
-        except BookReview.DoesNotExist:
-            return Response(
-                {"error": "Review not found"},
-                status=status.HTTP_404_NOT_FOUND,
-            )
+# wishlist
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def list_wishlist(request):
+    """List all books in the user’s wishlist."""
+    wishlist = BookWishlist.objects.filter(user=request.user).order_by('-priority')
+    serializer = BookWishlistSerializer(wishlist, many=True)
+    return Response(serializer.data)
 
-        # Check if user already liked this review
-        existing_like = ReviewHelpfulVote.objects.filter(
-            review=review, user=request.user
-        ).first()
 
-        if existing_like:
-            # Unlike: remove the like
-            existing_like.delete()
-        else:
-            # Like: add a new like
-            ReviewHelpfulVote.objects.create(review=review, user=request.user)
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def add_to_wishlist_by_title(request, title):
+    """Add a book to the user’s wishlist using the book title."""
+    book = get_object_or_404(Book, title=title)
+    wishlist_item, created = BookWishlist.objects.get_or_create(user=request.user, book=book)
 
-        # Return updated review data
-        serializer = ReviewSerializer(review, context={"request": request})
-        return Response({"review": serializer.data}, status=status.HTTP_200_OK)
+    if not created:
+        return Response({'message': 'Book already in wishlist.'}, status=status.HTTP_200_OK)
+
+    serializer = BookWishlistSerializer(wishlist_item)
+    return Response(serializer.data, status=status.HTTP_201_CREATED)

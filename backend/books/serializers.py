@@ -1,102 +1,38 @@
-"""
-Serializers for the books app.
-Handles book reviews and related data serialization.
-"""
-
-from django.contrib.auth import get_user_model
 from rest_framework import serializers
-
-from .models import BookReview, ReviewHelpfulVote
-
-User = get_user_model()
+from .models import Book, BookReview, BookWishlist
 
 
-class ReviewSerializer(serializers.ModelSerializer):
-    """
-    Serializer for BookReview model matching frontend expectations.
-    Used for GET requests to return review data.
-    """
+class BookSerializer(serializers.ModelSerializer):
+    author_names = serializers.ReadOnlyField()
+    owner_username = serializers.CharField(source='owner.username', read_only=True)
 
-    # Frontend expects these exact field names
-    id = serializers.IntegerField(read_only=True)
-    bookTitle = serializers.CharField(source="book_title", read_only=True)
-    authorName = serializers.CharField(source="author_name", read_only=True)
-    userName = serializers.CharField(
-        source="reviewer.username", read_only=True
-    )
-    userProfile = serializers.SerializerMethodField()
-    content = serializers.CharField(read_only=True)
-    imageUrls = serializers.ListField(
-        source="image_urls", read_only=True, child=serializers.URLField()
-    )
-    likeCount = serializers.IntegerField(source="like_count", read_only=True)
-    createdAt = serializers.DateTimeField(source="created_at", read_only=True)
+    class Meta:
+        model = Book
+        fields = [
+            'id', 'title', 'subtitle', 'author_names', 'description',
+            'language', 'condition', 'availability', 'is_for_barter',
+            'owner_username', 'cover_image', 'created_at'
+        ]
+
+
+class BookReviewSerializer(serializers.ModelSerializer):
+    reviewer_username = serializers.CharField(source='reviewer.username', read_only=True)
+    book_title = serializers.CharField(source='book.title', read_only=True)
 
     class Meta:
         model = BookReview
         fields = [
-            "id",
-            "bookTitle",
-            "authorName",
-            "userName",
-            "userProfile",
-            "content",
-            "imageUrls",
-            "likeCount",
-            "createdAt",
+            'id', 'book_title', 'reviewer_username',
+            'rating', 'title', 'content',
+            'helpful_count', 'created_at'
         ]
-
-    def get_userProfile(self, obj):
-        """Get user profile picture URL."""
-        if obj.reviewer.profile_picture:
-            request = self.context.get("request")
-            if request:
-                return request.build_absolute_uri(
-                    obj.reviewer.profile_picture.url
-                )
-            return obj.reviewer.profile_picture.url
-        return None
+        read_only_fields = ['book_title', 'reviewer_username', 'helpful_count', 'created_at']
 
 
-class CreateReviewSerializer(serializers.Serializer):
-    """
-    Serializer for creating new reviews.
-    Matches frontend POST request format.
-    """
-
-    bookTitle = serializers.CharField(max_length=200)
-    authorName = serializers.CharField(max_length=200, allow_blank=True)
-    content = serializers.CharField()
-    imageUrls = serializers.ListField(
-        child=serializers.URLField(), required=False, default=list
-    )
-
-    def create(self, validated_data):
-        """Create a new BookReview instance."""
-        user = self.context["request"].user
-
-        review = BookReview.objects.create(
-            reviewer=user,
-            book_title=validated_data["bookTitle"],
-            author_name=validated_data.get("authorName", ""),
-            content=validated_data["content"],
-            image_urls=validated_data.get("imageUrls", []),
-        )
-        return review
-
-    def to_representation(self, instance):
-        """Return the created review in the same format as ReviewSerializer."""
-        serializer = ReviewSerializer(instance, context=self.context)
-        return serializer.data
-
-
-class ReviewLikeResponseSerializer(serializers.Serializer):
-    """
-    Serializer for like/unlike response.
-    Returns the updated review with new like count.
-    """
-
-    review = ReviewSerializer(read_only=True)
+class BookWishlistSerializer(serializers.ModelSerializer):
+    book_title = serializers.CharField(source='book.title', read_only=True)
 
     class Meta:
-        fields = ["review"]
+        model = BookWishlist
+        fields = ['id', 'book', 'book_title', 'priority', 'notes', 'created_at']
+        read_only_fields = ['book_title', 'created_at']

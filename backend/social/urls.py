@@ -1,13 +1,13 @@
-"""
-URL configuration for the social app.
-"""
-
 from django.urls import path
-
-from social import views
+from .views import like_post, add_comment, create_post, list_posts, like_comment, list_comments
 
 urlpatterns = [
-    path("home/", views.home_feed, name="home-feed"),
-    path("posts/<int:post_id>/like/", views.like_post, name="like-post"),
-]
 
+    path('posts/', list_posts, name='list-posts'),
+    path('posts/create/', create_post, name='create-post'),
+    path('posts/<uuid:post_id>/like/', like_post, name='like-post'),
+    
+    path('posts/<uuid:post_id>/comments/add/', add_comment, name='add-comment'),
+    path('posts/<uuid:post_id>/<uuid:comment_id>/like/', like_comment, name='like-comment'),
+    path('posts/<uuid:post_id>/comments/', list_comments, name='list-comments'),
+]
