@@ -8,6 +8,8 @@ A book bartering social network mobile application built for the SNU Software Pr
 ![Django](https://img.shields.io/badge/django-5.2.7-green)
 
 [▶️ Watch Demo (iter1_demo.mov)](./sources/iter1_demo.mov)
+[▶️ Watch Demo (iter2_demo.mov)](./sources/iter2_demo.mov)
+
 
 ## 📖 About
 
@@ -60,7 +62,9 @@ adb install app/build/outputs/apk/debug/app-debug.apk
 
 ## 📱 Features
 
-- **User Authentication**: Email/password Sign up / Sign in
+- **User Authentication**: Email/password Signup & Signin
+- **User Profile Management**
+- **Home Feed UI**
 
 ## 🏗️ Architecture
 
