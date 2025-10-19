@@ -88,7 +88,7 @@ class User(AbstractUser):
         ordering = ["-created_at"]
 
     def __str__(self):
-        return f"{self.get_full_name()} ({self.email})"
+        return self.username
 
     def get_full_name(self):
         """Return the user's full name."""
@@ -186,4 +186,4 @@ class UserPreferences(models.Model):
         verbose_name_plural = "User Preferences"
 
     def __str__(self):
-        return f"Preferences for {self.user.username}"
+        return f"{self.user.username}'s preferences"

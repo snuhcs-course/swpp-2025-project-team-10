@@ -52,4 +52,5 @@ urlpatterns = [
     # Profile management
     path("profile/", views.user_profile, name="user_profile"),
     path("profile/update/", views.update_profile, name="update_profile"),
+    path("preferences/", views.user_preferences, name="user_preferences"),
 ]

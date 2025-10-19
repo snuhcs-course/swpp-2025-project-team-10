@@ -95,13 +95,11 @@ class UserPreferencesModelTestCase(TestCase):
             user=self.user,
             email_notifications=True,
             push_notifications=False,
-            privacy_level="public",
         )
 
         self.assertEqual(preferences.user, self.user)
         self.assertTrue(preferences.email_notifications)
         self.assertFalse(preferences.push_notifications)
-        self.assertEqual(preferences.privacy_level, "public")
 
     def test_user_preferences_default_values(self):
         """Test default values for user preferences."""

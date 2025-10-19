@@ -31,6 +31,7 @@ from .serializers import (
     PasswordResetVerifySerializer,
     ProfileUpdateSerializer,
     SocialAuthSerializer,
+    UserPreferencesSerializer,
     UserRegistrationSerializer,
     UserSerializer,
 )
@@ -171,38 +172,49 @@ class PasswordResetRequestView(APIView):
         if serializer.is_valid():
             email = serializer.validated_data["email"]
 
+            # Check if user exists (but don't reveal this in response)
+            try:
+                user = User.objects.get(email=email)
+                user_exists = True
+            except User.DoesNotExist:
+                user_exists = False
+
             # Generate reset code and request ID
             request_id = str(uuid.uuid4())
             reset_code = get_random_string(6, allowed_chars="0123456789")
 
-            # Store in cache for 15 minutes
-            cache_key = f"password_reset_{request_id}"
-            cache.set(
-                cache_key,
-                {"email": email, "code": reset_code, "verified": False},
-                timeout=900,
-            )  # 15 minutes
+            # Only store and send email if user exists
+            if user_exists:
+                # Store in cache for 15 minutes
+                cache_key = f"password_reset_{request_id}"
+                cache.set(
+                    cache_key,
+                    {"email": email, "code": reset_code, "verified": False},
+                    timeout=900,
+                )  # 15 minutes
 
-            # Send email (in production, use proper email service)
-            try:
-                send_mail(
-                    subject="Password Reset Code",
-                    message=f"Your password reset code is: {reset_code}",
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[email],
-                    fail_silently=False,
-                )
-            except Exception:
-                # In development, just log the code
-                print(f"Password reset code for {email}: {reset_code}")
+                # Send email (in production, use proper email service)
+                try:
+                    send_mail(
+                        subject="Password Reset Code",
+                        message=f"Your password reset code is: {reset_code}",
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        recipient_list=[email],
+                        fail_silently=False,
+                    )
+                except Exception:
+                    # In development, just log the code
+                    print(f"Password reset code for {email}: {reset_code}")
 
+            # Always return success to prevent email enumeration
             return Response(
                 {
+                    "ok": True,
                     "requestId": request_id,
                     "code": (
-                        reset_code if settings.DEBUG else None
-                    ),  # Only return code in debug mode
-                    "message": "Reset code sent to email",
+                        reset_code if settings.DEBUG and user_exists else None
+                    ),  # Only return code in debug mode and if user exists
+                    "message": "If the email exists, a reset code has been sent",
                 },
                 status=status.HTTP_200_OK,
             )
@@ -333,8 +345,8 @@ class SocialAuthView(APIView):
                 return Response(
                     {
                         "ok": True,
-                        "token": str(refresh.access_token),
-                        "refresh": str(refresh),
+                        "accessToken": str(refresh.access_token),
+                        "refreshToken": str(refresh),
                         "user": UserSerializer(user).data,
                         "message": "Social authentication successful",
                     },
@@ -475,6 +487,31 @@ def update_profile(request):
         {"ok": False, "errors": serializer.errors},
         status=status.HTTP_400_BAD_REQUEST,
     )
+
+
+@api_view(["GET", "PUT", "PATCH"])
+@permission_classes([permissions.IsAuthenticated])
+def user_preferences(request):
+    """Get or update user preferences."""
+    # Get or create preferences for the user
+    preferences, created = UserPreferences.objects.get_or_create(
+        user=request.user
+    )
+
+    if request.method == "GET":
+        serializer = UserPreferencesSerializer(preferences)
+        return Response(serializer.data)
+
+    # PUT or PATCH
+    serializer = UserPreferencesSerializer(
+        preferences, data=request.data, partial=(request.method == "PATCH")
+    )
+
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class GoogleLoginView(APIView):

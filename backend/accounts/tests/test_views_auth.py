@@ -32,7 +32,8 @@ class LoginViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(response.data.get("ok"))
-        self.assertIn("token", response.data)
+        self.assertIn("accessToken", response.data)
+        self.assertIn("refreshToken", response.data)
 
     def test_login_invalid_credentials(self):
         """Test login with invalid credentials."""
@@ -169,7 +170,7 @@ class TokenRefreshViewTestCase(TestCase):
             self.login_url, login_data, format="json"
         )
 
-        refresh_token = login_response.data.get("refresh")
+        refresh_token = login_response.data.get("refreshToken")
 
         # Refresh the token
         refresh_data = {"refresh": refresh_token}
@@ -178,7 +179,7 @@ class TokenRefreshViewTestCase(TestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn("access", response.data)
+        self.assertIn("accessToken", response.data)
 
     def test_token_refresh_invalid_token(self):
         """Test token refresh with invalid token."""

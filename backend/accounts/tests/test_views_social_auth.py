@@ -1,5 +1,6 @@
 """
-Tests for the accounts app.
+Tests for social authentication views.
+Tests username generation and social auth API endpoints.
 """
 
 from unittest.mock import patch
@@ -10,8 +11,8 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
 
-from .models import UserPreferences
-from .views import SocialAuthView
+from accounts.models import UserPreferences
+from accounts.views import SocialAuthView
 
 User = get_user_model()
 
@@ -139,7 +140,7 @@ class SocialAuthAPITest(APITestCase):
     def setUp(self):
         """Set up test fixtures."""
         self.client = APIClient()
-        self.social_auth_url = reverse("social-auth")
+        self.social_auth_url = reverse("accounts:social_auth")
 
     @patch("accounts.views.SocialAuthView.validate_social_token")
     def test_social_auth_success(self, mock_validate):
@@ -155,7 +156,7 @@ class SocialAuthAPITest(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(response.data["ok"])
-        self.assertIn("token", response.data)
+        self.assertIn("accessToken", response.data)
         self.assertIn("user", response.data)
 
     @patch("accounts.views.SocialAuthView.validate_social_token")
@@ -181,3 +182,4 @@ class SocialAuthAPITest(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertFalse(response.data["ok"])
+
