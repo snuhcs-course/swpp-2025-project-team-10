@@ -36,7 +36,7 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
     # API Endpoints
     path("auth/", include("accounts.urls")),  # Matches frontend expectations
-    # path("api/v1/books/", include("books.urls")),
+    path("library/", include("books.urls")),  # User's library (reviews, books)
     # path("api/v1/social/", include("social.urls")),
     # path("api/v1/barter/", include("barter.urls")),
     # path("api/v1/notifications/", include("notify.urls")),

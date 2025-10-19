@@ -205,23 +205,47 @@ class Book(models.Model):
 class BookReview(models.Model):
     """
     Model to represent book reviews by users.
+    Supports both book-linked reviews and standalone reviews.
     """
 
+    # Book reference (optional for standalone reviews)
     book = models.ForeignKey(
-        Book, on_delete=models.CASCADE, related_name="reviews"
+        Book,
+        on_delete=models.CASCADE,
+        related_name="reviews",
+        null=True,
+        blank=True,
     )
     reviewer = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="book_reviews"
     )
 
+    # Book information (for standalone reviews without Book object)
+    book_title = models.CharField(
+        max_length=200, help_text="Title of the book being reviewed"
+    )
+    author_name = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text="Author(s) of the book being reviewed",
+    )
+
+    # Review content
     rating = models.IntegerField(
         validators=[MinValueValidator(1), MaxValueValidator(5)],
         help_text="Rate the book from 1 to 5 stars",
+        null=True,
+        blank=True,
     )
     title = models.CharField(max_length=100, blank=True)
     content = models.TextField()
 
-    # Helpful votes
+    # Images (stored as JSON array of URLs)
+    image_urls = models.JSONField(
+        default=list, blank=True, help_text="List of image URLs for the review"
+    )
+
+    # Likes (using helpful_votes as likes for compatibility)
     helpful_votes = models.ManyToManyField(
         User,
         through="ReviewHelpfulVote",
@@ -236,16 +260,26 @@ class BookReview(models.Model):
         db_table = "books_book_review"
         verbose_name = "Book Review"
         verbose_name_plural = "Book Reviews"
-        unique_together = ("book", "reviewer")
         ordering = ["-created_at"]
+        indexes = [
+            models.Index(fields=["reviewer", "-created_at"]),
+            models.Index(fields=["book_title"]),
+        ]
 
     def __str__(self):
-        return f"Review of {self.book.title} by {self.reviewer.username}"
+        if self.book:
+            return f"Review of {self.book.title} by {self.reviewer.username}"
+        return f"Review of {self.book_title} by {self.reviewer.username}"
 
     @property
     def helpful_count(self):
-        """Return the number of helpful votes."""
+        """Return the number of helpful votes (likes)."""
         return self.helpful_votes.count()
+
+    @property
+    def like_count(self):
+        """Alias for helpful_count to match frontend expectations."""
+        return self.helpful_count
 
 
 class ReviewHelpfulVote(models.Model):
