@@ -117,15 +117,15 @@ POST   /auth/social/kakao/
 ```python
 # User's Book Reviews
 GET    /library/reviews/
-Response: {"results": [{"id": 1, "bookTitle": "...", ...}]}
+Response: {"results": [{"id": 1, "bookTitle": "...", "likeCount": 5, "isLiked": false, ...}]}
 
 POST   /library/reviews/
 Request:  {"bookTitle": "...", "authorName": "...", "content": "...", "imageUrls": [...]}
-Response: {"id": 1, "bookTitle": "...", "userName": "...", ...}
+Response: {"id": 1, "bookTitle": "...", "userName": "...", "likeCount": 0, "isLiked": false, ...}
 
 # Review Likes
 POST   /library/reviews/{id}/like/
-Response: {"review": {"id": 1, "likeCount": 5, ...}}
+Response: {"review": {"id": 1, "likeCount": 5, "isLiked": true, ...}}
 ```
 
 ### API Documentation (`/api/`)
