@@ -81,6 +81,7 @@ class ReviewListViewTestCase(APITestCase):
         self.assertIn("imageUrls", review_data)
         self.assertIn("likeCount", review_data)
         self.assertIn("createdAt", review_data)
+        self.assertIn("isLiked", review_data)
 
     def test_list_reviews_only_own_reviews(self):
         """Test that users only see their own reviews."""

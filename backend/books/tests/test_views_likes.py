@@ -53,6 +53,7 @@ class ReviewLikeViewTestCase(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("review", response.data)
         self.assertEqual(response.data["review"]["likeCount"], 1)
+        self.assertEqual(response.data["review"]["isLiked"], True)
 
         # Verify like was created in database
         self.assertTrue(
@@ -123,6 +124,7 @@ class ReviewUnlikeViewTestCase(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["review"]["likeCount"], 0)
+        self.assertEqual(response.data["review"]["isLiked"], False)
 
         # Verify like was removed from database
         self.assertFalse(
@@ -260,3 +262,84 @@ class ReviewMultipleLikesTestCase(APITestCase):
         self.assertEqual(
             ReviewHelpfulVote.objects.filter(review=self.review).count(), 0
         )
+
+
+class ReviewIsLikedFieldTestCase(APITestCase):
+    """Test cases for isLiked field in review responses."""
+
+    def setUp(self):
+        """Set up test data."""
+        self.user1 = User.objects.create_user(
+            username="testuser1",
+            email="test1@example.com",
+            password="testpass123",
+        )
+        self.user2 = User.objects.create_user(
+            username="testuser2",
+            email="test2@example.com",
+            password="testpass123",
+        )
+        self.review = BookReview.objects.create(
+            reviewer=self.user1,
+            book_title="Test Book",
+            author_name="Test Author",
+            content="Great book!",
+        )
+
+    def test_is_liked_false_when_not_liked(self):
+        """Test that isLiked is False when user hasn't liked the review."""
+        self.client.force_authenticate(user=self.user2)
+        url = reverse("books:user-reviews")
+
+        # Create a review by user2 to test
+        review2 = BookReview.objects.create(
+            reviewer=self.user2,
+            book_title="Another Book",
+            author_name="Another Author",
+            content="Good book!",
+        )
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Check that isLiked is False for the review
+        review_data = response.data["results"][0]
+        self.assertEqual(review_data["isLiked"], False)
+
+    def test_is_liked_true_when_liked(self):
+        """Test that isLiked is True when user has liked the review."""
+        # User2 creates a review
+        review2 = BookReview.objects.create(
+            reviewer=self.user2,
+            book_title="Another Book",
+            author_name="Another Author",
+            content="Good book!",
+        )
+
+        # User2 likes their own review
+        ReviewHelpfulVote.objects.create(review=review2, user=self.user2)
+
+        self.client.force_authenticate(user=self.user2)
+        url = reverse("books:user-reviews")
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        review_data = response.data["results"][0]
+        self.assertEqual(review_data["isLiked"], True)
+
+    def test_is_liked_after_like_toggle(self):
+        """Test that isLiked updates correctly after toggling like."""
+        self.client.force_authenticate(user=self.user1)
+        like_url = reverse("books:review-like", kwargs={"pk": self.review.pk})
+
+        # Like the review
+        response = self.client.post(like_url)
+        self.assertEqual(response.data["review"]["isLiked"], True)
+
+        # Unlike the review
+        response = self.client.post(like_url)
+        self.assertEqual(response.data["review"]["isLiked"], False)
+
+        # Like again
+        response = self.client.post(like_url)
+        self.assertEqual(response.data["review"]["isLiked"], True)
