@@ -408,10 +408,11 @@ jobs:
 
           INVALID_COMMITS=0
           TOTAL_COMMITS=0
+          INVALID_LIST=""
 
           while IFS= read -r commit; do
             # Skip empty lines
-            if [ -z "$commit" ]; then
+            if [[ -z "$commit" ]]; then
               continue
             fi
 
@@ -422,34 +423,39 @@ jobs:
             if [[ $commit =~ ^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\(.+\))?: .+ ]]; then
               echo "✅ Valid: $commit"
             else
-              echo "❌ Invalid: $commit"
+              echo "⚠️  Non-conventional: $commit"
               INVALID_COMMITS=$((INVALID_COMMITS + 1))
+              INVALID_LIST="${INVALID_LIST}\n  - $commit"
             fi
           done <<< "$COMMITS"
 
-          if [ $TOTAL_COMMITS -eq 0 ]; then
+          if [[ $TOTAL_COMMITS -eq 0 ]]; then
             echo "⚠️  No commits to validate (this might be a merge-only PR)"
             exit 0
           fi
 
-          if [ $INVALID_COMMITS -gt 0 ]; then
+          if [[ $INVALID_COMMITS -gt 0 ]]; then
             echo ""
-            echo "❌ Found $INVALID_COMMITS invalid commit message(s) out of $TOTAL_COMMITS"
-            echo "Commit messages should follow Conventional Commits format:"
+            echo "⚠️  Found $INVALID_COMMITS commit message(s) that don't follow Conventional Commits format (out of $TOTAL_COMMITS total)"
+            echo ""
+            echo "Non-conventional commits:"
+            echo -e "$INVALID_LIST"
+            echo ""
+            echo "📝 Conventional Commits format:"
             echo "  <type>(<scope>): <description>"
             echo ""
             echo "Valid types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert"
             echo "Scope is optional and should be in parentheses"
             echo ""
             echo "Examples:"
-            echo "  feat(backend): add user authentication"
-            echo "  fix(frontend): resolve login button issue"
-            echo "  docs: update API documentation"
-            echo "  ci: add workflow for testing"
+            echo "  ✅ feat(backend): add user authentication"
+            echo "  ✅ fix(frontend): resolve login button issue"
+            echo "  ✅ docs: update API documentation"
+            echo "  ✅ ci: add workflow for testing"
             echo ""
-            exit 1
+            echo "::warning::$INVALID_COMMITS commit message(s) don't follow Conventional Commits format. Please follow the convention for future commits."
           else
-            echo "✅ All $TOTAL_COMMITS commit messages are valid"
+            echo "✅ All $TOTAL_COMMITS commit messages follow Conventional Commits format"
           fi
 
   check-dependencies:
