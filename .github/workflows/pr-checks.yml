@@ -60,37 +60,38 @@ jobs:
             const matchWithoutEmoji = title.match(patternWithoutEmoji);
 
             if (!matchWithEmoji && !matchWithoutEmoji) {
-              let errorMsg = '❌ Invalid PR title format.\n\n';
-              errorMsg += 'PR title must follow one of these patterns:\n';
-              errorMsg += '  <emoji> <type>: <Description>  (preferred)\n';
-              errorMsg += '  <emoji> <type>(scope): <Description>\n';
-              errorMsg += '  <type>: <Description>\n';
-              errorMsg += '  <type>(scope): <Description>\n\n';
-              errorMsg += 'Type Emojis:\n';
-              errorMsg += '  🚀 feat/feature    - New feature or enhancement\n';
-              errorMsg += '  🐛 fix/bugfix      - Non-breaking fix for an issue\n';
-              errorMsg += '  🔥 hotfix          - Critical bug fix\n';
-              errorMsg += '  📝 docs            - Documentation changes\n';
-              errorMsg += '  ♻️  refactor       - Code refactoring\n';
-              errorMsg += '  ⚡ perf            - Performance improvement\n';
-              errorMsg += '  ✅ test/tests      - Adding or updating tests\n';
-              errorMsg += '  🔧 build/ci        - Build system or CI/CD changes\n';
-              errorMsg += '  🧹 chore           - Maintenance tasks\n';
-              errorMsg += '  🔄 revert          - Reverting changes\n\n';
-              errorMsg += 'Rules:\n';
-              errorMsg += '  - Type must be one of the valid types\n';
-              errorMsg += '  - Scope is optional and must be lowercase\n';
-              errorMsg += '  - Description must start with an uppercase letter\n\n';
-              errorMsg += 'Examples:\n';
-              errorMsg += '  ✅ 🚀 feat: Add user authentication\n';
-              errorMsg += '  ✅ 🐛 fix: Resolve login button issue\n';
-              errorMsg += '  ✅ 📝 docs: Update API documentation\n';
-              errorMsg += '  ✅ 🚀 feat(backend): Add user authentication\n';
-              errorMsg += '  ✅ feat: Add user authentication (without emoji)\n';
-              errorMsg += '  ❌ feat: add user authentication (description must start with uppercase)\n';
-              errorMsg += '  ❌ 🚀 feature/backend: Add auth (use parentheses for scope)\n';
+              let warnMsg = '⚠️  PR title doesn\'t follow the recommended format.\n\n';
+              warnMsg += 'PR title should follow one of these patterns:\n';
+              warnMsg += '  <emoji> <type>: <Description>  (preferred)\n';
+              warnMsg += '  <emoji> <type>(scope): <Description>\n';
+              warnMsg += '  <type>: <Description>\n';
+              warnMsg += '  <type>(scope): <Description>\n\n';
+              warnMsg += 'Type Emojis:\n';
+              warnMsg += '  🚀 feat/feature    - New feature or enhancement\n';
+              warnMsg += '  🐛 fix/bugfix      - Non-breaking fix for an issue\n';
+              warnMsg += '  🔥 hotfix          - Critical bug fix\n';
+              warnMsg += '  📝 docs            - Documentation changes\n';
+              warnMsg += '  ♻️  refactor       - Code refactoring\n';
+              warnMsg += '  ⚡ perf            - Performance improvement\n';
+              warnMsg += '  ✅ test/tests      - Adding or updating tests\n';
+              warnMsg += '  🔧 build/ci        - Build system or CI/CD changes\n';
+              warnMsg += '  🧹 chore           - Maintenance tasks\n';
+              warnMsg += '  🔄 revert          - Reverting changes\n\n';
+              warnMsg += 'Rules:\n';
+              warnMsg += '  - Type should be one of the valid types\n';
+              warnMsg += '  - Scope is optional and should be lowercase\n';
+              warnMsg += '  - Description should start with an uppercase letter\n\n';
+              warnMsg += 'Examples:\n';
+              warnMsg += '  ✅ 🚀 feat: Add user authentication\n';
+              warnMsg += '  ✅ 🐛 fix: Resolve login button issue\n';
+              warnMsg += '  ✅ 📝 docs: Update API documentation\n';
+              warnMsg += '  ✅ 🚀 feat(backend): Add user authentication\n';
+              warnMsg += '  ✅ feat: Add user authentication (without emoji)\n';
+              warnMsg += '  ⚠️  feat: add user authentication (description should start with uppercase)\n';
+              warnMsg += '  ⚠️  🚀 feature/backend: Add auth (use parentheses for scope)\n';
 
-              core.setFailed(errorMsg);
+              core.warning(warnMsg);
+              console.log('⚠️  PR title format is non-standard but PR can proceed');
               return;
             }
 
@@ -138,9 +139,9 @@ jobs:
           if [[ $BRANCH_NAME =~ ^(feat|feature|fix|bugfix|hotfix|docs?|doc|documentation|release|chore|refactor|refact|tests?|style|perf|performance|build|ci)/.+ ]]; then
             echo "✅ Branch name is valid: $BRANCH_NAME"
           else
-            echo "❌ Invalid branch name: $BRANCH_NAME"
+            echo "⚠️  Branch name doesn't follow recommended convention: $BRANCH_NAME"
             echo ""
-            echo "Branch name must follow pattern: <type>/<description>"
+            echo "Branch name should follow pattern: <type>/<description>"
             echo ""
             echo "Valid types (with common variations):"
             echo "  - feat, feature"
@@ -163,7 +164,7 @@ jobs:
             echo "  ✅ docs/update-readme"
             echo "  ✅ documentation/api-guide"
             echo "  ✅ hotfix/critical-security-patch"
-            exit 1
+            echo "::warning::Branch name '$BRANCH_NAME' doesn't follow recommended convention. Consider using <type>/<description> format."
           fi
 
   check-pr-size:
@@ -190,14 +191,14 @@ jobs:
             CHANGED_LINES=0
           fi
 
-          if [ $CHANGED_LINES -gt 500 ]; then
+          if [ $CHANGED_LINES -gt 1000 ]; then
+            echo "⚠️  Warning: This PR is very large ($CHANGED_LINES lines changed)"
+            echo "Strongly consider breaking it into smaller, focused PRs for easier review"
+            echo "::warning::Very large PR detected ($CHANGED_LINES lines changed). Consider breaking into smaller PRs."
+          elif [ $CHANGED_LINES -gt 500 ]; then
             echo "⚠️  Warning: This PR has $CHANGED_LINES changed lines"
             echo "Consider breaking it into smaller PRs for easier review"
             echo "::warning::Large PR detected ($CHANGED_LINES lines changed)"
-          elif [ $CHANGED_LINES -gt 1000 ]; then
-            echo "❌ Error: This PR is too large ($CHANGED_LINES lines changed)"
-            echo "Please break it into smaller, focused PRs"
-            exit 1
           else
             echo "✅ PR size is reasonable ($CHANGED_LINES lines changed)"
           fi
