@@ -221,3 +221,19 @@ quote-style = "double"
 indent-style = "space"
 skip-magic-trailing-comma = false
 line-ending = "auto"
+
+[tool.bandit]
+# Bandit security linting configuration
+exclude_dirs = [
+    "*/migrations/*",
+    "*/tests/*",
+    "tests/*",
+    ".venv/*",
+    "venv/*",
+    "htmlcov/*",
+    "__pycache__/*",
+]
+# Only report medium and high severity issues
+skips = ["B101"] # Skip assert_used (common in tests, already excluded)
+# Confidence levels: LOW, MEDIUM, HIGH
+# Severity levels: LOW, MEDIUM, HIGH

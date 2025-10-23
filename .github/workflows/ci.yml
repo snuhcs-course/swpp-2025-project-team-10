@@ -65,7 +65,12 @@ jobs:
       - name: Run bandit (security linting)
         working-directory: backend
         run: |
-          bandit -r . -ll -f json -o bandit-report.json || true
+          bandit -r . \
+            --exclude './*/migrations/*,./*/tests/*,./tests/*,./.venv/*,./htmlcov/*' \
+            -ll \
+            -f json \
+            -o bandit-report.json || true
+          echo "Bandit security scan completed. Check bandit-report.json for details."
 
       - name: Upload bandit report
         uses: actions/upload-artifact@v4
