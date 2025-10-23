@@ -179,8 +179,8 @@ jobs:
           REDIS_URL: redis://localhost:6379/0
           DJANGO_SETTINGS_MODULE: core.settings
           SECRET_KEY: test-secret-key-for-ci
-          DEBUG: 'False'
-          ALLOWED_HOSTS: localhost,127.0.0.1
+          DEBUG: 'True'
+          ALLOWED_HOSTS: localhost,127.0.0.1,testserver
         run: |
           uv run python manage.py migrate --noinput
 
@@ -191,8 +191,8 @@ jobs:
           REDIS_URL: redis://localhost:6379/0
           DJANGO_SETTINGS_MODULE: core.settings
           SECRET_KEY: test-secret-key-for-ci
-          DEBUG: 'False'
-          ALLOWED_HOSTS: localhost,127.0.0.1
+          DEBUG: 'True'
+          ALLOWED_HOSTS: localhost,127.0.0.1,testserver
         run: |
           uv run pytest --cov=. --cov-report=xml --cov-report=html --cov-report=term-missing
 
