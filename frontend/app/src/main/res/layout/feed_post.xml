@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    style="@style/Card.Base"
     android:id="@+id/cardFeed"
     app:strokeWidth="0dp"
     app:strokeColor="@android:color/transparent"
@@ -12,12 +14,12 @@
         android:id="@+id/contentFeed"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="12dp">
+        android:padding="@dimen/space_m">
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/ivProfileImage"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_width="@dimen/avatar_s"
+            android:layout_height="@dimen/avatar_s"
             android:src="@drawable/person_icon"
             app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.Circle"
             app:layout_constraintTop_toTopOf="parent"
@@ -27,20 +29,20 @@
             android:id="@+id/tvPoster"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="SeoRo"
+            android:text="@string/feed_poster"
+            style="@style/Text.Body"
             android:textStyle="bold"
-            android:textSize="14sp"
             app:layout_constraintStart_toEndOf="@id/ivProfileImage"
             app:layout_constraintTop_toTopOf="@id/ivProfileImage"
             app:layout_constraintEnd_toStartOf="@id/btnMore"
-            android:layout_marginStart="10dp" />
+            android:layout_marginStart="@dimen/space_m" />
 
         <TextView
             android:id="@+id/tvTitle"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="돈의 심리학"
-            android:textSize="12sp"
+            android:text="@string/feed_title"
+            style="@style/Text.Caption"
             app:layout_constraintStart_toStartOf="@id/tvPoster"
             app:layout_constraintTop_toBottomOf="@id/tvPoster" />
 
@@ -48,9 +50,9 @@
             android:id="@+id/tvDash"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="-"
-            android:textSize="12sp"
-            android:layout_marginHorizontal="6dp"
+            android:text="@string/feed_dash"
+            style="@style/Text.Caption"
+            android:layout_marginHorizontal="@dimen/space_s"
             app:layout_constraintStart_toEndOf="@id/tvTitle"
             app:layout_constraintTop_toBottomOf="@id/tvPoster"/>
 
@@ -58,8 +60,8 @@
             android:id="@+id/tvAuthor"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="모건 하우절"
-            android:textSize="12sp"
+            android:text="@string/feed_author"
+            style="@style/Text.Caption"
             android:layout_marginHorizontal="6dp"
             app:layout_constraintStart_toEndOf="@id/tvDash"
             app:layout_constraintTop_toBottomOf="@id/tvPoster"/>
@@ -67,17 +69,19 @@
         <ImageButton
             android:id="@+id/btnMore"
             style="?attr/borderlessButtonStyle"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_width="@dimen/avatar_s"
+            android:layout_height="@dimen/avatar_s"
+            android:contentDescription="@string/desc_more"
             android:src="@drawable/more_icon"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/mcPostImage"
+            style="@style/Card.Base"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="@dimen/space_xxs"
             android:visibility="gone"
             tools:visibility="visible"
             app:shapeAppearanceOverlay="@style/Shape.Round12"
@@ -111,11 +115,11 @@
                     app:tabIndicatorHeight="0dp"
                     app:tabRippleColor="@null"
                     app:tabGravity="center"
-                    app:tabMode="fixed"
+                    app:tabMode="scrollable"
                     app:tabPaddingStart="0dp"
                     app:tabPaddingEnd="0dp"
-                    app:tabPaddingTop="0dp"
-                    app:tabPaddingBottom="0dp"
+                    app:tabMinWidth="0dp"
+                    app:tabMaxWidth="0dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"/>
@@ -124,112 +128,84 @@
 
         </com.google.android.material.card.MaterialCardView>
 
+        <TextView
+            android:id="@+id/tvContent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/space_xs"
+            android:text="@string/feed_content"
+            style="@style/Text.Body"
+            android:lineSpacingExtra="@dimen/space_xxs"
+            android:ellipsize="end"
+            android:maxLines="3"
+            app:layout_constraintHorizontal_bias="0"
+            app:layout_constraintTop_toBottomOf="@id/mcPostImage"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
+
         <LinearLayout
             android:id="@+id/actionBar"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
+            android:layout_marginTop="@dimen/space_xxs"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            app:layout_constraintTop_toBottomOf="@id/mcPostImage"
+            app:layout_constraintTop_toBottomOf="@id/tvContent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnLike"
-                style="@style/Widget.Material3.Button.TonalButton"
+                style="@style/Btn.Tonal.TextIcon"
                 android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:backgroundTint="@android:color/transparent"
-                android:text="좋아요"
-                android:textStyle="bold"
-                android:paddingHorizontal="0dp"
-                android:minWidth="0dp"
-                app:icon="@drawable/like_icon"
-                app:iconPadding="6dp"
-                app:iconGravity="textStart" />
+                android:text="@string/like"
+                app:icon="@drawable/like_icon"/>
 
             <Space
-                android:layout_width="18dp"
+                android:layout_width="@dimen/space_l"
                 android:layout_height="wrap_content"/>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnBookReview"
-                style="@style/Widget.Material3.Button.TonalButton"
+                style="@style/Btn.Tonal.TextIcon"
                 android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:backgroundTint="@android:color/transparent"
-                android:text="서평"
-                android:textStyle="bold"
-                android:paddingHorizontal="0dp"
-                android:minWidth="0dp"
-                app:icon="@drawable/comment_icon"
-                app:iconPadding="6dp"
-                app:iconGravity="textStart" />
+                android:text="@string/review"
+                app:icon="@drawable/comment_icon"/>
 
             <Space
-                android:layout_width="18dp"
+                android:layout_width="@dimen/space_l"
                 android:layout_height="wrap_content"/>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnExchange"
-                style="@style/Widget.Material3.Button.TonalButton"
+                style="@style/Btn.Tonal.TextIcon"
                 android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:backgroundTint="@android:color/transparent"
-                android:text="교환"
-                android:textStyle="bold"
-                android:paddingHorizontal="0dp"
-                android:minWidth="0dp"
-                app:icon="@drawable/exchange_icon"
-                app:iconPadding="6dp"
-                app:iconGravity="textStart"/>
+                android:text="@string/exchange"
+                app:icon="@drawable/exchange_icon"/>
 
             <Space
-                android:layout_width="18dp"
+                android:layout_width="@dimen/space_l"
                 android:layout_height="wrap_content"/>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnAdd"
-                style="@style/Widget.Material3.Button.TonalButton"
+                style="@style/Btn.Tonal.TextIcon"
                 android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:backgroundTint="@android:color/transparent"
-                android:text="찜하기"
-                android:textStyle="bold"
-                android:paddingHorizontal="0dp"
-                android:minWidth="0dp"
-                app:icon="@drawable/add_icon"
-                app:iconPadding="6dp"
-                app:iconGravity="textStart"/>
+                android:text="@string/bookmark"
+                app:icon="@drawable/add_icon"/>
         </LinearLayout>
-
-        <TextView
-            android:id="@+id/tvContent"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:text="책을 읽은 후 느낀점...책을 읽은 후 느낀점...책을 읽은 후 느낀점...책을 읽은 후 느낀점..."
-            android:textSize="14sp"
-            android:lineSpacingExtra="2dp"
-            android:ellipsize="end"
-            android:maxLines="3"
-            app:layout_constraintHorizontal_bias="0"
-            app:layout_constraintTop_toBottomOf="@id/actionBar"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
 
         <TextView
             android:id="@+id/tvTime"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:text="1시간 전"
-            android:textSize="14sp"
+            android:layout_marginTop="@dimen/space_xs"
+            android:text="@string/feed_time"
+            style="@style/Text.Caption"
             android:textColor="@color/grey"
             android:ellipsize="end"
             app:layout_constraintHorizontal_bias="0"
-            app:layout_constraintTop_toBottomOf="@id/tvContent"
+            app:layout_constraintTop_toBottomOf="@id/actionBar"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 

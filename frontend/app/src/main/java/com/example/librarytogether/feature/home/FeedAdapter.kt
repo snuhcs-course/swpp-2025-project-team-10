@@ -107,17 +107,15 @@ class FeedAdapter(
 
             val images = post.imageUrls
             mcPostImage.isVisible = images.isNotEmpty()
-            val cs = ConstraintSet().apply { clone(contentFeed) }
 
             if (images.isNotEmpty()) {
                 vpImages.adapter = ImagePagerAdapter(images)
                 vpImages.offscreenPageLimit = 1
-                dotsMediator?.detach()
                 dotsMediator = TabLayoutMediator(tabDots, vpImages) { tab, _ ->
                     tab.setCustomView(R.layout.item_dot_tab)
                 }.also {it.attach()}
 
-                vpImages.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                pageCallback = object : ViewPager2.OnPageChangeCallback() {
                     override fun onPageSelected(position: Int) {
                         super.onPageSelected(position)
                         for (i in 0 until tabDots.tabCount) {
@@ -127,24 +125,18 @@ class FeedAdapter(
                             dot?.setBackgroundResource(bg)
                         }
                     }
-                })
-                cs.clear(binding.actionBar.id, ConstraintSet.TOP)
-                cs.connect(binding.actionBar.id, ConstraintSet.TOP, binding.mcPostImage.id, ConstraintSet.BOTTOM)
-                cs.clear(binding.tvContent.id, ConstraintSet.TOP)
-                cs.connect(binding.tvContent.id, ConstraintSet.TOP, binding.actionBar.id, ConstraintSet.BOTTOM)
-                cs.clear(binding.tvTime.id, ConstraintSet.TOP)
-                cs.connect(binding.tvTime.id, ConstraintSet.TOP, binding.tvContent.id, ConstraintSet.BOTTOM)
-                cs.applyTo(contentFeed)
+                }.also { vpImages.registerOnPageChangeCallback(it) }
+
+//                tabDots.post {
+//                    for (i in 0 until tabDots.tabCount) {
+//                        val dot = tabDots.getTabAt(i)?.customView
+//                        val bg = if (i == 0) R.drawable.dot_selected else R.drawable.dot_unselected
+//                        dot?.setBackgroundResource(bg)
+//                    }
+//                }
             } else {
-                dotsMediator?.detach()
-                dotsMediator = null
-                cs.clear(binding.actionBar.id, ConstraintSet.TOP)
-                cs.connect(binding.actionBar.id, ConstraintSet.TOP, binding.tvContent.id, ConstraintSet.BOTTOM)
-                cs.clear(binding.tvContent.id, ConstraintSet.TOP)
-                cs.connect(binding.tvContent.id, ConstraintSet.TOP, binding.mcPostImage.id, ConstraintSet.BOTTOM)
-                cs.clear(binding.tvTime.id, ConstraintSet.TOP)
-                cs.connect(binding.tvTime.id, ConstraintSet.TOP, binding.actionBar.id, ConstraintSet.BOTTOM)
-                cs.applyTo(contentFeed)
+                vpImages.adapter = null
+                tabDots.removeAllTabs()
             }
 
             val isExpanded = expandedIds.contains(post.id)
@@ -164,5 +156,19 @@ class FeedAdapter(
             }
             binding.btnLike.iconTint = ColorStateList.valueOf(likeIconColor)
         }
+
+        fun cleanup() = with(binding) {
+            pageCallback?.let { vpImages.unregisterOnPageChangeCallback(it) }
+            pageCallback = null
+            dotsMediator?.detach()
+            dotsMediator = null
+            vpImages.adapter = null
+            tabDots.removeAllTabs()
+        }
+    }
+
+    override fun onViewRecycled(holder: PostVH) {
+        holder.cleanup()
+        super.onViewRecycled(holder)
     }
 }

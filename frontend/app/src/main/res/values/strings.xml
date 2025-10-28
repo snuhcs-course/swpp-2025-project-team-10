@@ -1,8 +1,136 @@
 <resources>
-    <string name="app_name">Library together</string>
+    <string name="app_name">서로서로도서관</string>
     <string name="nav_home" />
     <string name="nav_explore" />
     <string name="nav_search" />
     <string name="nav_notification" />
     <string name="nav_library" />
+
+    <string name="hint_email">이메일</string>
+    <string name="hint_password">비밀번호</string>
+    <string name="password_hint">비밀번호는 영문 포함 6자 이상이어야 합니다</string>
+    <string name="text_or">또는</string>
+
+    <!-- 로그인 화면 (log_in.xml) -->
+    <string name="login_title">로그인</string>
+    <string name="login_button">로그인</string>
+    <string name="forgot_password">비밀번호를 잊으셨나요?</string>
+    <string name="login_google">Google을 사용하여 로그인</string>
+    <string name="login_kakao">카카오톡을 사용하여 로그인</string>
+    <string name="no_account">계정이 없으신가요?</string>
+    <string name="sign_up">가입하기</string>
+
+    <!-- 회원가입 화면 (sign_up.xml) -->
+    <string name="sign_up_title">회원가입</string>
+    <string name="hint_username">아이디</string>
+    <string name="sign_up_button">시작하기</string>
+    <string name="sign_up_google">Google로 시작하기</string>
+    <string name="sign_up_kakao">카카오톡으로 시작하기</string>
+    <string name="has_account">계정이 있으신가요?</string>
+    <string name="login_here">로그인하기</string>
+
+    <!-- 비밀번호 재설정 화면 (reset_password.xml) -->
+    <string name="reset_password_title">비밀번호 재설정</string>
+    <string name="reset_password_subtitle">새로운 비밀번호를 입력해주세요</string>
+    <string name="reset_password_button">비밀번호 재설정</string>
+
+    <!-- 이메일 인증 화면 (verify_email.xml) -->
+    <string name="verify_title">비밀번호 재설정</string>
+    <string name="verify_subtitle">인증번호(6자리)를 입력해 주세요</string>
+    <string name="verify_button">인증하기</string>
+    <string name="resend_email">인증메일 재전송</string>
+
+    <string name="review">서평</string>
+    <string name="like">좋아요</string>
+    <string name="exchange">교환</string>
+    <string name="bookmark">찜하기</string>
+    <string name="shelf">책장</string>
+    <string name="profile">프로필</string>
+    <!-- feed_post -->
+    <string name="feed_poster">SeoRo</string>
+    <string name="feed_title">돈의 심리학</string>
+    <string name="feed_dash">-</string>
+    <string name="feed_author">모건 하우절</string>
+    <string name="feed_content">책을 읽은 후 느낀점</string>
+    <string name="feed_time">1시간 전</string>
+
+    <!-- a11y descriptions -->
+    <string name="desc_profile_image">작성자 프로필 이미지</string>
+    <string name="desc_more">더보기</string>
+    <string name="desc_post_images">게시물 이미지</string>
+    <string name="desc_like">좋아요</string>
+    <string name="desc_open_reviews">서평 보기</string>
+    <string name="desc_open_exchange">교환 제안 열기</string>
+    <string name="desc_add_bookmark">찜하기</string>
+    <string name="desc_add">추가</string>
+    <string name="desc_fab">floating button</string>
+
+    <!-- forgot password-->
+    <string name="forgot_title">비밀번호 재설정</string>
+    <string name="forgot_subtitle">회원가입 시 등록한 이메일을 입력해 주세요</string>
+    <string name="forgot_email_hint">이메일</string>
+    <string name="forgot_send_code">인증 번호 보내기</string>
+
+    <!-- stat -->
+    <string name="stat_reviews">서평</string>
+    <string name="stat_followers">팔로워</string>
+    <string name="stat_following">팔로잉</string>
+
+    <!-- 섹션 타이틀 -->
+    <string name="profile_trade_style">거래 스타일</string>
+    <string name="profile_reading_taste">독서 취향</string>
+    <string name="profile_wishlist">위시리스트</string>
+
+    <!-- 거래 스타일 상세 -->
+    <string name="profile_location">거래 위치</string>
+    <string name="profile_location_example_1">서울시 관악구</string>
+    <string name="profile_location_example_2">서울시 강남구</string>
+    <string name="profile_spot">거래 장소</string>
+    <string name="profile_spot_example_1">지하철 역</string>
+    <string name="profile_spot_example_2">카페</string>
+    <string name="profile_location_hint_1">주요 거래 지역 1</string>
+    <string name="profile_location_hint_2">주요 거래 지역 2</string>
+    <string name="profile_spot_hint_1">거래 장소 예시 1</string>
+    <string name="profile_spot_hint_2">거래 장소 예시 2</string>
+
+
+    <!-- 독서 취향 상세 -->
+    <string name="profile_preferred_genres">선호 장르</string>
+    <string name="genre_modern_fiction">현대소설</string>
+    <string name="genre_classic_fiction">고전소설</string>
+    <string name="genre_essay">에세이</string>
+    <string name="genre_poetry_play">시/희곡</string>
+    <string name="genre_self_improvement">자기계발</string>
+    <string name="genre_science_tech">과학·기술</string>
+    <string name="genre_humanities_social">인문·사회</string>
+    <string name="genre_history_philosophy">역사·철학</string>
+    <string name="genre_art_language">예술·언어</string>
+
+
+    <string name="profile_favorite_book">내가 좋아하는 책</string>
+    <string name="profile_favorite_book_example">데미안</string>
+    <string name="profile_favorite_book_note_example">"새는 알에서 나오려고 투쟁한다…" 구절이 특히 인상 깊었어요.</string>
+    <string name="profile_favorite_book_note_hint">책에 대한 한 줄 감상</string>
+    <string name="profile_favorite_author_note_hint">작가에 대한 한 줄 메모</string>
+    <string name="profile_favorite_author_note_example">데미안을 재밌게 읽었어요</string>
+
+
+    <string name="profile_favorite_author">내가 좋아하는 작가</string>
+    <string name="profile_favorite_author_example">헤르만 헤세</string>
+
+    <string name="profile_reading_habit">독서 습관</string>
+    <string name="profile_reading_habit_example">주로 주말 오전에 커피와 함께 읽어요.</string>
+    <string name="profile_reading_habit_hint">언제, 어떤 분위기에서 책을 읽나요?</string>
+
+    <!-- 위시리스트 -->
+    <string name="wishlist_manage">관리</string>
+    <string name="wishlist_add">위시리스트 추가</string>
+    <string name="profile_wishlist_empty">아직 위시리스트가 비어 있어요.</string>
+
+    <string name="book_cover">책 표지</string>
+    <string name="book_title_placeholder">책 제목</string>
+    <string name="book_author_placeholder">저자명</string>
+    <string name="book_note_placeholder">한 줄 메모</string>
+    <string name="more_options">더보기</string>
+
 </resources>

@@ -21,18 +21,6 @@ package com.example.librarytogether.feature.home.data
 //    val total_pages: Int
 //)
 
-data class Post(
-    val id: Int,
-    val bookTitle: String,
-    val authorName: String,
-    val posterName: String,
-    val posterProfile: String,
-    val content: String,
-    val imageUrls: List<String> = emptyList(),
-    val likeCount: Int = 0,
-    val createdAt: String? = null,
-    val isLiked: Boolean = false
-)
 
 data class FeedResponse(
     val results: List<Post>

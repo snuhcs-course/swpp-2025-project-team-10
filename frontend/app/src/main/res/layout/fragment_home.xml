@@ -48,11 +48,10 @@
 <!--    </com.google.android.material.chip.ChipGroup>-->
     <TextView
         android:id="@+id/tvAppName"
+        style="@style/Text.Title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="서로서로도서관"
-        android:textStyle="bold"
-        android:textSize="20sp"
+        android:text="@string/app_name"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
@@ -61,7 +60,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/sort_icon"
-        android:layout_marginStart="4dp"
+        android:layout_marginStart="@dimen/space_xs"
         app:layout_constraintTop_toTopOf="@id/tvAppName"
         app:layout_constraintBottom_toBottomOf="@+id/tvAppName"
         app:layout_constraintStart_toEndOf="@id/tvAppName" />
@@ -71,8 +70,8 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:clipToPadding="false"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp"
+        android:paddingTop="@dimen/space_s"
+        android:paddingBottom="@dimen/space_s"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

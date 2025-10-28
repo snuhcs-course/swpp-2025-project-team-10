@@ -18,7 +18,7 @@
                 android:id="@+id/etBookTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="책 제목"
+                android:hint="@string/book_title_placeholder"
                 android:inputType="textCapSentences"
                 tools:text="Harry Potter" />
         </com.google.android.material.textfield.TextInputLayout>
@@ -32,7 +32,7 @@
                 android:id="@+id/etAuthor"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="저자"
+                android:hint="@string/book_author_placeholder"
                 android:inputType="textCapSentences"
                 tools:text="J.K.Rowling" />
         </com.google.android.material.textfield.TextInputLayout>
