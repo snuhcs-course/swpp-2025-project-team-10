@@ -41,6 +41,7 @@ class PostSerializer(serializers.ModelSerializer):
             "createdAt",
             "isLiked",
         ]
+        read_only_fields = ["id", "posterName", "posterProfile", "likeCount", "isLiked", "createdAt"]
 
     def get_posterProfile(self, obj):
         """Get poster's profile picture URL."""
@@ -101,3 +102,19 @@ class LikeResponseSerializer(serializers.Serializer):
     """
 
     post = PostSerializer(read_only=True)
+
+class PostCreateSerializer(serializers.ModelSerializer):
+    """
+    Serializer for creating new posts.
+    Accepts content, post_type, related_book, image, and is_public.
+    """
+
+    class Meta:
+        model = Post
+        fields = ["content", "post_type", "related_book", "image", "is_public"]
+
+    def create(self, validated_data):
+        user = self.context["request"].user
+        return Post.objects.create(author=user, **validated_data)
+
+
