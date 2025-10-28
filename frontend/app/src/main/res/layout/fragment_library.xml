@@ -186,6 +186,32 @@
         tools:listitem="@layout/item_book_tile"
         tools:visibility="gone"/>
 
+    <TextView
+        android:id="@+id/tvReviewEmpty"
+        style="@style/Text.Body.Medium"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/library_reviews_empty"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/contentTabs"
+        tools:visibility="visible"/>
+
+    <TextView
+        android:id="@+id/tvBookEmpty"
+        style="@style/Text.Body.Medium"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/library_books_empty"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/contentTabs"
+        tools:visibility="gone"/>
+
     <ScrollView
         android:id="@+id/profileContainer"
         android:layout_width="0dp"
@@ -399,6 +425,16 @@
                         android:layout_marginTop="@dimen/space_xs"
                         app:singleLine="false"
                         android:visibility="visible"
+                        tools:visibility="visible" />
+
+                    <TextView
+                        android:id="@+id/tvGenreNone"
+                        style="@style/Text.Body.Medium"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_xs"
+                        android:text="@string/genre_none"
+                        android:visibility="gone"
                         tools:visibility="visible" />
 
                     <!-- 편집모드 -->
@@ -670,7 +706,7 @@
 
                     <!-- 비어있을 때 안내 -->
                     <LinearLayout
-                        android:id="@+id/emptyWishlistContainer"
+                        android:id="@+id/tvWishlistEmpty"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="vertical"
@@ -680,20 +716,27 @@
                         tools:visibility="visible">
 
                         <TextView
-                            android:id="@+id/tvWishlistEmpty"
                             style="@style/Text.Body.Medium"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="@string/profile_wishlist_empty"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/btnAddWishlist"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:paddingVertical="@dimen/space_l"
+                        android:visibility="gone"
+                        tools:visibility="visible">
 
                         <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnAddWishlist"
                             style="@style/Btn.Tonal.Text"
                             android:layout_height="wrap_content"
                             android:layout_width="wrap_content"
-                            android:layout_marginTop="@dimen/space_s"
                             android:text="@string/wishlist_add"
-                            android:visibility="gone"
                             tools:visibility="visible"/>
                     </LinearLayout>
 

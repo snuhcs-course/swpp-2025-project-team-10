@@ -4,6 +4,7 @@ import android.content.res.ColorStateList
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ListAdapter
@@ -11,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.librarytogether.R
 import com.example.librarytogether.feature.home.FeedClicks
 import com.example.librarytogether.feature.library.data.Review
+import com.example.librarytogether.util.loadAvatar
 import com.google.android.material.button.MaterialButton
 
 data class ReviewClicks(
@@ -37,6 +39,8 @@ class ReviewAdapter(
 
         private val btnLike: MaterialButton = itemView.findViewById(R.id.btnLike)
 
+        private val img: ImageView = itemView.findViewById(R.id.ivProfileImage)
+
         fun bind(item: Review) {
             tvUserName.text = item.userName
             tvBookTitle.text = item.bookTitle
@@ -46,6 +50,7 @@ class ReviewAdapter(
             btnLike.setOnClickListener {
                 clicks.onClickLike(item)
             }
+            img.loadAvatar(item.userProfile)
 
             val likeIconColor = if (item.isLiked) {
                 ContextCompat.getColor(itemView.context, R.color.red)

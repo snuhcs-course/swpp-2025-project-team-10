@@ -17,6 +17,7 @@ import com.example.librarytogether.R
 import com.example.librarytogether.databinding.FeedPostBinding
 import com.example.librarytogether.feature.home.data.Post
 import com.example.librarytogether.util.TimeUtils
+import com.example.librarytogether.util.loadAvatar
 import com.google.android.material.tabs.TabLayoutMediator
 
 data class FeedClicks(
@@ -93,11 +94,7 @@ class FeedAdapter(
             tvPoster.text = post.posterName
             tvContent.text = post.content
             tvTitle.text = post.bookTitle
-            Glide.with(ivProfileImage.context)
-                .load(post.posterProfile)
-                .placeholder(R.drawable.person_icon)
-                .circleCrop()
-                .into(ivProfileImage)
+            ivProfileImage.loadAvatar(post.posterProfile)
             tvTime.text = TimeUtils.relativeTime(itemView.context, post.createdAt)
 
             pageCallback?.let { vpImages.unregisterOnPageChangeCallback(it) }

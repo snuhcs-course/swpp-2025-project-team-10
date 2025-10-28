@@ -23,6 +23,57 @@ import com.example.librarytogether.feature.library.data.Review
 //    val total_pages: Int
 //)
 
+
+data class Review(
+    val id: Int,
+    val bookTitle: String,
+    val authorName: String,
+    val userName: String,
+    val userProfile: String, // profile image
+    val content: String,
+    val imageUrls: List<String> = emptyList(),
+    val likeCount: Int = 0,
+    val createdAt: String? = null,
+    val isLiked: Boolean = false,
+)
+
+data class postReview(
+    val bookTitle: String,
+    val authorName: String,
+    val content: String,
+    val imageUrls: List<String> = emptyList(),
+)
+
+data class Book(
+    val id: String,
+    val title: String,
+    val author: String?,
+    val coverUrl: String?,
+)
+
+data class UserProfile(
+    val username: String,
+    val bio: String?,
+    val profileUrl: String?,
+    val reviewCount: Int = 0,
+    val followerCount: Int = 0,
+    val followingCount: Int = 0,
+    val favoriteGenres: List<String>,
+    val preferences: UserPreferences
+)
+
+data class UserPreferences(
+    val tradeLocation1: String?,
+    val tradeLocation2: String?,
+    val tradeSpot1: String?,
+    val tradeSpot2: String?,
+    val favBook: String?,
+    val favBookNote: String?,
+    val favAuthor: String?,
+    val favAuthorNote: String?,
+    val readingHabit: String?
+)
+
 data class ReviewResponse(
     val results: List<Review>
 )

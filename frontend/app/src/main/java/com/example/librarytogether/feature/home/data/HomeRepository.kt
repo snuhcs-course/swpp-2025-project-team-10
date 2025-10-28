@@ -9,19 +9,6 @@ import retrofit2.Response
 import javax.inject.Inject
 import javax.inject.Singleton
 
-data class Post(
-    val id: Int,
-    val bookTitle: String,
-    val authorName: String,
-    val posterName: String,
-    val posterProfile: String,
-    val content: String,
-    val imageUrls: List<String> = emptyList(),
-    val likeCount: Int = 0,
-    val createdAt: String? = null,
-    val isLiked: Boolean = false
-)
-
 @Singleton
 class HomeRepository @Inject constructor(
     private val homeApi: HomeApi

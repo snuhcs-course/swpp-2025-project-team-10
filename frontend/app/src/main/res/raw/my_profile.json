@@ -1,0 +1,24 @@
+{
+  "username": "BookLover123",
+  "bio": "책 읽는 것을 좋아하는 직장인입니다. 고전 소설과 SF를 즐겨 읽습니다.",
+  "profileUrl": "https://example.com/images/my_profile_pic.png",
+  "favoriteGenres": [
+    "현대소설",
+    "고전소설",
+    "에세이"
+  ],
+  "reviewCount": 3,
+  "followerCount": 50,
+  "followingCount": 20,
+  "preferences": {
+    "tradeLocation1": "서울시 강남구",
+    "tradeLocation2": "분당구 정자동",
+    "tradeSpot1": "강남역 10번 출구",
+    "tradeSpot2": "정자역 카페거리",
+    "favBook": "멋진 신세계",
+    "favBookNote": "올더스 헉슬리의 통찰력이 돋보이는 최고의 디스토피아 소설이라고 생각합니다.",
+    "favAuthor": "어니스트 헤밍웨이",
+    "favAuthorNote": "간결하면서도 힘 있는 문체를 좋아합니다.",
+    "readingHabit": "주로 주말 오전에 2~3시간씩 몰아서 읽는 편입니다."
+  }
+}

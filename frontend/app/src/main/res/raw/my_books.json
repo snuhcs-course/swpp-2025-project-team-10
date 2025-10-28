@@ -1,0 +1,32 @@
+[
+  {
+    "id": "book-1",
+    "title": "1984",
+    "author": "George Orwell",
+    "coverUrl": "https://i.imgur.com/gTAlp7M.jpeg"
+  },
+  {
+    "id": "book-2",
+    "title": "동물농장",
+    "author": "George Orwell",
+    "coverUrl": "https://i.imgur.com/kFLW41h.jpeg"
+  },
+  {
+    "id": "book-3",
+    "title": "멋진 신세계",
+    "author": "Aldous Huxley",
+    "coverUrl": "https://i.imgur.com/VOWGICI.jpeg"
+  },
+  {
+    "id": "book-4",
+    "title": "파우스트",
+    "author": "Goethe",
+    "coverUrl": "https://i.imgur.com/0PVuN1V.jpeg"
+  },
+  {
+    "id": "book-5",
+    "title": "데미안",
+    "author": "Hermann Hesse",
+    "coverUrl": "https://i.imgur.com/n1kBUq9.jpeg"
+  }
+]

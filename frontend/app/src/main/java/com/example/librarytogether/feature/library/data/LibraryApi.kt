@@ -1,10 +1,9 @@
 package com.example.librarytogether.feature.library.data
 
-import com.example.librarytogether.feature.home.data.FeedResponse
-import com.example.librarytogether.feature.library.data.Review
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
 
@@ -17,4 +16,16 @@ interface LibraryApi {
 
     @POST("library/reviews/{id}/like/")
     suspend fun toggleReviewLike(@Path("id") reviewId: Int): Response<Review>
+
+    @GET("library/books/")
+    suspend fun getMyBooks(): Response<List<Book>>
+
+    @GET("accounts/profile/me/")
+    suspend fun getMyProfile(): Response<UserProfile>
+
+    @PATCH("accounts/profile/me/")
+    suspend fun updateMyProfile(@Body profile: UserProfile): Response<UserProfile>
+
+    @GET("library/wishlist/")
+    suspend fun getMyWishlist(): Response<List<Book>>
 }

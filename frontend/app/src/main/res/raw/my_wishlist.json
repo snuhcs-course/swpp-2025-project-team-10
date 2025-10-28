@@ -1,0 +1,20 @@
+[
+  {
+    "id": "wish-1",
+    "title": "데미안",
+    "author": "헤르만 헤세",
+    "coverUrl": "https://i.imgur.com/n1kBUq9.jpeg"
+  },
+  {
+    "id": "wish-2",
+    "title": "사피엔스",
+    "author": "유발 하라리",
+    "coverUrl": "https://i.imgur.com/y1v2D8R.jpeg"
+  },
+  {
+    "id": "wish-3",
+    "title": "모비 딕",
+    "author": "허먼 멜빌",
+    "coverUrl": "https://i.imgur.com/1a7g6q4.jpeg"
+  }
+]

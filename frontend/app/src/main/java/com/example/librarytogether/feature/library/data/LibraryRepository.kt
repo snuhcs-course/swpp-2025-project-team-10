@@ -1,32 +1,8 @@
 package com.example.librarytogether.feature.library.data
 
-import android.content.Context
 import android.util.Log
-import androidx.core.content.ContentProviderCompat.requireContext
-import com.example.librarytogether.network.RetrofitClient
-import retrofit2.Response
 import javax.inject.Inject
 import javax.inject.Singleton
-
-data class Review(
-    val id: Int,
-    val bookTitle: String,
-    val authorName: String,
-    val userName: String,
-    val userProfile: String,
-    val content: String,
-    val imageUrls: List<String> = emptyList(),
-    val likeCount: Int = 0,
-    val createdAt: String? = null,
-    val isLiked: Boolean = false,
-)
-
-data class postReview(
-    val bookTitle: String,
-    val authorName: String,
-    val content: String,
-    val imageUrls: List<String> = emptyList(),
-)
 
 @Singleton
 class LibraryRepository @Inject constructor(
@@ -67,6 +43,66 @@ class LibraryRepository @Inject constructor(
         } catch (e: Exception) {
             Log.e("LibraryRepository", "Error toggling like", e)
             null
+        }
+    }
+
+    suspend fun getMyBooks(): List<Book>? {
+        return try {
+            val response = libraryApi.getMyBooks()
+            if (response.isSuccessful) {
+                response.body()
+            } else {
+                Log.e("LibraryRepository", "getMyBooks failed: ${response.code()}")
+                emptyList()
+            }
+        } catch (e: Exception) {
+            Log.e("LibraryRepository", "Error fetching my books", e)
+            emptyList()
+        }
+    }
+
+    suspend fun getMyProfile(): UserProfile? {
+        return try {
+            val response = libraryApi.getMyProfile()
+            if (response.isSuccessful) {
+                response.body()
+            } else {
+                Log.e("LibraryRepository", "getMyProfile failed: ${response.code()}")
+                null
+            }
+        } catch (e: Exception) {
+            Log.e("LibraryRepository", "Error fetching my profile", e)
+            null
+        }
+    }
+
+    suspend fun updateMyProfile(profile: UserProfile): UserProfile? {
+        return try {
+            val response = libraryApi.updateMyProfile(profile)
+            if (response.isSuccessful) {
+                response.body()
+            } else {
+                Log.e("LibraryRepository", "updatdMyProfile failed: ${response.code()}")
+                null
+            }
+        } catch (e: Exception) {
+            Log.e("LibraryRepository", "Error updating my profile", e)
+            null
+        }
+    }
+
+    suspend fun getMyWishlist(): List<Book>? {
+        return try {
+            val response = libraryApi.getMyWishlist()
+            if (response.isSuccessful) {
+                response.body()
+            } else {
+                Log.e("LibraryRepository", "getMyWishlist failed: ${response.code()}")
+                emptyList()
+            }
+        } catch (e: Exception) {
+            Log.e("LibraryRepository", "Error fetching my wishlist", e)
+            emptyList()
         }
     }
 }

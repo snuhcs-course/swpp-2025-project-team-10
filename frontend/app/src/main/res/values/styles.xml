@@ -100,7 +100,7 @@
         <item name="android:checkable">false</item>
     </style>
     <style name="Chip.Filter" parent="Widget.Material3.Chip.Assist">
-        <item name="android:checkable">false</item>
+        <item name="android:checkable">true</item>
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
     </style>
