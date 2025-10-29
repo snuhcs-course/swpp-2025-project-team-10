@@ -10,9 +10,9 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterField(
-            model_name="post",
-            name="id",
-            field=models.AutoField(primary_key=True, serialize=False),
-        ),
+        # Migration removed: changing Post.id to AutoField would coerce existing
+        # UUID values to integers which is unsafe and not desired.
+        # This migration intentionally contains no operations to act as a no-op
+        # placeholder. If this file should be removed entirely, do so once all
+        # references and CI pipelines are updated.
     ]
