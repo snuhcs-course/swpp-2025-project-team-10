@@ -37,8 +37,8 @@ class LibraryViewModelTest {
         // Arrange
         val r1 = LibraryFixtures.review(1)
         val r2 = LibraryFixtures.review(2, likeCount = 10)
-        val b1 = LibraryFixtures.book("1")
-        val b2 = LibraryFixtures.book("2")
+        val b1 = LibraryFixtures.book(1)
+        val b2 = LibraryFixtures.book(2)
         val prof = LibraryFixtures.profile()
         val wish = listOf(b1)
 
@@ -139,7 +139,7 @@ class LibraryViewModelTest {
     @Test
     fun refreshMyBooks_success_populatesList_andStopsLoading() = runTest {
         // Arrange
-        `when`(repo.getMyBooks()).thenReturn(listOf(LibraryFixtures.book("1")))
+        `when`(repo.getMyBooks()).thenReturn(listOf(LibraryFixtures.book(1)))
 
         // Act
         val vm = createVM()
@@ -198,7 +198,7 @@ class LibraryViewModelTest {
     @Test
     fun refreshWishlist_success_populatesList_andStopsLoading() = runTest {
         // Arrange
-        `when`(repo.getMyWishlist()).thenReturn(listOf(LibraryFixtures.book("1")))
+        `when`(repo.getMyWishlist()).thenReturn(listOf(LibraryFixtures.book(1)))
 
         // Act
         val vm = createVM()

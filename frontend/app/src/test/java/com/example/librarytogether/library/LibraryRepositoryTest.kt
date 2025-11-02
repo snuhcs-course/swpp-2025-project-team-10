@@ -100,22 +100,15 @@ class LibraryRepositoryTest {
     @Test
     fun addReview_calls_api_without_throwing_exception() = runTest {
         // Arrange
-        val newReview = PostReview(bookTitle = "New Book", authorName = "New Author", content = "New Content")
-        // API 호출이 성공적으로 이루어지지만, 반환값은 Unit이므로 특별한 when/then 설정은 필요 없음
-        // `verify`를 통해 호출 여부만 검증할 것임
+        val newReview = PostReview(bookTitle = "New Book", authorName = "New Author", publisher = "PUB", isbn = "ISBN", content = "New Content")
 
-        // Act & Assert
         try {
             repository.addReview(newReview)
-            // Exception이 발생하지 않으면 테스트 성공
         } catch (e: Exception) {
-            // 이 블록이 실행되면 테스트 실패
             throw AssertionError("addReview should not throw an exception on success", e)
         }
 
         // Assert: API의 addReview 함수가 올바른 파라미터로 호출되었는지 검증
-        // suspend 함수에 대한 verify는 `coVerify`를 사용하는 것이 좋지만,
-        // 간단한 호출 검증은 verify로도 충분히 가능합니다.
         Mockito.verify(libraryApi).addReview(newReview)
     }
 
@@ -123,7 +116,7 @@ class LibraryRepositoryTest {
     @Test
     fun getMyBooks_success_returns_book_list() = runTest {
         // Arrange
-        val fakeBooks = listOf(LibraryFixtures.book("1"), LibraryFixtures.book("2"))
+        val fakeBooks = listOf(LibraryFixtures.book(1), LibraryFixtures.book(2))
         `when`(libraryApi.getMyBooks()).thenReturn(Response.success(fakeBooks))
 
         // Act
@@ -191,7 +184,7 @@ class LibraryRepositoryTest {
     @Test
     fun getMyWishlist_success_returns_book_list() = runTest {
         // Arrange
-        val fakeWishlist = listOf(LibraryFixtures.book("3"), LibraryFixtures.book("4"))
+        val fakeWishlist = listOf(LibraryFixtures.book(3), LibraryFixtures.book(4))
         `when`(libraryApi.getMyWishlist()).thenReturn(Response.success(fakeWishlist))
 
         // Act
@@ -199,7 +192,7 @@ class LibraryRepositoryTest {
 
         // Assert
         assertThat(result?.size, `is`(2))
-        assertThat(result?.first()?.id, `is`("3"))
+        assertThat(result?.first()?.id, `is`(3))
     }
 
     @Test

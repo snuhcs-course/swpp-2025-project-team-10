@@ -21,6 +21,7 @@ object PostFixtures {
         imageUrls = emptyList(),
         likeCount = likeCount,
         createdAt = createdAt,
+        userBookId = 1,
         isLiked = liked
     )
 }
