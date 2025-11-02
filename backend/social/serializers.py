@@ -25,18 +25,21 @@ class PostSerializer(serializers.ModelSerializer):
     authorName = serializers.SerializerMethodField()
     content = serializers.CharField(read_only=True)
     imageUrls = serializers.SerializerMethodField()
-    
+
+    # New: bookId for direct bartering
+    bookId = serializers.SerializerMethodField()
+
     # Engagement stats
     likeCount = serializers.IntegerField(source="like_count", read_only=True)
     commentCount = serializers.IntegerField(source="comment_count", read_only=True)
-    
+
     # User-specific interaction states
     isLiked = serializers.SerializerMethodField()
     isBookmarked = serializers.SerializerMethodField()
-    
+
     # Related book availability for barter button
     bookAvailableForBarter = serializers.SerializerMethodField()
-    
+
     createdAt = serializers.DateTimeField(source="created_at", read_only=True)
 
     class Meta:
@@ -49,6 +52,7 @@ class PostSerializer(serializers.ModelSerializer):
             "authorName",
             "content",
             "imageUrls",
+            "bookId",
             "likeCount",
             "commentCount",
             "isLiked",
@@ -66,7 +70,13 @@ class PostSerializer(serializers.ModelSerializer):
             "isBookmarked",
             "bookAvailableForBarter",
             "createdAt",
+            "bookId",
         ]
+    def get_bookId(self, obj):
+        """Return the related book's id if exists, else None."""
+        if obj.related_book:
+            return str(obj.related_book.id)
+        return None
 
     def get_posterProfile(self, obj):
         """Get poster's profile picture URL."""
