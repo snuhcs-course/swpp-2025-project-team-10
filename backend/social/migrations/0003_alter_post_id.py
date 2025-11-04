@@ -35,11 +35,15 @@ class Migration(migrations.Migration):
                     choices=[
                         ('text', 'Text Post'),
                         ('book_review', 'Book Review'),
-                        ('barter_offer', 'Barter Offer'),
+                        ('book_recommendation', 'Book Recommendation'),
+                        ('reading_update', 'Reading Update'),
+                        ('barter_success', 'Successful Barter'),
                     ],
-                    max_length=20
+                    max_length=20,
+                    default='text'
                 )),
-                ('content', models.TextField()),
+                ('content', models.TextField(help_text='Share your thoughts about books!')),
+                ('image', models.ImageField(upload_to='post_images/', null=True, blank=True)),
                 ('is_public', models.BooleanField(default=True)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
@@ -52,13 +56,22 @@ class Migration(migrations.Migration):
                     blank=True,
                     null=True,
                     on_delete=django.db.models.deletion.SET_NULL,
-                    related_name='posts',
-                    to='books.book'
+                    related_name='related_posts',
+                    to='books.book',
+                    help_text='Book this post is about (optional)'
                 )),
             ],
             options={
                 'db_table': 'social_post',
+                'verbose_name': 'Post',
+                'verbose_name_plural': 'Posts',
                 'ordering': ['-created_at'],
+                'indexes': [
+                    models.Index(fields=['author'], name='social_post_author_idx'),
+                    models.Index(fields=['post_type'], name='social_post_type_idx'),
+                    models.Index(fields=['created_at'], name='social_post_created_idx'),
+                    models.Index(fields=['is_public'], name='social_post_public_idx'),
+                ],
             },
         ),
         
