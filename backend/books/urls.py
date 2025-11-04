@@ -10,7 +10,8 @@ from .views import (
     UserReviewListCreateView,
     nearby_owners,
     toggle_book_for_barter,
-    toggle_wishlist,
+    user_books_list,
+    user_wishlist_list,
 )
 
 app_name = "books"
@@ -24,12 +25,10 @@ urlpatterns = [
         ReviewLikeView.as_view(),
         name="review-like",
     ),
-    # Toggle wishlist (bookmark a book)
-    path(
-        "books/<uuid:book_id>/wishlist/",
-        toggle_wishlist,
-        name="toggle-wishlist",
-    ),
+    # User's books list
+    path("books/", user_books_list, name="user-books-list"),
+    # User's wishlist
+    path("wishlist/", user_wishlist_list, name="user-wishlist-list"),
     # Toggle barter availability for owned book
     path(
         "books/<uuid:book_id>/toggle-barter/",

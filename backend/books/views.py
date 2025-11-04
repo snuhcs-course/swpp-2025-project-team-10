@@ -13,6 +13,7 @@ from .models import Book, BookReview, BookWishlist, ReviewHelpfulVote
 from notify.models import Notification
 from rest_framework.decorators import api_view, permission_classes
 from .serializers import (
+    BookSummarySerializer,
     CreateReviewSerializer,
     ReviewLikeResponseSerializer,
     ReviewSerializer,
@@ -149,39 +150,55 @@ class ReviewLikeView(APIView):
         return Response({"review": serializer.data}, status=status.HTTP_200_OK)
 
 
-@api_view(["POST"])
+@api_view(["GET"])
 @permission_classes([permissions.IsAuthenticated])
-def toggle_wishlist(request, book_id):
+def user_books_list(request):
     """
-    Toggle the current user's wishlist for a given book (bookmark button).
-
-    POST /books/{book_id}/wishlist/
-
-    Returns { "wishlisted": true|false }
+    Get list of books owned by the current user.
+    
+    GET /library/books/
+    
+    Returns list of books with id, title, author, coverUrl
     """
-    try:
-        book = Book.objects.get(pk=book_id)
-    except Book.DoesNotExist:
-        return Response({"error": "Book not found"}, status=status.HTTP_404_NOT_FOUND)
+    books = Book.objects.filter(owner=request.user).select_related("publisher").prefetch_related("authors")
+    
+    # Map to frontend's expected Book format
+    results = []
+    for book in books:
+        results.append({
+            "id": str(book.id),
+            "title": book.title,
+            "author": book.author_names if hasattr(book, 'author_names') else ", ".join([a.name for a in book.authors.all()]),
+            "coverUrl": request.build_absolute_uri(book.cover_image.url) if book.cover_image else None,
+        })
+    
+    return Response(results, status=status.HTTP_200_OK)
 
-    existing = BookWishlist.objects.filter(user=request.user, book=book).first()
-    if existing:
-        existing.delete()
-        wishlisted = False
-    else:
-        BookWishlist.objects.create(user=request.user, book=book)
-        wishlisted = True
-        # Record a notification for the actor (accumulates in notifications tab)
-        Notification.objects.create(
-            recipient=request.user,
-            sender=request.user,
-            notification_type="book_wishlisted",
-            title="Book added to wishlist",
-            message=f"You added '{book.title}' to your wishlist.",
-            content_object=book,
-        )
 
-    return Response({"wishlisted": wishlisted}, status=status.HTTP_200_OK)
+@api_view(["GET"])
+@permission_classes([permissions.IsAuthenticated])
+def user_wishlist_list(request):
+    """
+    Get list of books in the current user's wishlist.
+    
+    GET /library/wishlist/
+    
+    Returns list of books with id, title, author, coverUrl
+    """
+    wishlist_items = BookWishlist.objects.filter(user=request.user).select_related("book__publisher").prefetch_related("book__authors")
+    
+    # Map to frontend's expected Book format
+    results = []
+    for item in wishlist_items:
+        book = item.book
+        results.append({
+            "id": str(book.id),
+            "title": book.title,
+            "author": book.author_names if hasattr(book, 'author_names') else ", ".join([a.name for a in book.authors.all()]),
+            "coverUrl": request.build_absolute_uri(book.cover_image.url) if book.cover_image else None,
+        })
+    
+    return Response(results, status=status.HTTP_200_OK)
 
 
 @api_view(["PATCH"])
