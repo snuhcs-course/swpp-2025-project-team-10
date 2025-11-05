@@ -71,10 +71,114 @@ class Publisher(models.Model):
         return self.name
 
 
-class Book(models.Model):
+class Translator(models.Model):
     """
-    Model to represent books in the system.
+    Model to represent book translators.
     """
+
+    name = models.CharField(max_length=100)
+    bio = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "books_translator"
+        verbose_name = "Translator"
+        verbose_name_plural = "Translators"
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
+class BookPublication(models.Model):
+    """Metadata shared across all user-owned copies."""
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    title = models.CharField(max_length=200)
+    subtitle = models.CharField(max_length=200, blank=True)
+    authors = models.ManyToManyField(Author, related_name="publications")
+    translators = models.ManyToManyField(
+        Translator, related_name="publications", blank=True
+    )
+    publisher = models.ForeignKey(
+        Publisher, on_delete=models.SET_NULL, null=True, blank=True
+    )
+
+    isbn_10 = models.CharField(
+        max_length=10, blank=True, unique=True, null=True
+    )
+    isbn_13 = models.CharField(
+        max_length=13, blank=True, unique=True, null=True
+    )
+    publication_date = models.DateField(null=True, blank=True)
+    edition = models.CharField(max_length=50, blank=True)
+    pages = models.IntegerField(
+        null=True, blank=True, validators=[MinValueValidator(1)]
+    )
+    language = models.CharField(max_length=30, default="English")
+    description = models.TextField(blank=True)
+    genres = models.ManyToManyField(
+        Genre, related_name="publications", blank=True
+    )
+
+    cover_image = models.ImageField(
+        upload_to="book_covers/", null=True, blank=True
+    )
+
+    external_url = models.URLField(
+        blank=True,
+        help_text="URL to the book detail page on external API (e.g., Kakao)",
+    )
+    original_price = models.BigIntegerField(
+        null=True,
+        blank=True,
+        help_text="Original price from external API",
+    )
+    sale_price = models.BigIntegerField(
+        null=True,
+        blank=True,
+        help_text="Sale price from external API",
+    )
+    sales_status = models.CharField(
+        max_length=50,
+        blank=True,
+        help_text="Sales status from external API (e.g., 정상, 품절, 절판)",
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "books_book_publication"
+        verbose_name = "Book Publication"
+        verbose_name_plural = "Book Publications"
+        ordering = ["title"]
+        indexes = [
+            models.Index(fields=["title"]),
+            models.Index(fields=["isbn_13"]),
+        ]
+
+    def __str__(self):
+        return self.title
+
+    def save(self, *args, **kwargs):
+        """Resize cover image for consistent storage."""
+        super().save(*args, **kwargs)
+
+        if self.cover_image:
+            img = Image.open(self.cover_image.path)
+            if img.height > 600 or img.width > 400:
+                output_size = (400, 600)
+                img.thumbnail(output_size)
+                img.save(self.cover_image.path)
+
+    @property
+    def author_names(self):
+        return ", ".join(author.name for author in self.authors.all())
+
+
+class BookCopy(models.Model):
+    """A user-owned copy of a publication with personal metadata."""
 
     CONDITION_CHOICES = [
         ("new", "New"),
@@ -92,42 +196,14 @@ class Book(models.Model):
         ("not_available", "Not Available"),
     ]
 
-    # Basic Information
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    title = models.CharField(max_length=200)
-    subtitle = models.CharField(max_length=200, blank=True)
-    authors = models.ManyToManyField(Author, related_name="books")
-    publisher = models.ForeignKey(
-        Publisher, on_delete=models.SET_NULL, null=True, blank=True
+    publication = models.ForeignKey(
+        BookPublication,
+        on_delete=models.CASCADE,
+        related_name="copies",
     )
-
-    # Publication Details
-    isbn_10 = models.CharField(
-        max_length=10, blank=True, unique=True, null=True
-    )
-    isbn_13 = models.CharField(
-        max_length=13, blank=True, unique=True, null=True
-    )
-    publication_date = models.DateField(null=True, blank=True)
-    edition = models.CharField(max_length=50, blank=True)
-    pages = models.IntegerField(
-        null=True, blank=True, validators=[MinValueValidator(1)]
-    )
-    language = models.CharField(max_length=30, default="English")
-
-    # Content
-    description = models.TextField(blank=True)
-    genres = models.ManyToManyField(Genre, related_name="books", blank=True)
-    tags = TaggableManager(blank=True)
-
-    # Images
-    cover_image = models.ImageField(
-        upload_to="book_covers/", null=True, blank=True
-    )
-
-    # Owner Information
     owner = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="books"
+        User, on_delete=models.CASCADE, related_name="book_copies"
     )
     condition = models.CharField(
         max_length=20, choices=CONDITION_CHOICES, default="good"
@@ -135,23 +211,18 @@ class Book(models.Model):
     availability = models.CharField(
         max_length=20, choices=AVAILABILITY_CHOICES, default="available"
     )
-
-    # Owner's Notes
     owner_notes = models.TextField(
         blank=True,
         help_text="Additional notes about the book's condition or special features",
     )
-
-    # Barter Information
+    tags = TaggableManager(blank=True)
     is_for_barter = models.BooleanField(default=True)
     preferred_genres_for_trade = models.ManyToManyField(
         Genre,
-        related_name="books_wanted_for_trade",
+        related_name="book_copies_wanted_for_trade",
         blank=True,
         help_text="Genres you'd like to receive in exchange",
     )
-
-    # Ratings and Reviews
     average_rating = models.DecimalField(
         max_digits=3,
         decimal_places=2,
@@ -159,47 +230,71 @@ class Book(models.Model):
         validators=[MinValueValidator(0), MaxValueValidator(5)],
     )
     review_count = models.IntegerField(default=0)
-
-    # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        db_table = "books_book"
-        verbose_name = "Book"
-        verbose_name_plural = "Books"
+        db_table = "books_book_copy"
+        verbose_name = "Book Copy"
+        verbose_name_plural = "Book Copies"
         ordering = ["-created_at"]
         indexes = [
-            models.Index(fields=["title"]),
-            models.Index(fields=["isbn_13"]),
             models.Index(fields=["owner"]),
             models.Index(fields=["availability"]),
             models.Index(fields=["is_for_barter"]),
         ]
 
+    _PUBLICATION_FIELD_PROXY = {
+        "subtitle",
+        "isbn_10",
+        "isbn_13",
+        "publication_date",
+        "edition",
+        "pages",
+        "language",
+        "description",
+        "external_url",
+        "original_price",
+        "sale_price",
+        "sales_status",
+        "cover_image",
+        "publisher",
+        "authors",
+        "translators",
+        "genres",
+    }
+
     def __str__(self):
-        return f"{self.title} by {', '.join([author.name for author in self.authors.all()])}"
+        return f"{self.owner.username}'s copy of {self.publication.title}"
 
-    def save(self, *args, **kwargs):
-        """Override save to resize cover image."""
-        super().save(*args, **kwargs)
+    @property
+    def title(self):
+        return self.publication.title
 
-        if self.cover_image:
-            img = Image.open(self.cover_image.path)
-            if img.height > 600 or img.width > 400:
-                output_size = (400, 600)
-                img.thumbnail(output_size)
-                img.save(self.cover_image.path)
+    @property
+    def subtitle(self):
+        return self.publication.subtitle
+
+    @property
+    def isbn_10(self):
+        return self.publication.isbn_10
+
+    @property
+    def isbn_13(self):
+        return self.publication.isbn_13
 
     @property
     def author_names(self):
-        """Return comma-separated author names."""
-        return ", ".join([author.name for author in self.authors.all()])
+        return self.publication.author_names
 
     @property
     def is_available_for_barter(self):
-        """Check if book is available for bartering."""
         return self.is_for_barter and self.availability == "available"
+
+    def __getattr__(self, item):
+        if item in self._PUBLICATION_FIELD_PROXY:
+            return getattr(self.publication, item)
+        return super().__getattr__(item)
 
 
 class BookReview(models.Model):
@@ -210,7 +305,7 @@ class BookReview(models.Model):
 
     # Book reference (optional for standalone reviews)
     book = models.ForeignKey(
-        Book,
+        BookCopy,
         on_delete=models.CASCADE,
         related_name="reviews",
         null=True,
@@ -310,7 +405,7 @@ class BookWishlist(models.Model):
         User, on_delete=models.CASCADE, related_name="wishlist"
     )
     book = models.ForeignKey(
-        Book, on_delete=models.CASCADE, related_name="wishlisted_by"
+        BookCopy, on_delete=models.CASCADE, related_name="wishlisted_by"
     )
     priority = models.IntegerField(
         default=1,
@@ -344,7 +439,7 @@ class BookCollection(models.Model):
         User, on_delete=models.CASCADE, related_name="collections"
     )
     books = models.ManyToManyField(
-        Book, related_name="collections", blank=True
+        BookCopy, related_name="collections", blank=True
     )
 
     is_public = models.BooleanField(
@@ -386,7 +481,7 @@ class ReadingStatus(models.Model):
         User, on_delete=models.CASCADE, related_name="reading_statuses"
     )
     book = models.ForeignKey(
-        Book, on_delete=models.CASCADE, related_name="reading_statuses"
+        BookCopy, on_delete=models.CASCADE, related_name="reading_statuses"
     )
     status = models.CharField(
         max_length=20, choices=STATUS_CHOICES, default="want_to_read"
@@ -420,6 +515,11 @@ class ReadingStatus(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.book.title} ({self.get_status_display()})"
+
+    def get_status_display(self):
+        """Return a human-readable status label even if Django's helper is unavailable."""
+        choices = dict(self.STATUS_CHOICES)
+        return choices.get(self.status, self.status)
 
     @property
     def reading_progress(self):
