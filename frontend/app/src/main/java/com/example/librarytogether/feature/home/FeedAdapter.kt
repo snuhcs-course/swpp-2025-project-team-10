@@ -9,6 +9,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
@@ -17,6 +18,7 @@ import com.example.librarytogether.R
 import com.example.librarytogether.databinding.FeedPostBinding
 import com.example.librarytogether.feature.home.data.Post
 import com.example.librarytogether.util.TimeUtils
+import com.example.librarytogether.util.loadAvatar
 import com.google.android.material.tabs.TabLayoutMediator
 
 data class FeedClicks(
@@ -93,11 +95,7 @@ class FeedAdapter(
             tvPoster.text = post.posterName
             tvContent.text = post.content
             tvTitle.text = post.bookTitle
-            Glide.with(ivProfileImage.context)
-                .load(post.posterProfile)
-                .placeholder(R.drawable.person_icon)
-                .circleCrop()
-                .into(ivProfileImage)
+            ivProfileImage.loadAvatar(post.posterProfile)
             tvTime.text = TimeUtils.relativeTime(itemView.context, post.createdAt)
 
             pageCallback?.let { vpImages.unregisterOnPageChangeCallback(it) }
@@ -107,17 +105,15 @@ class FeedAdapter(
 
             val images = post.imageUrls
             mcPostImage.isVisible = images.isNotEmpty()
-            val cs = ConstraintSet().apply { clone(contentFeed) }
 
             if (images.isNotEmpty()) {
                 vpImages.adapter = ImagePagerAdapter(images)
                 vpImages.offscreenPageLimit = 1
-                dotsMediator?.detach()
                 dotsMediator = TabLayoutMediator(tabDots, vpImages) { tab, _ ->
                     tab.setCustomView(R.layout.item_dot_tab)
                 }.also {it.attach()}
 
-                vpImages.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                pageCallback = object : ViewPager2.OnPageChangeCallback() {
                     override fun onPageSelected(position: Int) {
                         super.onPageSelected(position)
                         for (i in 0 until tabDots.tabCount) {
@@ -127,24 +123,18 @@ class FeedAdapter(
                             dot?.setBackgroundResource(bg)
                         }
                     }
-                })
-                cs.clear(binding.actionBar.id, ConstraintSet.TOP)
-                cs.connect(binding.actionBar.id, ConstraintSet.TOP, binding.mcPostImage.id, ConstraintSet.BOTTOM)
-                cs.clear(binding.tvContent.id, ConstraintSet.TOP)
-                cs.connect(binding.tvContent.id, ConstraintSet.TOP, binding.actionBar.id, ConstraintSet.BOTTOM)
-                cs.clear(binding.tvTime.id, ConstraintSet.TOP)
-                cs.connect(binding.tvTime.id, ConstraintSet.TOP, binding.tvContent.id, ConstraintSet.BOTTOM)
-                cs.applyTo(contentFeed)
+                }.also { vpImages.registerOnPageChangeCallback(it) }
+
+//                tabDots.post {
+//                    for (i in 0 until tabDots.tabCount) {
+//                        val dot = tabDots.getTabAt(i)?.customView
+//                        val bg = if (i == 0) R.drawable.dot_selected else R.drawable.dot_unselected
+//                        dot?.setBackgroundResource(bg)
+//                    }
+//                }
             } else {
-                dotsMediator?.detach()
-                dotsMediator = null
-                cs.clear(binding.actionBar.id, ConstraintSet.TOP)
-                cs.connect(binding.actionBar.id, ConstraintSet.TOP, binding.tvContent.id, ConstraintSet.BOTTOM)
-                cs.clear(binding.tvContent.id, ConstraintSet.TOP)
-                cs.connect(binding.tvContent.id, ConstraintSet.TOP, binding.mcPostImage.id, ConstraintSet.BOTTOM)
-                cs.clear(binding.tvTime.id, ConstraintSet.TOP)
-                cs.connect(binding.tvTime.id, ConstraintSet.TOP, binding.actionBar.id, ConstraintSet.BOTTOM)
-                cs.applyTo(contentFeed)
+                vpImages.adapter = null
+                tabDots.removeAllTabs()
             }
 
             val isExpanded = expandedIds.contains(post.id)
@@ -164,5 +154,27 @@ class FeedAdapter(
             }
             binding.btnLike.iconTint = ColorStateList.valueOf(likeIconColor)
         }
+
+        fun cleanup() = with(binding) {
+            pageCallback?.let { vpImages.unregisterOnPageChangeCallback(it) }
+            pageCallback = null
+            dotsMediator?.detach()
+            dotsMediator = null
+            vpImages.adapter = null
+            tabDots.removeAllTabs()
+        }
     }
+
+    override fun onViewRecycled(holder: PostVH) {
+        holder.cleanup()
+        super.onViewRecycled(holder)
+    }
+}
+
+object PostDiff : DiffUtil.ItemCallback<Post>() {
+    override fun areItemsTheSame(oldItem: Post, newItem: Post): Boolean =
+        oldItem.id == newItem.id
+
+    override fun areContentsTheSame(oldItem: Post, newItem: Post): Boolean =
+        oldItem == newItem
 }

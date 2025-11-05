@@ -14,6 +14,15 @@ from drf_spectacular.views import (
     SpectacularRedocView,
     SpectacularSwaggerView,
 )
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
+
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 
 urlpatterns = [
     # Admin
@@ -30,6 +39,13 @@ urlpatterns = [
         SpectacularRedocView.as_view(url_name="schema"),
         name="redoc",
     ),
+    # Token API
+    path(
+        "api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"
+    ),
+    path(
+        "api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"
+    ),
     # Authentication
     path("auth/", include("djoser.urls")),
     path("auth/", include("djoser.urls.jwt")),
@@ -38,7 +54,7 @@ urlpatterns = [
     path("auth/", include("accounts.urls")),  # Matches frontend expectations
     path("library/", include("books.urls")),  # User's library (reviews, books)
     path("", include("social.urls")),  # Social features (home feed, posts)
-    # path("api/v1/barter/", include("barter.urls")),
+    path("barter/", include("barter.urls")),  # Barter requests
     # path("api/v1/notifications/", include("notify.urls")),
 ]
 

@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.librarytogether.R
+import com.example.librarytogether.util.loadFeed
 import com.google.android.material.imageview.ShapeableImageView
 
 class ImagePagerAdapter(
@@ -28,11 +29,7 @@ class ImagePagerAdapter(
         private val iv = itemView.findViewById<ShapeableImageView>(R.id.ivPage)
 
         fun bind(url: String) {
-            Glide.with(iv)
-                .load(url)
-                .placeholder(android.R.color.darker_gray)
-                .centerCrop()
-                .into(iv)
+            iv.loadFeed(url)
         }
     }
 }

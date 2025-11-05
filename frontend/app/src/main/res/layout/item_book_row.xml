@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginVertical="@dimen/space_xs"
+    app:cardUseCompatPadding="false"
+    app:cardElevation="0dp"
+    app:strokeWidth="0dp"
+    app:strokeColor="?attr/colorOutline"
+    app:cardBackgroundColor="@android:color/transparent">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="0dp">
+
+        <!-- 표지 -->
+        <ImageView
+            android:id="@+id/imgCover"
+            android:layout_width="@dimen/book_thumb_w"
+            android:layout_height="0dp"
+            app:layout_constraintDimensionRatio="5:7"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:scaleType="centerCrop"
+            android:contentDescription="@string/book_cover"
+            android:background="@drawable/book_icon"/>
+
+        <!-- 텍스트 영역 -->
+        <LinearLayout
+            android:id="@+id/containerText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginStart="@dimen/space_m"
+            app:layout_constraintStart_toEndOf="@id/imgCover"
+            app:layout_constraintEnd_toStartOf="@id/btnAction"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <TextView
+                android:id="@+id/tvTitle"
+                style="@style/Text.Body.Medium"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:text="@string/book_title_placeholder"/>
+
+            <TextView
+                android:id="@+id/tvAuthor"
+                style="@style/Text.Caption"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/space_xs"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="?attr/colorOutline"
+                android:text="@string/book_author_placeholder"/>
+        </LinearLayout>
+
+        <!-- (옵션) 우측 액션 -->
+        <ImageButton
+            android:id="@+id/btnAction"
+            style="@style/Btn.Icon.Base"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:contentDescription="@string/more_options"
+            android:src="@drawable/more_icon"
+            android:visibility="gone"/>
+
+        <!-- 구분선 -->
+        <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="?attr/colorOutlineVariant"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>
+

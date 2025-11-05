@@ -1,0 +1,57 @@
+example_id: example_2_casual_reader
+description: Casual reader with diverse interests from frontend
+input:
+  user_profile:
+    user_id: user_202
+    display_name: bookworm_jane
+    trust_score: 0.41000000000000003
+    preferences:
+      genres:
+      - Fiction
+      - Romance
+      - Self-Help
+      authors:
+      - Paulo Coelho
+      books:
+      - The Alchemist
+      reading_times:
+      - evening
+  candidate_books:
+  - title: The Notebook
+    author: Nicholas Sparks
+    genre: romance
+  - title: Atomic Habits
+    author: James Clear
+    genre: self-help
+  reading_history:
+  - The Alchemist
+  - Eat Pray Love
+  - The Secret
+output:
+  recommended_books:
+  - The Notebook
+  - Atomic Habits
+  confidence_score: 0.8999999999999999
+  conversation:
+  - turn: 1
+    speaker: recommender
+    message: '[Mock Response] Based on the context: ''Based on this user''s profile
+      and reading history, ...'', I would recommend considering the user''s preferences
+      and reading history.'
+  - turn: 2
+    speaker: critic
+    message: '[Mock Response] Based on the context: ''Review this book recommendation:
+
+
+      User Context:
+
+      Us...'', I would recommend considering the user''s preferences and reading history.'
+  - turn: 3
+    speaker: recommender
+    message: '[Mock Response] Based on the context: ''Your initial recommendation:
+
+      [Mock Response] Based...'', I would recommend considering the user''s preferences
+      and reading history.'
+  final_recommendation: '[Mock Response] Based on the context: ''Based on this conversation
+    about book recommendati...'', I would recommend considering the user''s preferences
+    and reading history.'

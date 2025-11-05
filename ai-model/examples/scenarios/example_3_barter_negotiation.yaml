@@ -1,0 +1,45 @@
+example_id: example_3_barter_negotiation
+description: Two-way barter negotiation with LLM mediation
+input:
+  participants:
+  - user_id: user_301
+    display_name: Alice_BookCollector
+    offering: The Da Vinci Code
+    receiving: Dune
+  - user_id: user_302
+    display_name: Bob_SciFiFan
+    offering: Dune
+    receiving: The Da Vinci Code
+  distance_km: 5.2
+  fairness_score: 0.87
+output:
+  match_score: 0.87
+  rationale: '[Mock Response] Based on the context: ''User: Alice_BookCollector
+
+    Trust Score: 0.88
+
+    Prefer...'', I would recommend considering the user''s preferences and reading
+    history.'
+  trust_warnings: []
+  conversation:
+  - speaker: proposer
+    message: '[Mock Response] Based on the context: ''User: Alice_BookCollector
+
+      Trust Score: 0.88
+
+      Prefer...'', I would recommend considering the user''s preferences and reading
+      history.'
+  - speaker: evaluator
+    message: '[Mock Response] Based on the context: ''User: Alice_BookCollector
+
+      Trust Score: 0.88
+
+      Prefer...'', I would recommend considering the user''s preferences and reading
+      history.'
+  - speaker: proposer
+    message: '[Mock Response] Based on the context: ''User: Alice_BookCollector
+
+      Trust Score: 0.88
+
+      Prefer...'', I would recommend considering the user''s preferences and reading
+      history.'

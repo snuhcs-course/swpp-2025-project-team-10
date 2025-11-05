@@ -1,0 +1,142 @@
+# 한국어 예제 1: 미스터리 소설 애호가
+# 생성 시간: 2025-10-30
+
+user_profile:
+  user_id: "user_001"
+  display_name: "김민수"
+  trust_score: 0.92
+  reliability: 0.88
+  preferences:
+    genres:
+      - "미스터리"
+      - "스릴러"
+      - "추리소설"
+    authors:
+      - "히가시노 게이고"
+      - "아가사 크리스티"
+    moods:
+      - "긴장감"
+      - "반전"
+
+reading_history:
+  - "백야행"
+  - "나미야 잡화점의 기적"
+  - "그리고 아무도 없었다"
+
+candidate_books:
+  - item_id: "book_001"
+    title: "용의자 X의 헌신"
+    author: "히가시노 게이고"
+    genre: "미스터리"
+    valuation: 0.95
+    year: 2005
+
+  - item_id: "book_002"
+    title: "오리엔트 특급 살인"
+    author: "아가사 크리스티"
+    genre: "추리소설"
+    valuation: 0.90
+    year: 1934
+
+  - item_id: "book_003"
+    title: "살인자의 기억법"
+    author: "김영하"
+    genre: "스릴러"
+    valuation: 0.88
+    year: 2013
+
+# LLM 대화 (BookBot vs CriticBot)
+conversation:
+  - turn: 1
+    speaker: "BookBot"
+    role: "추천자"
+    message: |
+      김민수님, 히가시노 게이고 작가 특유의 긴장감 넘치는 분위기와 반전이 돋보이는 "용의자 X의 헌신"을 추천합니다. 
+      백야행과 같은 작품에서 느꼈던 몰입감과 함께, 아가사 크리스티의 추리 소설을 좋아하는 취향에도 잘 맞을 것 같습니다. 
+      독서 경험을 고려했을 때, 김민수님의 미스터리 소설 선호도를 충족시켜줄 수 있는 작품이라고 생각합니다.
+
+  - turn: 2
+    speaker: "CriticBot"
+    role: "비평가"
+    message: |
+      1. 히가시노 게이고 작가에 대한 김민수님의 높은 신뢰도(Trust Score)를 고려할 때, "용의자 X의 헌신"이 그의 취향에 부합할 가능성이 높습니다.
+      2. 그러나, '살인자의 기억법'처럼 김민수님의 독서 기록에서 한국 작가의 추리 소설을 선호하는 경향을 보여주는 작품과의 차이가 있을 수 있습니다.
+      3. 추천 과정에서 김민수님의 '긴장감'과 '반전'이라는 감정적 선호도를 더욱 구체적으로 반영할 수 있을까요?
+
+  - turn: 3
+    speaker: "BookBot"
+    role: "추천자"
+    message: |
+      김민수님, 히가시노 게이고 작가의 긴장감 넘치는 분위기와 예측 불가능한 반전이 돋보이는 "용의자 X의 헌신"을 추천합니다. 
+      '백야행'처럼 몰입감 있는 스토리와 아가사 크리스티 스타일의 추리 요소가 결합되어, 김민수님의 선호하는 긴장감과 반전을 극대화할 수 있을 것입니다. 
+      특히 '살인자의 기억법'과는 또 다른, 숨 막히는 심리 묘사가 돋보이는 작품입니다.
+
+# 최종 추천
+final_recommendation:
+  summary: |
+    김민수님, 히가시노 게이고 작가의 '용의자 X의 헌신'은 '백야행'처럼 몰입도 높은 스토리와 아가사 크리스티 스타일의 추리, 
+    그리고 예측 불가능한 반전이 돋보이는 작품입니다. 특히 '살인자의 기억법'과는 또 다른, 숨 막히는 심리 묘사를 통해 긴장감을 극대화할 수 있을 것입니다.
+  
+  recommended_books:
+    - "용의자 X의 헌신"
+  
+  confidence_score: 0.90
+  
+  reasoning:
+    - "사용자가 선호하는 작가(히가시노 게이고)의 작품"
+    - "독서 이력(백야행)과 유사한 스타일"
+    - "선호하는 감정(긴장감, 반전)을 충족"
+    - "높은 신뢰도(0.92)를 고려한 안전한 추천"
+
+# 대화 특징
+conversation_analysis:
+  total_turns: 3
+  avg_message_length: "2-3문장 (간결함)"
+  language: "한국어"
+  tone: "전문적이면서 친근함"
+  
+  key_points:
+    - "BookBot: 사용자 선호도와 독서 이력을 구체적으로 언급"
+    - "CriticBot: 잠재적 우려사항을 3가지로 정리하여 제시"
+    - "BookBot: 비평을 반영하여 더 구체적인 추천으로 개선"
+  
+  user_experience:
+    - "한눈에 파악 가능한 짧은 대화"
+    - "전문가 간 토론 형식으로 신뢰도 향상"
+    - "사용자 맞춤형 근거 제시"
+
+# 안드로이드 UI 포맷 (RecyclerView용)
+android_format:
+  conversation_items:
+    - type: "message"
+      speaker: "BookBot"
+      speaker_emoji: "📚"
+      speaker_name: "북봇"
+      message: "김민수님, 히가시노 게이고 작가 특유의 긴장감 넘치는 분위기와 반전이 돋보이는 \"용의자 X의 헌신\"을 추천합니다. 백야행과 같은 작품에서 느꼈던 몰입감과 함께, 아가사 크리스티의 추리 소설을 좋아하는 취향에도 잘 맞을 것 같습니다."
+      timestamp: "2025-10-30T17:30:00Z"
+      
+    - type: "message"
+      speaker: "CriticBot"
+      speaker_emoji: "🔍"
+      speaker_name: "크리틱봇"
+      message: "히가시노 게이고 작가에 대한 높은 신뢰도를 고려할 때 좋은 추천입니다. 다만 한국 작가 선호 경향도 있으니, '긴장감'과 '반전'을 더 구체적으로 반영하면 어떨까요?"
+      timestamp: "2025-10-30T17:30:15Z"
+      
+    - type: "message"
+      speaker: "BookBot"
+      speaker_emoji: "📚"
+      speaker_name: "북봇"
+      message: "'백야행'처럼 몰입감 있는 스토리와 아가사 크리스티 스타일의 추리 요소가 결합되어, 긴장감과 반전을 극대화할 수 있습니다. 숨 막히는 심리 묘사가 돋보이는 작품입니다."
+      timestamp: "2025-10-30T17:30:30Z"
+      
+    - type: "recommendation_card"
+      book_title: "용의자 X의 헌신"
+      book_author: "히가시노 게이고"
+      book_cover_url: "/images/suspect_x.jpg"
+      confidence_score: 0.90
+      confidence_label: "매우 적합"
+      match_reasons:
+        - "선호 작가의 작품"
+        - "독서 이력과 유사"
+        - "긴장감과 반전 충족"
+

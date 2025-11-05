@@ -80,6 +80,31 @@ class MockInterceptor(
             return makeResponse(req, 200, body)
         }
 
+        if (path.endsWith("/library/reviews/") && method == "GET") {
+            val body = readJson(R.raw.my_feed)
+            return makeResponse(req, 200, body)
+        }
+
+        if (path.endsWith("/accounts/profile/me/") && method == "GET") {
+            val body = readJson(R.raw.my_profile)
+            return makeResponse(req, 200, body)
+        }
+
+        if (path.endsWith("/accounts/profile/me/") && method == "PATCH") {
+            val body = readJson(R.raw.my_profile)
+            return makeResponse(req, 200, body)
+        }
+
+        if (path.endsWith("/library/wishlist/") && method == "GET") {
+            val body = readJson(R.raw.my_wishlist)
+            return makeResponse(req, 200, body)
+        }
+
+        if (path.endsWith("/library/books/") && method == "GET") {
+            val body = readJson(R.raw.my_books)
+            return makeResponse(req, 200, body)
+        }
+
         val notMocked = """{ "success": false, "error": { "code": "NOT_MOCKED", "message": "모킹 없음: $path" } }"""
         return makeResponse(req, 404, notMocked)
     }

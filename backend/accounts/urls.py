@@ -8,6 +8,8 @@ from . import views
 
 app_name = "accounts"
 
+# Add URL patterns for the UserTaste views
+
 urlpatterns = [
     # Authentication endpoints matching frontend expectations
     path("login/", views.CustomTokenObtainPairView.as_view(), name="login"),
@@ -53,4 +55,6 @@ urlpatterns = [
     path("profile/", views.user_profile, name="user_profile"),
     path("profile/update/", views.update_profile, name="update_profile"),
     path("preferences/", views.user_preferences, name="user_preferences"),
+    # User Taste endpoints
+    path("taste/", views.UserTasteView.as_view(), name="user_taste"),
 ]

@@ -19,9 +19,10 @@ class Post(models.Model):
         ("barter_success", "Successful Barter"),
     ]
 
-    # Using AutoField (integer) to match frontend expectations
-    # Frontend Post data class expects id: Int
-    id = models.AutoField(primary_key=True)
+    # Use UUID primary key for Post (consistent with initial migration)
+    # UUIDs avoid exposing sequential IDs externally and are used across
+    # other social models (Comment, BookClub, etc.).
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     author = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="posts"
     )

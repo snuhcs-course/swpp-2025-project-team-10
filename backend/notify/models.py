@@ -21,6 +21,7 @@ class Notification(models.Model):
         ("message_received", "Message Received"),
         ("post_liked", "Post Liked"),
         ("comment_received", "Comment Received"),
+        ("book_wishlisted", "Book Wishlisted"),
         ("user_followed", "User Followed"),
         ("book_recommended", "Book Recommended"),
         ("club_invitation", "Club Invitation"),

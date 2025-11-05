@@ -11,5 +11,5 @@ interface HomeApi {
     suspend fun feed(): Response<FeedResponse>
 
     @POST("posts/{postId}/like/")
-    suspend fun likePost(@Path("postId") postId: Int): Response<LikeResponse>
+    suspend fun togglePostLike(@Path("postId") postId: Int): Response<LikeResponse>
 }

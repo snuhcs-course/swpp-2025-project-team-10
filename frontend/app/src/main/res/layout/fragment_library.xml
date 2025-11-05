@@ -7,22 +7,23 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingHorizontal="16dp"
-    tools:context=".feature.home.LibraryFragment">
+    tools:context=".feature.library.LibraryFragment">
 
     <TextView
         android:id="@+id/tvAppName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="서로서로도서관"
+        android:text="@string/app_name"
         android:textStyle="bold"
         android:textSize="20sp"
+        android:paddingBottom="@dimen/space_s"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/ivProfileImage"
-        android:layout_width="72dp"
-        android:layout_height="72dp"
+        android:layout_width="@dimen/avatar_m"
+        android:layout_height="@dimen/avatar_m"
         android:src="@drawable/person_icon"
         app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.Circle"
         app:layout_constraintTop_toBottomOf="@id/tvAppName"
@@ -33,32 +34,101 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:textStyle="bold"
-        android:textSize="18sp"
+        android:textSize="@dimen/text_h1"
         android:maxLines="1"
         android:ellipsize="end"
         app:layout_constraintTop_toTopOf="@id/ivProfileImage"
         app:layout_constraintStart_toEndOf="@id/ivProfileImage"
-        android:layout_marginStart="12dp"
+        android:layout_marginStart="@dimen/space_m"
         tools:text="SeoRo" />
+
+    <LinearLayout
+        android:id="@+id/statsContainer"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:baselineAligned="false"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@id/tvName"
+        app:layout_constraintStart_toStartOf="@id/tvName"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/tvReviewCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/Text.H2"
+                tools:text="32"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/Text.Caption"
+                android:text="@string/stat_reviews"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/followerContainer"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/tvFollowerCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/Text.H2"
+                tools:text="150"/>
+            <TextView
+                android:id="@+id/tvFollowerLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/Text.Caption"
+                android:text="@string/stat_followers"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/followingContainer"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/tvFollowingCount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/Text.H2"
+                tools:text="120"/>
+            <TextView
+                android:id="@+id/tvFollowingLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/Text.Caption"
+                android:text="@string/stat_following"/>
+        </LinearLayout>
+
+    </LinearLayout>
 
     <TextView
         android:id="@+id/tvBio"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:textColor="?attr/colorOnSurfaceVariant"
-        android:textSize="12sp"
-        android:maxLines="2"
+        style="@style/Text.Caption"
+        android:maxLines="1"
         android:ellipsize="end"
-        app:layout_constraintTop_toBottomOf="@id/tvName"
+        app:layout_constraintTop_toBottomOf="@id/statsContainer"
         app:layout_constraintStart_toStartOf="@id/tvName"
         app:layout_constraintEnd_toEndOf="parent"
-        tools:text="서로 서로 책을 교환해 보아요." />
+        tools:text="책 상태 깨끗하게 봅니다. 편하게 교환 신청해 주세요!" />
 
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/contentTabs"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="@dimen/space_s"
         app:tabGravity="fill"
         app:tabMode="fixed"
         app:tabIndicatorColor="@color/grey"
@@ -70,18 +140,18 @@
 
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:text="서평"/>
+            android:layout_height="@dimen/btn_h"
+            android:text="@string/review"/>
 
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:text="책장"/>
+            android:layout_height="@dimen/btn_h"
+            android:text="@string/shelf"/>
 
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
-            android:layout_height="40dp"
-            android:text="프로필"/>
+            android:layout_height="@dimen/btn_h"
+            android:text="@string/profile"/>
     </com.google.android.material.tabs.TabLayout>
 
     <androidx.recyclerview.widget.RecyclerView
@@ -89,8 +159,9 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:clipToPadding="false"
-        android:paddingTop="8dp"
-        android:paddingBottom="16dp"
+        android:paddingTop="@dimen/space_s"
+        android:paddingBottom="@dimen/space_l"
+        android:visibility="gone"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintTop_toBottomOf="@id/contentTabs"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -104,15 +175,42 @@
         android:layout_height="0dp"
         android:visibility="gone"
         android:clipToPadding="false"
-        android:paddingTop="8dp"
-        android:paddingBottom="16dp"
+        android:paddingTop="@dimen/space_s"
+        android:paddingBottom="@dimen/space_l"
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
         app:spanCount="3"
         app:layout_constraintTop_toBottomOf="@id/contentTabs"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
-<!--        tools:listitem="@layout/item_book_tile"/>-->
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:listitem="@layout/item_book_tile"
+        tools:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/tvReviewEmpty"
+        style="@style/Text.Body.Medium"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/library_reviews_empty"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/contentTabs"
+        tools:visibility="visible"/>
+
+    <TextView
+        android:id="@+id/tvBookEmpty"
+        style="@style/Text.Body.Medium"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/library_books_empty"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/contentTabs"
+        tools:visibility="gone"/>
 
     <ScrollView
         android:id="@+id/profileContainer"
@@ -122,44 +220,529 @@
         app:layout_constraintTop_toBottomOf="@id/contentTabs"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        tools:visibility="visible">
 
         <LinearLayout
+            android:id="@+id/profileRoot"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingTop="8dp"
-            android:paddingBottom="24dp">
+            android:paddingHorizontal="@dimen/space_l"
+            android:paddingVertical="@dimen/space_m">
 
-            <com.google.android.material.textfield.TextInputLayout
+            <!-- 1) 거래 스타일 -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardTradeStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="이름">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etName"
+                style="@style/Card.Base"
+                android:layout_marginTop="@dimen/space_s"
+                app:cardUseCompatPadding="true">
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    tools:text="SeoRo"/>
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:orientation="vertical"
+                    android:padding="@dimen/space_l">
 
-            <com.google.android.material.textfield.TextInputLayout
+                    <!-- 카드 타이틀 -->
+                    <TextView
+                        android:id="@+id/tvTradeStyleTitle"
+                        style="@style/Text.H2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/profile_trade_style" />
+
+                    <!-- Divider -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginVertical="@dimen/space_s"
+                        android:background="?attr/colorOutline"/>
+
+                    <!-- 위치 -->
+                    <TextView
+                        style="@style/Pill.Section"
+                        android:textStyle="bold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_m"
+                        android:text="@string/profile_location" />
+
+                    <!-- 보기모드 -->
+                    <TextView
+                        android:id="@+id/tvTradeLocation1"
+                        style="@style/Text.Body.Medium"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_s"
+                        android:text="@string/profile_location_example_1"
+                        android:visibility="visible"
+                        tools:visibility="visible" />
+
+                    <TextView
+                        android:id="@+id/tvTradeLocation2"
+                        style="@style/Text.Body.Medium"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_xs"
+                        android:text="@string/profile_location_example_2"
+                        android:visibility="visible"
+                        tools:visibility="visible" />
+
+                    <!-- 편집모드 (밑줄 스타일 EditText) -->
+                    <EditText
+                        android:id="@+id/editTradeLocation1"
+                        style="@style/Text.Body.Medium"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_s"
+                        android:hint="@string/profile_location_hint_1"
+                        android:background="@drawable/underline"
+                        android:paddingBottom="@dimen/space_xs"
+                        android:inputType="textPostalAddress|textCapWords"
+                        android:autofillHints="postalAddress"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
+
+                    <EditText
+                        android:id="@+id/editTradeLocation2"
+                        style="@style/Text.Body.Medium"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_s"
+                        android:hint="@string/profile_location_hint_2"
+                        android:background="@drawable/underline"
+                        android:paddingBottom="@dimen/space_xs"
+                        android:inputType="textPostalAddress|textCapWords"
+                        android:autofillHints="postalAddress"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
+
+                    <!-- 거래 장소 -->
+                    <TextView
+                        style="@style/Pill.Section"
+                        android:textStyle="bold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_m"
+                        android:text="@string/profile_spot" />
+
+                    <!-- 보기모드 -->
+                    <TextView
+                        android:id="@+id/tvTradeSpot1"
+                        style="@style/Text.Body.Medium"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_s"
+                        android:text="@string/profile_spot_example_1"
+                        android:visibility="visible"
+                        tools:visibility="visible" />
+
+                    <TextView
+                        android:id="@+id/tvTradeSpot2"
+                        style="@style/Text.Body.Medium"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_xs"
+                        android:text="@string/profile_spot_example_2"
+                        android:visibility="visible"
+                        tools:visibility="visible" />
+
+                    <!-- 편집모드 -->
+                    <EditText
+                        android:id="@+id/editTradeSpot1"
+                        style="@style/Text.Body.Medium"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_s"
+                        android:hint="@string/profile_spot_hint_1"
+                        android:background="@drawable/underline"
+                        android:paddingBottom="@dimen/space_xs"
+                        android:inputType="textCapWords"
+                        android:importantForAutofill="no"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
+
+                    <EditText
+                        android:id="@+id/editTradeSpot2"
+                        style="@style/Text.Body.Medium"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_xs"
+                        android:hint="@string/profile_spot_hint_2"
+                        android:background="@drawable/underline"
+                        android:paddingBottom="@dimen/space_xs"
+                        android:inputType="textCapWords"
+                        android:importantForAutofill="no"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+
+            <!-- 2) 독서 취향 -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardReadingTaste"
+                style="@style/Card.Base"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="소개">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etBio"
+                android:layout_marginTop="@dimen/space_m">
+
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:maxLines="4"
-                    tools:text="서로 서로 책을 교환해 보아요."/>
-            </com.google.android.material.textfield.TextInputLayout>
+                    android:orientation="vertical"
+                    android:padding="@dimen/space_l">
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnSaveProfile"
+                    <TextView
+                        style="@style/Text.H2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/profile_reading_taste" />
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginVertical="@dimen/space_s"
+                        android:background="?attr/colorOutline"/>
+
+                    <TextView
+                        style="@style/Pill.Section"
+                        android:textStyle="bold"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_m"
+                        android:text="@string/profile_preferred_genres" />
+
+                    <!-- 읽기모드 -->
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/groupSelectedGenres"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_xs"
+                        app:singleLine="false"
+                        android:visibility="visible"
+                        tools:visibility="visible" />
+
+                    <TextView
+                        android:id="@+id/tvGenreNone"
+                        style="@style/Text.Body.Medium"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_xs"
+                        android:text="@string/genre_none"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
+
+                    <!-- 편집모드 -->
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/chipGroupGenres"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_xs"
+                        android:visibility="gone"
+                        app:singleLine="false"
+                        tools:visibility="visible">
+
+                        <com.google.android.material.chip.Chip
+                            style="@style/Chip.Filter"
+                            android:text="@string/genre_modern_fiction"/>
+                        <com.google.android.material.chip.Chip
+                            style="@style/Chip.Filter"
+                            android:text="@string/genre_classic_fiction"/>
+                        <com.google.android.material.chip.Chip
+                            style="@style/Chip.Filter"
+                            android:text="@string/genre_essay"/>
+                        <com.google.android.material.chip.Chip
+                            style="@style/Chip.Filter"
+                            android:text="@string/genre_poetry_play"/>
+                        <com.google.android.material.chip.Chip
+                            style="@style/Chip.Filter"
+                            android:text="@string/genre_self_improvement"/>
+                        <com.google.android.material.chip.Chip
+                            style="@style/Chip.Filter"
+                            android:text="@string/genre_science_tech"/>
+                        <com.google.android.material.chip.Chip
+                            style="@style/Chip.Filter"
+                            android:text="@string/genre_humanities_social"/>
+                        <com.google.android.material.chip.Chip
+                            style="@style/Chip.Filter"
+                            android:text="@string/genre_history_philosophy"/>
+                        <com.google.android.material.chip.Chip
+                            style="@style/Chip.Filter"
+                            android:text="@string/genre_art_language"/>
+                    </com.google.android.material.chip.ChipGroup>
+
+                    <!-- ============ 좋아하는 책 ============ -->
+
+                    <!-- 보기모드 -->
+                    <TextView
+                        android:id="@+id/tvFavBookLabel"
+                        style="@style/Pill.Section"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_m"
+                        android:text="@string/profile_favorite_book"
+                        android:textStyle="bold"
+                        android:visibility="visible"
+                        tools:visibility="visible"/>
+
+                    <TextView
+                        android:id="@+id/tvFavBook"
+                        style="@style/Text.Body.Medium"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_s"
+                        android:text="@string/profile_favorite_book_example"
+                        android:visibility="visible"
+                        tools:visibility="visible"/>
+
+                    <TextView
+                        android:id="@+id/tvFavBookNote"
+                        style="@style/Text.Caption"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_xs"
+                        android:text="@string/profile_favorite_book_note_example"
+                        android:visibility="visible"
+                        tools:visibility="visible"/>
+
+
+                    <!-- 편집모드 (밑줄 스타일 EditText) -->
+
+                    <EditText
+                        android:id="@+id/editFavBook"
+                        style="@style/Text.Body.Medium"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_s"
+                        android:background="@drawable/underline"
+                        android:hint="@string/profile_favorite_book"
+                        android:paddingBottom="@dimen/space_xs"
+                        android:inputType="textCapWords"
+                        android:importantForAutofill="no"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
+
+                    <EditText
+                        android:id="@+id/editFavBookNote"
+                        style="@style/Text.Caption"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_s"
+                        android:hint="@string/profile_favorite_book_note_hint"
+                        android:gravity="top"
+                        android:background="@drawable/underline"
+                        android:paddingBottom="@dimen/space_xs"
+                        android:inputType="textMultiLine|textCapSentences"
+                        android:importantForAutofill="no"
+                        android:visibility="gone"
+                        tools:visibility="visible"/>
+
+                    <!-- ============ 좋아하는 작가 ============ -->
+
+                    <TextView
+                        android:id="@+id/tvFavAuthorLabel"
+                        style="@style/Pill.Section"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_m"
+                        android:text="@string/profile_favorite_author"
+                        android:textStyle="bold"
+                        android:visibility="visible"
+                        tools:visibility="visible"/>
+
+                    <TextView
+                        android:id="@+id/tvFavAuthor"
+                        style="@style/Text.Body.Medium"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_s"
+                        android:text="@string/profile_favorite_author_example"
+                        android:visibility="visible"
+                        tools:visibility="visible"/>
+
+                    <TextView
+                        android:id="@+id/tvFavAuthorNote"
+                        style="@style/Text.Caption"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_xs"
+                        android:text="@string/profile_favorite_author_note_example"
+                        android:maxLines="2"
+                        android:ellipsize="end"
+                        android:visibility="visible"
+                        tools:visibility="visible"/>
+
+                    <EditText
+                        android:id="@+id/editFavAuthor"
+                        style="@style/Text.Body.Medium"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_s"
+                        android:hint="@string/profile_favorite_author"
+                        android:background="@drawable/underline"
+                        android:paddingBottom="@dimen/space_xs"
+                        android:inputType="textPersonName"
+                        android:autofillHints="personName"
+                        android:visibility="gone"
+                        tools:visibility="visible"/>
+
+                    <EditText
+                        android:id="@+id/editFavAuthorNote"
+                        style="@style/Text.Caption"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_s"
+                        android:hint="@string/profile_favorite_author_note_hint"
+                        android:gravity="top"
+                        android:background="@drawable/underline"
+                        android:paddingBottom="@dimen/space_xs"
+                        android:inputType="textMultiLine|textCapSentences"
+                        android:importantForAutofill="no"
+                        android:visibility="gone"
+                        tools:visibility="visible"/>
+
+                    <!-- ============ 독서 습관 ============ -->
+
+                    <!-- 보기모드 -->
+                    <TextView
+                        android:id="@+id/tvReadHabitLabel"
+                        style="@style/Pill.Section"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_m"
+                        android:text="@string/profile_reading_habit"
+                        android:textStyle="bold"
+                        android:visibility="visible"
+                        tools:visibility="visible"/>
+
+                    <TextView
+                        android:id="@+id/tvReadingHabit"
+                        style="@style/Text.Body.Medium"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_s"
+                        android:text="@string/profile_reading_habit_example"
+                        android:visibility="visible"
+                        tools:visibility="visible"/>
+
+                    <!-- 편집모드 (밑줄 스타일 EditText) -->
+                    <EditText
+                        android:id="@+id/editReadingHabit"
+                        style="@style/Text.Body.Medium"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_s"
+                        android:hint="@string/profile_reading_habit_hint"
+                        android:gravity="top"
+                        android:background="@drawable/underline"
+                        android:paddingBottom="@dimen/space_xs"
+                        android:inputType="textMultiLine|textCapSentences"
+                        android:importantForAutofill="no"
+                        android:visibility="gone"
+                        tools:visibility="visible"/>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- 3) 위시리스트 -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardWishlist"
+                style="@style/Card.Base"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="프로필 저장"
-                android:layout_marginTop="16dp"/>
+                android:layout_marginTop="@dimen/space_m"
+                app:cardUseCompatPadding="true" >
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="@dimen/space_l">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:id="@+id/tvWishlistTitle"
+                            style="@style/Text.H2"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/profile_wishlist"/>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnManageWishlist"
+                            style="@style/Btn.Tonal.Text"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/wishlist_manage"
+                            android:visibility="gone"
+                            tools:visibility="visible"/>
+                    </LinearLayout>
+
+                    <!-- Divider -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="@dimen/space_s"
+                        android:background="?attr/colorOutline"/>
+
+                    <!-- 리스트 -->
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rvWishlist"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_s"
+                        android:nestedScrollingEnabled="false"
+                        tools:listitem="@layout/item_book_row" />
+
+                    <!-- 비어있을 때 안내 -->
+                    <LinearLayout
+                        android:id="@+id/tvWishlistEmpty"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:paddingVertical="@dimen/space_l"
+                        android:visibility="gone"
+                        tools:visibility="visible">
+
+                        <TextView
+                            style="@style/Text.Body.Medium"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/profile_wishlist_empty"/>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/btnAddWishlist"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:paddingVertical="@dimen/space_l"
+                        android:visibility="gone"
+                        tools:visibility="visible">
+
+                        <com.google.android.material.button.MaterialButton
+                            style="@style/Btn.Tonal.Text"
+                            android:layout_height="wrap_content"
+                            android:layout_width="wrap_content"
+                            android:text="@string/wishlist_add"
+                            tools:visibility="visible"/>
+                    </LinearLayout>
+
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
         </LinearLayout>
     </ScrollView>
 
@@ -169,6 +752,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
+        android:contentDescription="@string/desc_fab"
         app:backgroundTint="@color/light_grey"
         app:srcCompat="@drawable/plus_icon"
         app:tint="@color/white"

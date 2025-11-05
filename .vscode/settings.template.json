@@ -1,0 +1,62 @@
+{
+  // Global editor settings
+  "editor.formatOnSave": true,
+  "editor.insertSpaces": true,
+  "files.trimTrailingWhitespace": true,
+  "files.insertFinalNewline": true,
+  "files.encoding": "utf8",
+  "files.eol": "\n",
+  // Tooling
+  "python.terminal.activateEnvironment": true,
+  // Language-specific settings
+  "[python]": {
+    "editor.formatOnSave": true,
+    "editor.rulers": [
+      79
+    ],
+    "editor.tabSize": 4,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
+  },
+  "[kotlin]": {
+    "editor.formatOnSave": true,
+    "editor.rulers": [
+      120
+    ],
+    "editor.tabSize": 4
+  },
+  "[json]": {
+    "editor.tabSize": 2
+  },
+  "[yaml]": {
+    "editor.tabSize": 2
+  },
+  "[markdown]": {
+    "files.trimTrailingWhitespace": false
+  },
+  // File associations
+  "files.associations": {
+    "*.kt": "kotlin",
+    "*.kts": "kotlin"
+  },
+  // Exclude patterns for search/file watching
+  "files.exclude": {
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/__pycache__": true,
+    "**/*.pyc": true,
+    "**/.pytest_cache": true,
+    "**/node_modules": true,
+    "**/build": true,
+    "**/dist": true
+  },
+  "search.exclude": {
+    "**/.venv": true,
+    "**/venv": true,
+    "**/.gradle": true,
+    "**/build": true,
+    "**/dist": true,
+    "**/*.log": true
+  }
+}

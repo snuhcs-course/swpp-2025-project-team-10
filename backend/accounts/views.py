@@ -12,7 +12,7 @@ from django.core.cache import cache
 from django.core.mail import send_mail
 from django.utils.crypto import get_random_string
 from drf_spectacular.utils import OpenApiResponse, extend_schema
-from rest_framework import permissions, status
+from rest_framework import permissions, serializers, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -21,7 +21,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
-from .models import UserPreferences
+from .models import UserPreferences, UserTaste
 from .serializers import (
     CustomTokenObtainPairSerializer,
     GoogleAuthSerializer,
@@ -34,9 +34,132 @@ from .serializers import (
     UserPreferencesSerializer,
     UserRegistrationSerializer,
     UserSerializer,
+    UserTasteSerializer,
 )
 
 User = get_user_model()
+
+
+class UserTasteView(APIView):
+    """
+    View for managing user's book preferences and taste information.
+    Each step of the categorization process is handled separately.
+    """
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        """Get user's current taste information and step."""
+        try:
+            taste = UserTaste.objects.get(user=request.user)
+            serializer = UserTasteSerializer(taste)
+            return Response(
+                {
+                    "ok": True,
+                    "taste": serializer.data,
+                    "step": taste.current_step,
+                    "is_complete": request.user.has_initial_taste,
+                }
+            )
+        except UserTaste.DoesNotExist:
+            # Create new taste profile if it doesn't exist
+            taste = UserTaste.objects.create(user=request.user)
+            return Response(
+                {
+                    "ok": True,
+                    "taste": UserTasteSerializer(taste).data,
+                    "step": 1,
+                    "is_complete": False,
+                }
+            )
+
+    def post(self, request):
+        """Handle each step of the taste categorization process."""
+        try:
+            taste = UserTaste.objects.get(user=request.user)
+        except UserTaste.DoesNotExist:
+            taste = UserTaste.objects.create(user=request.user)
+
+        # Get current step from the taste profile
+        current_step = taste.current_step
+
+        # Validate and update based on current step
+        serializer = UserTasteSerializer(
+            taste, data=request.data, partial=True
+        )
+        if serializer.is_valid():
+            # Validate minimum selections based on current step
+            try:
+                self._validate_step_data(
+                    current_step, serializer.validated_data
+                )
+            except serializers.ValidationError as e:
+                return Response(
+                    {"ok": False, "message": str(e)},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Update the taste profile
+            taste = serializer.save()
+
+            # Move to next step or complete the process (now 7 steps)
+            if current_step < 7:
+                taste.current_step += 1
+                taste.save()
+            else:
+                # Mark categorization as complete
+                request.user.has_initial_taste = True
+                request.user.save()
+
+            return Response(
+                {
+                    "ok": True,
+                    "taste": UserTasteSerializer(taste).data,
+                    "step": taste.current_step,
+                    "is_complete": request.user.has_initial_taste,
+                }
+            )
+
+        return Response(
+            {"ok": False, "errors": serializer.errors},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    def _validate_step_data(self, step, data):
+        """Validate data for each categorization step."""
+        if step == 1 and "favorite_genres" in data:
+            if len(data["favorite_genres"]) < 3:
+                raise serializers.ValidationError(
+                    "최소 3개 이상의 장르를 선택해주세요"
+                )
+        elif step == 2 and "favorite_authors" in data:
+            if len(data["favorite_authors"]) < 3:
+                raise serializers.ValidationError(
+                    "최소 3명 이상의 작가를 선택해주세요"
+                )
+        elif step == 3 and "favorite_books" in data:
+            if len(data["favorite_books"]) < 3:
+                raise serializers.ValidationError(
+                    "최소 3권 이상의 책을 선택해주세요"
+                )
+        elif step == 4 and "preferred_length" in data:
+            if not data["preferred_length"]:
+                raise serializers.ValidationError("책 분량을 선택해주세요")
+        elif step == 5 and "preferred_moods" in data:
+            if len(data["preferred_moods"]) < 3:
+                raise serializers.ValidationError(
+                    "최소 3개 이상의 분위기를 선택해주세요"
+                )
+        elif step == 6 and "reading_purposes" in data:
+            if len(data["reading_purposes"]) < 3:
+                raise serializers.ValidationError(
+                    "최소 3개 이상의 목적을 선택해주세요"
+                )
+        elif step == 7:
+            # Trade style step is optional; if provided, accept without strict min checks
+            # Fields: trade_place_name, trade_address, trade_latitude, trade_longitude
+            # No additional validation required here.
+            return
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):

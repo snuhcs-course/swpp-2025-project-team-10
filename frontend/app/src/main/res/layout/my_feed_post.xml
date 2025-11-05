@@ -12,12 +12,12 @@
         android:id="@+id/contentFeed"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="12dp">
+        android:padding="@dimen/space_m">
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/ivProfileImage"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_width="@dimen/avatar_s"
+            android:layout_height="@dimen/avatar_s"
             android:src="@drawable/person_icon"
             app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.Circle"
             app:layout_constraintTop_toTopOf="parent"
@@ -27,39 +27,39 @@
             android:id="@+id/tvPoster"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="SeoRo"
+            android:text="@string/feed_poster"
             android:textStyle="bold"
             android:textSize="14sp"
             app:layout_constraintStart_toEndOf="@id/ivProfileImage"
             app:layout_constraintTop_toTopOf="@id/ivProfileImage"
             app:layout_constraintEnd_toStartOf="@id/btnMore"
-            android:layout_marginStart="10dp" />
+            android:layout_marginStart="@dimen/space_s" />
 
         <TextView
             android:id="@+id/tvTitle"
+            style="@style/Text.Caption"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="돈의 심리학"
-            android:textSize="12sp"
+            android:text="@string/feed_title"
             app:layout_constraintStart_toStartOf="@id/tvPoster"
             app:layout_constraintTop_toBottomOf="@id/tvPoster" />
 
         <TextView
             android:id="@+id/tvDash"
+            style="@style/Text.Caption"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="-"
-            android:textSize="12sp"
+            android:text="@string/feed_dash"
             android:layout_marginHorizontal="6dp"
             app:layout_constraintStart_toEndOf="@id/tvTitle"
             app:layout_constraintTop_toBottomOf="@id/tvPoster"/>
 
         <TextView
             android:id="@+id/tvAuthor"
+            style="@style/Text.Caption"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="모건 하우절"
-            android:textSize="12sp"
+            android:text="@string/feed_author"
             android:layout_marginHorizontal="6dp"
             app:layout_constraintStart_toEndOf="@id/tvDash"
             app:layout_constraintTop_toBottomOf="@id/tvPoster"/>
@@ -67,18 +67,19 @@
         <ImageButton
             android:id="@+id/btnMore"
             style="?attr/borderlessButtonStyle"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_width="@dimen/avatar_s"
+            android:layout_height="@dimen/avatar_s"
+            android:contentDescription="@string/desc_more"
             android:src="@drawable/more_icon"
-            app:layout_constraintTop_toTopOf="@id/tvTitle"
-            app:layout_constraintBottom_toBottomOf="@id/tvTitle"
+            app:layout_constraintTop_toTopOf="@id/ivProfileImage"
+            app:layout_constraintBottom_toBottomOf="@id/ivProfileImage"
             app:layout_constraintEnd_toEndOf="parent" />
 
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/mcPostImage"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="@dimen/space_s"
             android:visibility="gone"
             tools:visibility="visible"
             app:shapeAppearanceOverlay="@style/Shape.Round12"
@@ -132,7 +133,7 @@
             android:layout_marginTop="2dp"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            app:layout_constraintTop_toBottomOf="@id/mcPostImage"
+            app:layout_constraintTop_toBottomOf="@id/tvContent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
@@ -142,7 +143,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
                 android:backgroundTint="@android:color/transparent"
-                android:text="좋아요"
+                android:text="@string/like"
                 android:textStyle="bold"
                 android:paddingHorizontal="0dp"
                 android:minWidth="0dp"
@@ -160,7 +161,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
                 android:backgroundTint="@android:color/transparent"
-                android:text="서평"
+                android:text="@string/review"
                 android:textStyle="bold"
                 android:paddingHorizontal="0dp"
                 android:minWidth="0dp"
@@ -178,7 +179,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
                 android:backgroundTint="@android:color/transparent"
-                android:text="교환"
+                android:text="@string/exchange"
                 android:textStyle="bold"
                 android:paddingHorizontal="0dp"
                 android:minWidth="0dp"
@@ -192,13 +193,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:text="책을 읽은 후 느낀점...책을 읽은 후 느낀점...책을 읽은 후 느낀점...책을 읽은 후 느낀점..."
+            android:text="@string/feed_content"
             android:textSize="14sp"
             android:lineSpacingExtra="2dp"
             android:ellipsize="end"
             android:maxLines="3"
             app:layout_constraintHorizontal_bias="0"
-            app:layout_constraintTop_toBottomOf="@id/actionBar"
+            app:layout_constraintTop_toBottomOf="@id/mcPostImage"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
@@ -207,12 +208,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
-            android:text="1시간 전"
+            android:text="@string/feed_time"
             android:textSize="14sp"
             android:textColor="@color/grey"
             android:ellipsize="end"
             app:layout_constraintHorizontal_bias="0"
-            app:layout_constraintTop_toBottomOf="@id/tvContent"
+            app:layout_constraintTop_toBottomOf="@id/actionBar"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
