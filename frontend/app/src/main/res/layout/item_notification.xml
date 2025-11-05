@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingHorizontal="16dp"
+    android:paddingVertical="10dp">
+
+    <!-- Profile Image -->
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/imgProfile"
+        android:layout_width="42dp"
+        android:layout_height="42dp"
+        android:src="@drawable/sample_profile"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginEnd="10dp" />
+
+    <!-- Text 내용 -->
+    <LinearLayout
+        android:id="@+id/layoutTextArea"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintStart_toEndOf="@id/imgProfile"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/btnAction"
+        android:layout_marginEnd="10dp">
+
+        <!-- 닉네임+날짜 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/tvUser"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="교환신청 보낸 사람 ID"
+                android:textStyle="bold"
+                android:textSize="14sp"
+                android:ellipsize="end"
+                android:maxLines="1" />
+
+            <TextView
+                android:id="@+id/tvTime"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="오늘"
+                android:textSize="12sp"
+                android:layout_marginStart="6dp"
+                android:alpha="0.6" />
+        </LinearLayout>
+
+        <!-- 본문 내용 -->
+        <TextView
+            android:id="@+id/tvBody"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="회원님에게 교환신청을 하였습니다."
+            android:textSize="13sp"
+            android:layout_marginTop="2dp"
+            android:maxLines="2"
+            android:ellipsize="end"
+            android:alpha="0.8" />
+    </LinearLayout>
+
+    <!-- 교환 버튼 -->
+    <!-- TODO: 교환 신청 UI 수정 예정: 알림 클릭 시 popup window 형태로 교환 신청을 보낸 profile과  서재 보이도록 하고,
+               그 밑에 수락 또는 반려 버튼으로 처리할 예정 -->
+    <Button
+        android:id="@+id/btnAction"
+        android:layout_width="wrap_content"
+        android:layout_height="34dp"
+        android:text="교환"
+        android:textSize="13sp"
+        android:paddingHorizontal="12dp"
+        android:textColor="@android:color/white"
+        android:backgroundTint="@color/black"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginStart="10dp" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

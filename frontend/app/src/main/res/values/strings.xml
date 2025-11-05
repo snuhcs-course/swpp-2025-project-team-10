@@ -6,6 +6,14 @@
     <string name="nav_notification" />
     <string name="nav_library" />
 
+    <string name="onboarding_title_books">좋아하는 책을 3개 이상 선택하세요</string>
+    <string name="onboarding_title_authors">좋아하는 작가를 3명 이상 선택하세요</string>
+    <string name="onboarding_title_genres">좋아하는 장르를 3개 이상 선택하세요</string>
+    <string name="next">다음</string>
+    <string name="done">완료</string>
+
+</resources>
+
     <string name="hint_email">이메일</string>
     <string name="hint_password">비밀번호</string>
     <string name="password_hint">비밀번호는 영문 포함 6자 이상이어야 합니다</string>

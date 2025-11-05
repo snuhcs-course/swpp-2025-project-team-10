@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Onboarding Survey 에서 사용 중 -->
+<com.google.android.material.chip.Chip
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    style="@style/Widget.MaterialComponents.Chip.Filter"
+    android:id="@+id/chip"
+    android:checkable="true"
+    android:checked="false"
+    android:text="샘플"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"/>
+
+
