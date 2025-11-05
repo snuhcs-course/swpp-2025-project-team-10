@@ -31,6 +31,7 @@ class WriteReviewFragment : Fragment(R.layout.fragment_write_review) {
         setupRecyclerView()
         setupListeners()
         submitReview()
+
     }
 
     private fun setupRecyclerView() = with(binding) {
@@ -74,8 +75,13 @@ class WriteReviewFragment : Fragment(R.layout.fragment_write_review) {
         )
 
         parentViewModel.addNewReview(newReview)
+// 수정 전
+//        requireActivity().onBackPressedDispatcher.onBackPressed()
+        findNavController().previousBackStackEntry
+            ?.savedStateHandle
+            ?.set("shouldRefreshHome", true)
 
-        requireActivity().onBackPressedDispatcher.onBackPressed()
+        findNavController().popBackStack()
     }
 
 

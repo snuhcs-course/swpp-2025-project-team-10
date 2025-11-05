@@ -41,6 +41,17 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         setupRecyclerView()
         setupSortButton()
         observeViewModel()
+
+        // new rv 작성 후 돌아왔을 때만 home feed refresh + scroll to top
+        findNavController().currentBackStackEntry
+            ?.savedStateHandle
+            ?.getLiveData<Boolean>("shouldRefreshHome")
+            ?.observe(viewLifecycleOwner) { shouldRefresh ->
+                if (shouldRefresh == true) {
+                    viewModel.loadFeed()
+                    binding.rvFeed.scrollToPosition(0)
+                }
+            }
     }
 
     private fun setupRecyclerView() {
@@ -69,6 +80,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         viewModel.posts.observe(viewLifecycleOwner) { posts ->
             feedAdapter.submitList(posts)
         }
+
         viewModel.error.observe(viewLifecycleOwner) { error ->
             error?.let {
                 Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
