@@ -1,7 +1,7 @@
 import uuid
 
 import pytest
-from django.urls import reverse, resolve
+from django.urls import resolve, reverse
 
 
 @pytest.mark.django_db

@@ -3,12 +3,11 @@ Unit tests for review list and create views.
 Tests GET /library/reviews/ and POST /library/reviews/ endpoints.
 """
 
+from books.models import BookReview
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-
-from books.models import BookReview
 
 User = get_user_model()
 

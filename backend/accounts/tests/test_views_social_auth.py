@@ -5,14 +5,13 @@ Tests username generation and social auth API endpoints.
 
 from unittest.mock import patch
 
+from accounts.models import UserPreferences
+from accounts.views import SocialAuthView
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
-
-from accounts.models import UserPreferences
-from accounts.views import SocialAuthView
 
 User = get_user_model()
 

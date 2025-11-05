@@ -3,9 +3,6 @@ Unit tests for accounts serializers.
 Tests all serializers including authentication and user management.
 """
 
-from django.contrib.auth import get_user_model
-from django.test import TestCase
-
 from accounts.models import UserPreferences
 from accounts.serializers import (
     GoogleAuthResponseSerializer,
@@ -17,6 +14,8 @@ from accounts.serializers import (
     UserRegistrationSerializer,
     UserSerializer,
 )
+from django.contrib.auth import get_user_model
+from django.test import TestCase
 
 User = get_user_model()
 

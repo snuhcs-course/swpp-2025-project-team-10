@@ -3,12 +3,11 @@ Unit tests for review like/unlike views.
 Tests POST /library/reviews/{id}/like/ endpoint.
 """
 
+from books.models import BookReview, ReviewHelpfulVote
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
-
-from books.models import BookReview, ReviewHelpfulVote
 
 User = get_user_model()
 

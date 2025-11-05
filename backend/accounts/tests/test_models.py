@@ -3,10 +3,9 @@ Unit tests for accounts models.
 Tests User model and UserPreferences model.
 """
 
+from accounts.models import UserPreferences
 from django.contrib.auth import get_user_model
 from django.test import TestCase
-
-from accounts.models import UserPreferences
 
 User = get_user_model()
 

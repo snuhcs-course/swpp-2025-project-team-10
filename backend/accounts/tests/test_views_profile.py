@@ -3,12 +3,11 @@ Unit tests for profile management views.
 Tests profile retrieval, update, and preferences.
 """
 
+from accounts.models import UserPreferences
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
-
-from accounts.models import UserPreferences
 
 User = get_user_model()
 
