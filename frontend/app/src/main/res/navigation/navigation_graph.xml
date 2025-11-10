@@ -7,7 +7,7 @@
 
     <action
         android:id="@+id/action_global_to_barterDetailFragment"
-        app:destination="@id/barterDetailFragment">
+        app:destination="@id/nav_barter_flow">
 
         <argument
             android:name="userBookId"

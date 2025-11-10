@@ -9,15 +9,15 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 object MockConfig {
     // 필요할 때만 true로
-    const val USE_MOCK = true
+    const val USE_MOCK = false
     // JWT 흐름까지 테스트할 건지
-    const val TEST_JWT_FLOW = true
+    const val TEST_JWT_FLOW = false
 }
 
 object RetrofitClient {
     // Use 192.0.0.2 for physical device on same network
     // Use 10.0.2.2 for emulator
-    private const val BASE_URL = "http://10.0.2.2:8000/"
+    private const val BASE_URL = "http://15.165.200.135:8000/"
 
     @Volatile
     private var retrofit: Retrofit? = null

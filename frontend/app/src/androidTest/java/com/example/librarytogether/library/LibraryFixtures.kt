@@ -11,7 +11,7 @@ object LibraryFixtures {
         isLiked = liked
     )
 
-    fun book(id: String) = Book(id = id, title = "B$id", author = "Auth$id", coverUrl = null)
+    fun book(id: Int) = Book(id = id, title = "B$id", author = "Auth$id", publisher = "Pub$id", isbn = "isbn$id" ,coverUrl = null)
 
     fun userPrefs() = UserPreferences(
         tradeLocation1 = "L1", tradeLocation2 = "L2",
@@ -28,7 +28,7 @@ object LibraryFixtures {
     )
 
     fun postReview() = PostReview(
-        bookTitle = "New", authorName = "AA", content = "Body", imageUrls = emptyList()
+        bookTitle = "New", authorName = "AA", content = "Body", publisher = "Pub", isbn = "isbn" , imageUrls = emptyList()
     )
 }
 

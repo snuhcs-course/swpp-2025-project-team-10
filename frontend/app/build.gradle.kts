@@ -11,7 +11,7 @@ plugins {
 
 android {
     namespace = "com.example.librarytogether"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.example.librarytogether"
@@ -75,6 +75,7 @@ android {
 
 dependencies {
 
+    implementation(libs.androidx.hilt.navigation.fragment)
     testImplementation(libs.hamcrest)
     testImplementation(libs.truth)
     androidTestImplementation(libs.hilt.android.testing)

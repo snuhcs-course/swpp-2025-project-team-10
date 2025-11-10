@@ -73,7 +73,7 @@ class LibraryFragmentTest {
     @Test
     fun clickBookTab_showsBookContent() {
         // Given:
-        (fakeRepository as FakeLibraryRepository).setBooks(listOf(LibraryFixtures.book("1")))
+        (fakeRepository as FakeLibraryRepository).setBooks(listOf(LibraryFixtures.book(1)))
 
         // When:
         launchFragmentInHiltContainer<LibraryFragment>()

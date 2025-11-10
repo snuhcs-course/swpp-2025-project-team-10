@@ -7,7 +7,7 @@ import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
-import androidx.navigation.navGraphViewModels
+import androidx.hilt.navigation.fragment.hiltNavGraphViewModels
 import com.example.librarytogether.R
 import com.example.librarytogether.databinding.FragmentBarterDetailBinding
 import com.example.librarytogether.util.loadAvatar
@@ -20,13 +20,14 @@ class BarterDetailFragment : Fragment(R.layout.fragment_barter_detail) {
     private var _binding: FragmentBarterDetailBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: BarterDetailViewModel by navGraphViewModels(R.id.nav_barter_flow)
+    private val viewModel: BarterDetailViewModel by hiltNavGraphViewModels(R.id.nav_barter_flow)
 
     private val args by navArgs<BarterDetailFragmentArgs>()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentBarterDetailBinding.bind(view)
+        android.util.Log.d("BarterDetailFragment", "userBookId arg = ${args.userBookId}")
 
         setupClickListeners()
         observeViewModel()
@@ -53,7 +54,7 @@ class BarterDetailFragment : Fragment(R.layout.fragment_barter_detail) {
 
         binding.btnSubmitExchange.setOnClickListener {
             val message = binding.etOfferMessage.text.toString()
-            viewModel.submitOffer(message) // ViewModel의 submitOffer 호출 (기존과 동일)
+            viewModel.submitOffer(message)
         }
     }
 
@@ -67,31 +68,30 @@ class BarterDetailFragment : Fragment(R.layout.fragment_barter_detail) {
             binding.tvBookTitleWant.text = detail.book.title
             binding.tvBookAuthorWant.text = detail.book.author
 
-             binding.ivBookCoverWant.loadCover(detail.book.coverUrl)
+            binding.ivBookCoverWant.loadCover(detail.book.coverUrl)
         }
 
         viewModel.selectedBook.observe(viewLifecycleOwner) { book ->
             val isBookSelected = (book != null)
 
-            binding.selectionButtonsContainer.isVisible = !isBookSelected
-            binding.selectedBookContainer.isVisible = isBookSelected
+            binding.selectionButtonsContainer.visibility = if(isBookSelected) View.GONE else View.VISIBLE
+            binding.selectedBookContainer.visibility = if(isBookSelected) View.VISIBLE else View.GONE
+            binding.tilOfferMessage.visibility = if(isBookSelected) View.VISIBLE else View.GONE
 
-            binding.btnChangeBook.isVisible = isBookSelected
+            binding.btnChangeBook.visibility = if(isBookSelected) View.VISIBLE else View.GONE
 
             if (book != null) {
                 binding.tvBookTitleOffer.text = book.title
                 binding.tvBookAuthorOffer.text = book.author
-                 binding.ivBookCoverOffer.loadCover(book.coverUrl)
+                binding.ivBookCoverOffer.loadCover(book.coverUrl)
             }
         }
 
-        // 8. 'navigateToOfferComplete' observe 로직 (기존과 동일, 매우 중요)
         viewModel.navigateToOfferComplete.observe(viewLifecycleOwner) { hasCompleted ->
             if (hasCompleted) {
                 Toast.makeText(requireContext(), "교환 신청 완료!", Toast.LENGTH_SHORT).show()
-                findNavController().popBackStack() // 임시로 뒤로가기
+                findNavController().popBackStack()
 
-                // 이벤트 중복 실행을 막기 위해 ViewModel에 완료되었음을 알림
                 viewModel.onNavigationComplete()
             }
         }
