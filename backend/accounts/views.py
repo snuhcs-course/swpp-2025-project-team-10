@@ -158,7 +158,7 @@ class UserTasteView(APIView):
                 )
         elif step == 7:
             # Trade style step is optional; if provided, accept without strict min checks
-            # Fields: trade_place_name, trade_address, trade_latitude, trade_longitude
+            # Fields: trade_place_name, trade_address
             # No additional validation required here.
             return
 

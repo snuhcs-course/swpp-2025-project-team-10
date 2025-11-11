@@ -8,7 +8,6 @@ from django.urls import reverse, resolve
 def test_core_url_includes_exist(client):
     # Ensure books app routes are included
     fake_uuid = uuid.uuid4()
-    assert resolve(f"/library/books/{fake_uuid}/nearby-owners/")
     assert resolve(f"/library/books/{fake_uuid}/toggle-barter/")
     assert resolve(f"/library/books/{fake_uuid}/wishlist/")
 

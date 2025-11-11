@@ -59,7 +59,7 @@ def test_user_barter_info_includes_full_taste_and_counts():
     b2.authors.add(author)
     BookWishlist.objects.create(user=other, book=b1)
 
-    # Serialize with request context (so distance_km can be computed)
+    # Serialize with request context
     factory = APIRequestFactory()
     request = factory.get("/")
     request.user = me
@@ -85,9 +85,6 @@ def test_user_barter_info_includes_full_taste_and_counts():
     # Collections
     assert isinstance(data["library"], list) and len(data["library"]) >= 2
     assert isinstance(data["wishlist"], list) and len(data["wishlist"]) >= 1
-
-    # Distance computed
-    assert data["distance_km"] is not None
 
     # Reviews info present even if none exist
     assert data["reviewCount"] == 0

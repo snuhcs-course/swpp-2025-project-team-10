@@ -359,8 +359,6 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "last_name",
             "bio",
             "location",
-            "latitude",
-            "longitude",
             "birth_date",
             "profile_picture",
             "phone_number",
@@ -419,7 +417,6 @@ class UserBarterInfoSerializer(serializers.ModelSerializer):
     library = serializers.SerializerMethodField()
     wishlist = serializers.SerializerMethodField()
     taste = serializers.SerializerMethodField()
-    distance_km = serializers.SerializerMethodField()
     reviews = serializers.SerializerMethodField()
     reviewCount = serializers.SerializerMethodField()
 
@@ -437,7 +434,6 @@ class UserBarterInfoSerializer(serializers.ModelSerializer):
             "library",
             "wishlist",
             "taste",
-            "distance_km",
             "reviews",
             "reviewCount",
         )
@@ -470,42 +466,7 @@ class UserBarterInfoSerializer(serializers.ModelSerializer):
             return None
 
         data = UserTasteSerializer(taste, context=self.context).data
-        # For barter payloads, exclude precise coordinates to avoid exposing PII
-        data.pop("trade_latitude", None)
-        data.pop("trade_longitude", None)
         return data
-
-    def get_distance_km(self, obj):
-        """Compute approximate distance (km) from request.user to obj without exposing coords."""
-        request = self.context.get("request")
-        if not request or not request.user.is_authenticated:
-            return None
-
-        me = request.user
-        if not (me.latitude and me.longitude and obj.latitude and obj.longitude):
-            return None
-
-        from math import radians, sin, cos, sqrt, atan2
-
-        try:
-            lat1 = float(me.latitude)
-            lon1 = float(me.longitude)
-            lat2 = float(obj.latitude)
-            lon2 = float(obj.longitude)
-        except (TypeError, ValueError):
-            return None
-
-        # Haversine formula
-        R = 6371.0  # Earth radius in km
-        dlat = radians(lat2 - lat1)
-        dlon = radians(lon2 - lon1)
-        a = (
-            sin(dlat / 2) ** 2
-            + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2) ** 2
-        )
-        c = 2 * atan2(sqrt(a), sqrt(1 - a))
-        km = R * c
-        return round(km, 2)
 
     def get_reviews(self, obj):
         """All reviews written by this user (as seen in their user tab)."""
@@ -525,10 +486,8 @@ class UserTasteSerializer(serializers.ModelSerializer):
     """
     Serializer for user's book preferences and taste information.
     """
-
     favorite_genres = serializers.ListField(
-        child=serializers.ChoiceField(choices=BookGenre.choices),
-        required=False,
+        child=serializers.ChoiceField(choices=BookGenre.choices), required=False
     )
     favorite_authors = serializers.ListField(
         child=serializers.ChoiceField(choices=Author.choices), required=False
@@ -553,12 +512,6 @@ class UserTasteSerializer(serializers.ModelSerializer):
     trade_address = serializers.CharField(
         max_length=200, required=False, allow_blank=True
     )
-    trade_latitude = serializers.DecimalField(
-        max_digits=9, decimal_places=6, required=False, allow_null=True
-    )
-    trade_longitude = serializers.DecimalField(
-        max_digits=9, decimal_places=6, required=False, allow_null=True
-    )
 
     class Meta:
         model = UserTaste
@@ -571,8 +524,6 @@ class UserTasteSerializer(serializers.ModelSerializer):
             "reading_purposes",
             "trade_place_name",
             "trade_address",
-            "trade_latitude",
-            "trade_longitude",
             "current_step",
         )
         read_only_fields = ("current_step",)

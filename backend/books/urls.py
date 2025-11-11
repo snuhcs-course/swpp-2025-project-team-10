@@ -8,7 +8,6 @@ from django.urls import path
 from .views import (
     ReviewLikeView,
     UserReviewListCreateView,
-    nearby_owners,
     toggle_book_for_barter,
     toggle_wishlist,
     user_books_list,
@@ -41,11 +40,5 @@ urlpatterns = [
         "books/<uuid:book_id>/toggle-barter/",
         toggle_book_for_barter,
         name="toggle-barter",
-    ),
-    # Get nearby owners of a book
-    path(
-        "books/<uuid:book_id>/nearby-owners/",
-        nearby_owners,
-        name="nearby-owners",
     ),
 ]
