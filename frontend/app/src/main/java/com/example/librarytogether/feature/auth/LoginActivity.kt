@@ -101,7 +101,7 @@ class LoginActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
-                val resp = service.login(LoginRequest(username=id, password=pw))
+                val resp = service.login(LoginRequest(username = id, password = pw))
 
                 if (resp.isSuccessful) {
                     val body = resp.body()
@@ -117,24 +117,40 @@ class LoginActivity : AppCompatActivity() {
 
                         startActivity(Intent(this@LoginActivity, MainActivity::class.java))
                         finish()
-                    }
-                    else {
+                    } else {
+                        // 200 OK && body.ok == false
                         Toast.makeText(this@LoginActivity, "아이디 또는 비밀번호가 올바르지 않습니다.", Toast.LENGTH_SHORT).show()
                     }
+                } else {
+                    // State code 별로
+                    when (resp.code()) {
+                        400, 401, 403 -> {
+                            // 잘못된 아이디/비밀번호
+                            Toast.makeText(this@LoginActivity, "아이디와 비밀번호를 다시 한 번 확인해주세요.", Toast.LENGTH_SHORT).show()
+                        }
+                        in 500..599 -> {
+                            // server error
+                            Toast.makeText(
+                                this@LoginActivity,
+                                "서버에 문제가 발생했습니다. 잠시 후 다시 시도해주세요.",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+
+                        else -> {
+                            Toast.makeText(this@LoginActivity, "로그인에 실패했습니다. (${resp.code()})", Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 }
-                else {
-                    Toast.makeText(this@LoginActivity, "서버 응답 없음: ${resp.message()}", Toast.LENGTH_SHORT).show()
-                }
-            }
-            catch (e: Exception) {
+            } catch (e: Exception) {
                 Log.e("LoginActivity", "Login error: ${e.message}")
-                Toast.makeText(this@LoginActivity, "네트워크 에러: ${e.message}", Toast.LENGTH_LONG).show()
-            }
-            finally {
+                Toast.makeText(this@LoginActivity, "네트워크 에러가 발생했습니다. 연결 상태를 확인한 후 다시 시도해주세요.", Toast.LENGTH_LONG).show()
+            } finally {
                 btnLogin.isEnabled = true
             }
         }
     }
+
 
     private fun onClickForgotPassword() {
         val intent = Intent(this, ForgotPasswordActivity::class.java)
