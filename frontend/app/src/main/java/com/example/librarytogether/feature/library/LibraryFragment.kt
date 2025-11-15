@@ -39,6 +39,7 @@ class LibraryFragment : Fragment() {
     private var isReviewEmpty = true
     private var isBookEmpty = true
     private var isWishlistEmpty = true
+    private var isGenreEmpty = true
 
     private val selectedLocations = mutableListOf<Pair<String, String>>()
 
@@ -137,9 +138,10 @@ class LibraryFragment : Fragment() {
         profileContainer.visibility = if (currentTab == Tab.PROFILE) View.VISIBLE else View.GONE
 
         if (currentTab == Tab.PROFILE) {
-            rvWishlist.visibility       = if (!isWishlistEmpty) View.VISIBLE else View.GONE
-            tvWishlistEmpty.visibility  = if (isWishlistEmpty)  View.VISIBLE else View.GONE
-            btnAddWishlist.visibility   = if (isEditingProfile)  View.VISIBLE else View.GONE
+            rvWishlist.visibility = if (!isWishlistEmpty) View.VISIBLE else View.GONE
+            tvWishlistEmpty.visibility = if (isWishlistEmpty)  View.VISIBLE else View.GONE
+            btnAddWishlist.visibility = if (isEditingProfile)  View.VISIBLE else View.GONE
+            tvGenreNone.visibility = if (!isEditingProfile && isGenreEmpty) View.VISIBLE else View.GONE
         } else {
             rvWishlist.visibility = View.GONE
             tvWishlistEmpty.visibility = View.GONE
@@ -183,7 +185,7 @@ class LibraryFragment : Fragment() {
             binding.tvFavAuthor.text = profile.preferences.favAuthor
             binding.tvFavAuthorNote.text = profile.preferences.favAuthorNote
             binding.tvReadingHabit.text = profile.preferences.readingHabit
-            binding.tvGenreNone.visibility = if (profile.favoriteGenres.isEmpty()) View.VISIBLE else View.GONE
+            isGenreEmpty = profile.favoriteGenres.isEmpty()
 
             renderSelectedGenresFromViewModel(profile.favoriteGenres)
             syncEditChipsFromViewModel(profile.favoriteGenres)

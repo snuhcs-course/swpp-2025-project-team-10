@@ -156,6 +156,18 @@ class FeedAdapter(
             } else {
                 btnLike.setIconResource(R.drawable.like_icon)
             }
+
+            val barterAvailable = post.bookAvailableForBarter
+
+            btnExchange.isEnabled = barterAvailable
+
+            val exchangeColor = if (barterAvailable) {
+                ContextCompat.getColor(itemView.context, R.color.black)
+            } else {
+                ContextCompat.getColor(itemView.context, android.R.color.darker_gray)
+            }
+            btnExchange.iconTint = ColorStateList.valueOf(exchangeColor)
+            btnExchange.setTextColor(exchangeColor)
         }
 
         fun cleanup() = with(binding) {
