@@ -63,7 +63,4 @@ urlpatterns = [
     # Reading status API
     path("reading-status/", reading_status_view, name="reading-status-view"),  # Add or update reading status
     path("reading-status/<int:pk>/", modify_reading_status, name="reading-status-detail"),  # Single book status
-
-
-
 ]

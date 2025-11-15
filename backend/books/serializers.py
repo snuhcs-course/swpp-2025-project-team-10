@@ -143,7 +143,7 @@ class BookSerializer(serializers.ModelSerializer):
             "authors",
             "publisher",
             "publication_date",
-            "isbn",
+            "isbn_13",
             "description",
             "cover_image",
             "is_for_barter",
