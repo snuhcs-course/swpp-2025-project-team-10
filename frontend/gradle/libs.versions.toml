@@ -31,8 +31,12 @@ mockitoAndroid = "5.11.0"
 navigation = "2.9.5"
 truth = "1.4.4"
 hamcrest = "2.2"
+hiltNavigationFragment = "1.2.0"
+flowbinding = "1.2.0"
 
 [libraries]
+flowbinding-android = { group = "io.github.reactivecircus.flowbinding", name = "flowbinding-android", version.ref = "flowbinding" }
+androidx-hilt-navigation-fragment = { group = "androidx.hilt", name = "hilt-navigation-fragment", version.ref = "hiltNavigationFragment" }
 hamcrest = { group = "org.hamcrest", name = "hamcrest", version.ref = "hamcrest" } # <-- 이 라인 추가
 truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
 hilt-android-testing = { group = "com.google.dagger", name = "hilt-android-testing", version.ref = "hilt" }

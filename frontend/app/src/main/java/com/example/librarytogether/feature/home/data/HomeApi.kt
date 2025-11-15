@@ -12,4 +12,7 @@ interface HomeApi {
 
     @POST("posts/{postId}/like/")
     suspend fun togglePostLike(@Path("postId") postId: Int): Response<LikeResponse>
+
+    @POST("barter/requests/create/")
+    suspend fun createRequest(@Body body: CreateBarterRequest): Response<Unit>
 }

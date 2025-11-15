@@ -8,7 +8,6 @@ import com.example.librarytogether.feature.home.data.HomeRepository
 import com.example.librarytogether.feature.home.data.LikeResponse
 import com.example.librarytogether.feature.home.data.Post
 import com.example.librarytogether.testing.MainDispatcherRule
-import com.example.librarytogether.home.PostFixtures
 import com.example.librarytogether.testing.getOrAwaitValue
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -17,7 +16,6 @@ import org.hamcrest.CoreMatchers.equalTo
 import org.hamcrest.CoreMatchers.`is`
 import org.hamcrest.MatcherAssert
 import org.hamcrest.MatcherAssert.assertThat
-import org.hamcrest.CoreMatchers.notNullValue
 import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.Matchers.contains
 import org.hamcrest.Matchers.emptyIterable
@@ -169,16 +167,17 @@ class HomeViewModelTest {
     fun likeResponse_wraps_post_and_preserves_flags() {
         val liked = Post(
             id = 7,
+            posterId = 0,
             bookTitle = "BX",
             authorName = "AX",
             posterName = "UX",
             posterProfile = "PX",
             content = "CX",
-            userBookId = 77,
             imageUrls = listOf("u1", "u2"),
             likeCount = 9,
             createdAt = "2025-10-10T00:00:00Z",
-            isLiked = true
+            isLiked = true,
+            userBookId = 77
         )
 
         val resp = LikeResponse(post = liked)
@@ -207,7 +206,7 @@ class HomeViewModelTest {
         val vm = vm()
         advanceUntilIdle()
 
-        val updated = p2.copy(isLiked = true, likeCount = p2.likeCount + 1)
+        val updated = p2.copy(, posterId = 0,,,,,, likeCount = p2.likeCount + 1, isLiked = true,)
         Mockito.`when`(repo.toggleLike(2)).thenReturn(updated)
 
         vm.toggleLike(p2)

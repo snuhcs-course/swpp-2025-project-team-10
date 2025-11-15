@@ -69,28 +69,28 @@ class LibraryRepositoryTest {
         assertThat(result?.size, `is`(0))
     }
 
-    // --- toggleReviewLike 테스트 ---
+    // --- toggleLike 테스트 ---
 
     @Test
-    fun toggleReviewLike_success_returns_updated_review() = runTest {
+    fun toggleReviewLike_success_returns_updated_() = runTest {
         // Arrange
         val updatedReview = LibraryFixtures.review(1, liked = true)
         `when`(libraryApi.toggleReviewLike(1)).thenReturn(Response.success(updatedReview))
 
         // Act
-        val result = repository.toggleReviewLike(1)
+        val result = repository.toggleLike(1)
 
         // Assert
         assertThat(result?.isLiked, `is`(true))
     }
 
     @Test
-    fun toggleReviewLike_failure_returns_null() = runTest {
+    fun toggleLike_failure_returns_null() = runTest {
         // Arrange
         `when`(libraryApi.toggleReviewLike(1)).thenReturn(Response.error(500, okhttp3.ResponseBody.create(null, "")))
 
         // Act
-        val result = repository.toggleReviewLike(1)
+        val result = repository.toggleLike(1)
 
         // Assert
         assertThat(result, `is`(null as Review?))

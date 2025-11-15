@@ -94,8 +94,8 @@
     <string name="profile_spot">거래 장소</string>
     <string name="profile_spot_example_1">지하철 역</string>
     <string name="profile_spot_example_2">카페</string>
-    <string name="profile_location_hint_1">주요 거래 지역 1</string>
-    <string name="profile_location_hint_2">주요 거래 지역 2</string>
+    <string name="profile_location_hint_1">시/도</string>
+    <string name="profile_location_hint_2">시/군/구</string>
     <string name="profile_spot_hint_1">거래 장소 예시 1</string>
     <string name="profile_spot_hint_2">거래 장소 예시 2</string>
 
@@ -166,5 +166,47 @@
     <!-- photo-->
     <string name="review_photos">사진</string>
     <string name="review_add_photo">사진 추가</string>
+
+    <!--barter-->
+    <string name="barter_title_to_user">%1$s님에게 교환 신청</string>
+    <string name="barter_confirm_msg">사용자님의 책장에서 자동으로 상대방의 취향에 맞는 3권이 교환 대상이 됩니다\n교환 하시겠습니까?</string>
+    <string name="barter_apply">신청</string>
+    <string name="cancel">취소</string>
+
+    <!--follow-->
+    <string name="follow">팔로우</string>
+    <string name="following">팔로잉</string>
+
+    <!--book detail-->
+    <string name="book_detail_title">도서 상세</string>
+    <string name="book_cover_desc">도서 표지 이미지</string>
+    <string name="toggle_wishlist">위시리스트 토글</string>
+    <string name="open_owner_profile">소유자 프로필 열기</string>
+    <string name="status_owned">내 소장</string>
+    <string name="status_wishlist">위시리스트</string>
+    <string name="status_barterable">교환 가능</string>
+    <string name="label_about_book">책 소개</string>
+    <string name="action_request_barter">교환 요청</string>
+    <string name="action_add_wishlist">위시리스트에 추가</string>
+    <string name="action_edit_book">도서 편집</string>
+    <string name="action_toggle_barterable">교환 가능 토글</string>
+    <string name="label_author">저자</string>
+    <string name="label_publisher">출판사</string>
+    <string name="label_isbn">ISBN</string>
+    <string name="owned_by">소유자: %1$s</string>
+    <string name="unavailable_for_trade">교환 불가</string>
+    <string name="action_barter_approve">교환 승인</string>
+
+    <!--explore-->
+    <string name="explore_empty">추천 항목이 아직 없어요.</string>
+    <string name="msg_error_generic">오류가 발생했어요. 잠시 후 다시 시도해 주세요.</string>
+    <string name="barter_approval_title">교환 신청 상세</string>
+    <string name="barter_reject">교환 신청 거절</string>
+    <string name="desc_book_cover">책 표지</string>
+    <string name="msg_barter_book_accepted">교환을 수락했어요.</string>
+    <string name="msg_barter_request_rejected">교환 신청을 거절했어요.</string>
+    <string name="error_common">문제가 발생했습니다. 잠시 후 다시 시도해주세요.</string>
+
+
 
 </resources>

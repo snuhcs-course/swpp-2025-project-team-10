@@ -1,11 +1,6 @@
 package com.example.librarytogether.feature.home.data
 
-import android.content.Context
 import android.util.Log
-import androidx.core.content.ContentProviderCompat.requireContext
-import com.example.librarytogether.feature.library.data.LibraryApi
-import com.example.librarytogether.network.RetrofitClient
-import retrofit2.Response
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -40,5 +35,10 @@ class HomeRepository @Inject constructor(
             Log.e("HomeRepository", "Error toggling like", e)
             throw e
         }
+    }
+
+    suspend fun createRequest(recipientId: Int, requestedBookId: String): Boolean {
+        val res = homeApi.createRequest(CreateBarterRequest(recipientId, requestedBookId))
+        return res.isSuccessful
     }
 }

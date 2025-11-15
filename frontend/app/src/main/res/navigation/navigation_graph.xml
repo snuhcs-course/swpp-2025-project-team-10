@@ -6,13 +6,12 @@
     app:startDestination="@id/nav_home">
 
     <action
-        android:id="@+id/action_global_to_barterDetailFragment"
-        app:destination="@id/barterDetailFragment">
+        android:id="@+id/action_global_to_UserProfileFragment"
+        app:destination="@id/userProfileFragment" />
 
-        <argument
-            android:name="userBookId"
-            app:argType="integer" />
-    </action>
+    <action
+        android:id="@+id/action_global_bookDetail"
+        app:destination="@id/bookDetailFragment" />
 
     <fragment
         android:id="@+id/nav_home"
@@ -64,40 +63,44 @@
         android:id="@+id/addBookFragment"
         android:name="com.example.librarytogether.feature.library.AddBookFragment"
         android:label="AddBookFragment"
-        tools:layout="@layout/fragment_add_book" />
-
+        tools:layout="@layout/fragment_add_book">
+        <argument
+            android:name="mode"
+            app:argType="com.example.librarytogether.feature.library.AddBookMode" />
+    </fragment>
 
     <fragment
-        android:id="@+id/write_review_fragment"
-        android:name="com.example.librarytogether.feature.library.WriteReviewFragment"
-        android:label=""/>
+        android:id="@+id/userProfileFragment"
+        android:name="com.example.librarytogether.feature.profile.UserProfileFragment"
+        android:label="UserProfile"
+        tools:layout="@layout/fragment_user_profile">
+        <argument
+            android:name="userId"
+            app:argType="integer"/>
+    </fragment>
 
-    <navigation
-        android:id="@+id/nav_barter_flow"
-        app:startDestination="@id/barterDetailFragment">
+    <fragment
+        android:id="@+id/bookDetailFragment"
+        android:name="com.example.librarytogether.feature.bookdetail.BookDetailFragment">
+        <argument android:name="bookId" app:argType="string" />
+        <argument
+            android:name="source"
+            app:argType="com.example.librarytogether.feature.bookdetail.EntrySource"/>
+    </fragment>
 
-        <fragment
-            android:id="@+id/barterDetailFragment"
-            android:name="com.example.librarytogether.feature.barter.BarterDetailFragment"
-            android:label="BarterDetailFragment"
-            tools:layout="@layout/fragment_barter_detail">
+    <fragment
+        android:id="@+id/barterApprovalFragment"
+        android:name="com.example.librarytogether.feature.barterapproval.BarterApprovalFragment"
+        tools:layout="@layout/fragment_barter_approval">
 
-            <argument
-                android:name="userBookId"
-                app:argType="integer" />
+        <argument
+            android:name="requestId"
+            app:argType="string" />
 
-            <action
-                android:id="@+id/action_barterDetailFragment_to_selectMyBookFragment"
-                app:destination="@id/selectMyBookFragment" />
-        </fragment>
+        <action
+            android:id="@+id/action_barterApprovalFragment_to_bookDetailFragment"
+            app:destination="@id/bookDetailFragment" />
+    </fragment>
 
-        <fragment
-            android:id="@+id/selectMyBookFragment"
-            android:name="com.example.librarytogether.feature.barter.SelectMyBookFragment"
-            android:label="SelectMyBookFragment"
-            tools:layout="@layout/fragment_select_my_book">
-        </fragment>
-
-    </navigation>
 
 </navigation>

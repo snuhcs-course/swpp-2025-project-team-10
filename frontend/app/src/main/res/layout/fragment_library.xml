@@ -292,33 +292,103 @@
                         tools:visibility="visible" />
 
                     <!-- 편집모드 (밑줄 스타일 EditText) -->
-                    <EditText
-                        android:id="@+id/editTradeLocation1"
-                        style="@style/Text.Body.Medium"
+                    <com.google.android.material.chip.ChipGroup
+                        android:id="@+id/chipGroupLocations"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/space_s"
-                        android:hint="@string/profile_location_hint_1"
-                        android:background="@drawable/underline"
-                        android:paddingBottom="@dimen/space_xs"
-                        android:inputType="textPostalAddress|textCapWords"
-                        android:autofillHints="postalAddress"
+                        android:minHeight="0dp"
+                        app:singleLine="false"
                         android:visibility="gone"
-                        tools:visibility="visible" />
+                        tools:visibility="visible">
 
-                    <EditText
-                        android:id="@+id/editTradeLocation2"
-                        style="@style/Text.Body.Medium"
+                        <com.google.android.material.chip.Chip
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            style="@style/Widget.MaterialComponents.Chip.Entry"
+                            android:text="서울 마포구"
+                            app:closeIconVisible="true"/>
+                    </com.google.android.material.chip.ChipGroup>
+
+                    <LinearLayout
+                        android:id="@+id/locationEditorRow"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/space_s"
-                        android:hint="@string/profile_location_hint_2"
-                        android:background="@drawable/underline"
-                        android:paddingBottom="@dimen/space_xs"
-                        android:inputType="textPostalAddress|textCapWords"
-                        android:autofillHints="postalAddress"
+                        android:orientation="horizontal"
+                        android:gravity="bottom"
                         android:visibility="gone"
-                        tools:visibility="visible" />
+                        tools:visibility="visible">
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/menuTradeCity"
+                            style="@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            app:boxBackgroundColor="@android:color/transparent"
+                            app:hintEnabled="false"
+                            app:boxStrokeWidth="1dp"
+                            app:boxStrokeWidthFocused="2dp"
+                            tools:visibility="visible">
+
+                            <AutoCompleteTextView
+                                android:id="@+id/autoCompleteLocation1"
+                                style="@style/Text.Body.Medium"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:hint="@string/profile_location_hint_1"
+                                android:inputType="none"
+                                android:minHeight="0dp"
+                                android:singleLine="true"
+                                android:ellipsize="end"
+                                android:scrollHorizontally="true"
+                                android:paddingTop="6dp"
+                                android:paddingBottom="6dp"/>
+
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <View
+                            android:layout_width="@dimen/space_s"
+                            android:layout_height="0dp"
+                            />
+
+                        <com.google.android.material.textfield.TextInputLayout
+                            android:id="@+id/menuTradeDistrict"
+                            style="@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            app:hintEnabled="false"
+                            app:boxBackgroundColor="@android:color/transparent"
+                            app:boxStrokeWidth="1dp"
+                            app:boxStrokeWidthFocused="2dp"
+                            tools:visibility="visible">
+
+                            <AutoCompleteTextView
+                                android:id="@+id/autoCompleteLocation2"
+                                style="@style/Text.Body.Medium"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:hint="@string/profile_location_hint_2"
+                                android:minHeight="0dp"
+                                android:inputType="none"
+                                android:ellipsize="end"
+                                android:scrollHorizontally="true"
+                                android:paddingTop="6dp"
+                                android:paddingBottom="6dp"/>
+
+                        </com.google.android.material.textfield.TextInputLayout>
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnAddLocation"
+                            style="@style/Widget.MaterialComponents.Button.TextButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:minWidth="0dp"
+                            android:minHeight="0dp"
+                            android:text="추가"
+                            tools:visibility="visible"/>
+                    </LinearLayout>
 
                     <!-- 거래 장소 -->
                     <TextView
@@ -753,7 +823,7 @@
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="16dp"
         android:contentDescription="@string/desc_fab"
-        app:backgroundTint="@color/light_grey"
+        app:backgroundTint="@color/light_gray"
         app:srcCompat="@drawable/plus_icon"
         app:tint="@color/white"
         app:layout_constraintEnd_toEndOf="parent"

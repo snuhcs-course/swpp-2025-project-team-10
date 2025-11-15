@@ -1,9 +1,9 @@
 package com.example.librarytogether.barter
 
-import com.example.librarytogether.feature.barter.data.BarterApi
-import com.example.librarytogether.feature.barter.data.BarterDetailResponse
-import com.example.librarytogether.feature.barter.data.BarterOfferRequest
-import com.example.librarytogether.feature.barter.data.BarterRepository
+import com.example.librarytogether.feature.barter_approve.data.BarterApi
+import com.example.librarytogether.feature.barter_approve.data.BarterDetailResponse
+import com.example.librarytogether.feature.barter_approve.data.BarterOfferRequest
+import com.example.librarytogether.feature.barter_approve.data.BarterRepository
 import com.example.librarytogether.feature.library.data.Book
 import com.example.librarytogether.feature.library.data.UserPreferences
 import com.example.librarytogether.feature.library.data.UserProfile

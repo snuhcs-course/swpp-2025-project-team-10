@@ -10,7 +10,6 @@ import com.example.librarytogether.testing.getOrAwaitValue
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.hamcrest.CoreMatchers.`is`
-import org.hamcrest.CoreMatchers.nullValue
 import org.hamcrest.MatcherAssert.assertThat
 import org.junit.Rule
 import org.junit.Test
@@ -21,7 +20,6 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 import org.mockito.Mockito.`when`
 import org.mockito.junit.MockitoJUnitRunner
-import org.mockito.kotlin.whenever
 
 @RunWith(MockitoJUnitRunner::class)
 class LibraryViewModelTest {
@@ -184,7 +182,7 @@ class LibraryViewModelTest {
 
     @Test
     fun addNewBook_success_refresh_and_navigate() = runTest {
-        val post = PostBook(title = "T", author = "A", publisher = null, isbn = null, isForBarter = true)
+        val post = PostBook(title = "T", author = "A", publisher = null, isbn = null, is_for_barter = true)
         val newBookList =
             listOf(Book(id = 1, title = "T", author = "A", publisher = null, isbn = null, coverUrl = null))
 
@@ -390,7 +388,7 @@ class LibraryViewModelTest {
         advanceUntilIdle()
 
         val updated = r2.copy(isLiked = true, likeCount = r2.likeCount + 1)
-        `when`(repo.toggleReviewLike(2)).thenReturn(updated)
+        `when`(repo.toggleLike(2)).thenReturn(updated)
 
         // Act
         vm.toggleLike(r2)
@@ -404,7 +402,7 @@ class LibraryViewModelTest {
         assertThat(after1.likeCount, `is`(0))
         assertThat(after2.isLiked, `is`(true))
         assertThat(after2.likeCount, `is`(6))
-        verify(repo).toggleReviewLike(2)
+        verify(repo).toggleLike(2)
     }
 
     @Test
@@ -414,7 +412,7 @@ class LibraryViewModelTest {
         `when`(repo.getMyReviews()).thenReturn(listOf(r1))
         val vm = createVM()
         advanceUntilIdle()
-        `when`(repo.toggleReviewLike(1)).thenReturn(null) // 실패 경로
+        `when`(repo.toggleLike(1)).thenReturn(null) // 실패 경로
 
         // Act
         vm.toggleLike(r1)

@@ -39,7 +39,7 @@ class FakeLibraryRepository @Inject constructor() :
         return if (shouldReturnError) null else profile
     }
 
-    override suspend fun toggleReviewLike(reviewId: Int): Review? {
+    override suspend fun toggleLike(reviewId: Int): Review? {
         val review = reviews.find { it.id == reviewId }
         review?.let {
             val updatedReview = it.copy(isLiked = !it.isLiked)

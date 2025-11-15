@@ -1,10 +1,8 @@
 package com.example.librarytogether.diffutil
 
-import android.net.Uri
 import com.example.librarytogether.feature.home.PostDiff
 import com.example.librarytogether.feature.home.data.Post
 import com.example.librarytogether.feature.library.BookDiff
-import com.example.librarytogether.feature.library.PhotoAdapter
 import com.example.librarytogether.feature.library.ReviewDiff
 import com.example.librarytogether.feature.library.data.Book
 import com.example.librarytogether.feature.library.data.Review
@@ -18,16 +16,15 @@ class DiffTest {
 
     private fun base(id: Int = 1) = Post(
         id = id,
+        posterId = 0,
         bookTitle = "B",
         authorName = "A",
         posterName = "U",
         posterProfile = "",
         content = "C",
-        userBookId = 11,
         imageUrls = listOf("u1"),
-        likeCount = 0,
         createdAt = "2025-01-01T00:00:00Z",
-        isLiked = false
+        userBookId = 11
     )
 
     @Test
@@ -47,35 +44,35 @@ class DiffTest {
     @Test
     fun areContentsTheSame_sameObject_true() {
         val o = base()
-        val n = o.copy()
+        val n = o.copy(, 0,,,,,,)
         assertThat(diff.areContentsTheSame(o, n), equalTo(true))
     }
 
     @Test
     fun areContentsTheSame_likeCount_changed_false() {
         val o = base()
-        val n = o.copy(likeCount = 1)
+        val n = o.copy(, posterId = 0,,,,,, likeCount = 1,)
         assertThat(diff.areContentsTheSame(o, n), equalTo(false))
     }
 
     @Test
     fun areContentsTheSame_isLiked_changed_false() {
         val o = base()
-        val n = o.copy(isLiked = true)
+        val n = o.copy(, posterId = 0,,,,,, isLiked = true,)
         assertThat(diff.areContentsTheSame(o, n), equalTo(false))
     }
 
     @Test
     fun areContentsTheSame_text_changed_false() {
         val o = base()
-        val n = o.copy(content = "C2")
+        val n = o.copy(, posterId = 0,,,,, content = "C2",)
         assertThat(diff.areContentsTheSame(o, n), equalTo(false))
     }
 
     @Test
     fun areContentsTheSame_images_order_changed_false() {
-        val o = base().copy(imageUrls = listOf("a", "b"))
-        val n = o.copy(imageUrls = listOf("b", "a"))
+        val o = base().copy(, posterId = 0,,,,,, imageUrls = listOf("a", "b"),)
+        val n = o.copy(, posterId = 0,,,,,, imageUrls = listOf("b", "a"),)
         // 순서가 바뀌면 UI가 달라지므로 false (순서 무시하려면 비교 로직을 set 비교로 바꿔야 함)
         assertThat(diff.areContentsTheSame(o, n), equalTo(false))
     }
@@ -83,7 +80,7 @@ class DiffTest {
     @Test
     fun areContentsTheSame_createdAt_changed_false() {
         val o = base()
-        val n = o.copy(createdAt = "2025-01-02T00:00:00Z")
+        val n = o.copy(, posterId = 0,,,,,, createdAt = "2025-01-02T00:00:00Z",)
         assertThat(diff.areContentsTheSame(o, n), equalTo(false))
     }
 

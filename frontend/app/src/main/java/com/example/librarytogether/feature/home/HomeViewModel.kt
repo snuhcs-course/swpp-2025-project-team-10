@@ -26,6 +26,15 @@ class HomeViewModel @Inject constructor(
     private val _isLoading = MutableLiveData<Boolean>()
     val isLoading: LiveData<Boolean> = _isLoading
 
+    private val _barterLoading = MutableLiveData(false)
+    val barterLoading: LiveData<Boolean> = _barterLoading
+
+    private val _barterSuccess = MutableLiveData<Boolean?>()
+    val barterSuccess: LiveData<Boolean?> = _barterSuccess
+
+    private val _barterError = MutableLiveData<String?>()
+    val barterError: LiveData<String?> = _barterError
+
     init {
         loadFeed()
     }
@@ -68,6 +77,28 @@ class HomeViewModel @Inject constructor(
     private fun applyLocalUpdate(updated: Post) {
         originalPosts = originalPosts.map { if (it.id == updated.id) updated else it }
         _posts.value = _posts.value?.map { if (it.id == updated.id) updated else it }
+    }
+
+    fun requestBarter(ownerId: Int, bookId: String) {
+        _barterError.value = null
+        viewModelScope.launch {
+            try {
+                val ok = repository.createRequest(
+                    ownerId, requestedBookId = bookId
+                )
+                _barterSuccess.value = ok
+                if (!ok) _barterError.value = "교환 신청에 실패했습니다."
+            } catch (e: Exception) {
+                _barterError.value = e.message ?: "네트워크 오류가 발생했습니다."
+            } finally {
+                _barterLoading.value = false
+            }
+        }
+    }
+
+    fun clearBarterResult() {
+        _barterSuccess.value = null
+        _barterError.value = null
     }
 
     fun onClickAdd(post: Post) {

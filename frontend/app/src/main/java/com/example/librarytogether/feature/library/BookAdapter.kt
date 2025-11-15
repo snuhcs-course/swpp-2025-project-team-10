@@ -61,7 +61,7 @@ class BookAdapter(
         private val img: ImageView = itemView.findViewById(R.id.imgCover)
 
         fun bind(item: Book) {
-            img.loadCover(item.coverUrl)
+            img.loadCover(item.cover_image)
             itemView.setOnClickListener { clicks.onClickItem(item) }
         }
     }
@@ -77,9 +77,9 @@ class BookAdapter(
         private val btnMore: View?     = itemView.findViewById(R.id.btnAction)  // 있으면 사용
 
         fun bind(item: Book) {
-            img.loadCover(item.coverUrl)
+            img.loadCover(item.cover_image)
             tvTitle.text  = item.title
-            tvAuthor.text = item.author.orEmpty()
+            tvAuthor.text = item.authors.orEmpty()
 
             itemView.setOnClickListener { clicks.onClickItem(item) }
             btnMore?.setOnClickListener { v -> clicks.onClickMore(item, v) }

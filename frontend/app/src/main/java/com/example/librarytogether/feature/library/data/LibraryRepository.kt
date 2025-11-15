@@ -30,18 +30,16 @@ open class LibraryRepository @Inject constructor(
         }
     }
 
-    open suspend fun toggleReviewLike(reviewId: Int): Review? {
+    open suspend fun toggleLike(reviewId: Int): Review {
         return try {
             val response = libraryApi.toggleReviewLike(reviewId)
             if (response.isSuccessful) {
-                response.body()
+                response.body()?.review ?: throw IllegalStateException("Response body is null")
             } else {
-                Log.e("LibraryRepository", "Like toggle failed: ${response.code()}")
-                null
+                throw IllegalStateException("Failed to toggle like: ${response.code()}")
             }
         } catch (e: Exception) {
-            Log.e("LibraryRepository", "Error toggling like", e)
-            null
+            throw IllegalStateException("Error toggling like", e)
         }
     }
 
@@ -130,6 +128,49 @@ open class LibraryRepository @Inject constructor(
         } catch (e: Exception) {
             Log.e("LibraryRepository", "Error fetching my wishlist", e)
             emptyList()
+        }
+    }
+
+    open suspend fun addToWishlist(book: Book): Boolean {
+        val postBook : PostBook = PostBook(
+            title = book.title,
+            authors = book.authors ?: "",
+            publisher = book.publisher,
+            isbn = book.isbn,
+            is_for_barter = false,
+            cover_image = book.cover_image
+        )
+        return try {
+            val res = libraryApi.addToWishlist(WishlistRequest(postBook))
+            if (!res.isSuccessful) {
+                Log.e("LibraryRepository", "addToWishlist failed: ${res.code()}")
+            }
+            res.isSuccessful
+        } catch (e: Exception) {
+            Log.e("LibraryRepository", "Error addToWishlist", e)
+            false
+        }
+    }
+
+    open suspend fun addToWishlistById(bookId: String): Boolean {
+        return try {
+            val res = libraryApi.addToWishlistById(bookId)
+            if (!res.isSuccessful) Log.e("LibraryRepository", "addToWishlistById failed: ${res.code()}")
+            res.isSuccessful
+        } catch (e: Exception) {
+            Log.e("LibraryRepository", "Error addToWishlistById", e)
+            false
+        }
+    }
+
+    open suspend fun removeFromWishlistById(bookId: String): Boolean {
+        return try {
+            val res = libraryApi.removeFromWishlistById(bookId)
+            if (!res.isSuccessful) Log.e("LibraryRepository", "removeFromWishlistById failed: ${res.code()}")
+            res.isSuccessful
+        } catch (e: Exception) {
+            Log.e("LibraryRepository", "Error removeFromWishlistById", e)
+            false
         }
     }
 }

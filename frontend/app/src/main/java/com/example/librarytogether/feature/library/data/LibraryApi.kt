@@ -2,6 +2,7 @@ package com.example.librarytogether.feature.library.data
 
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.PATCH
 import retrofit2.http.POST
@@ -16,7 +17,7 @@ interface LibraryApi {
     suspend fun addReview(@Body review: PostReview): Response<Unit>
 
     @POST("library/reviews/{id}/like/")
-    suspend fun toggleReviewLike(@Path("id") reviewId: Int): Response<Review>
+    suspend fun toggleReviewLike(@Path("id") reviewId: Int): Response<ReviewLikeResponse>
 
     @GET("library/books/")
     suspend fun getMyBooks(): Response<List<Book>>
@@ -39,4 +40,15 @@ interface LibraryApi {
 
     @GET("library/wishlist/")
     suspend fun getMyWishlist(): Response<List<Book>>
+
+    //legacy
+    @POST("library/wishlist/")
+    suspend fun addToWishlist(@Body body: WishlistRequest): Response<Unit>
+
+
+    @POST("library/books/{bookId}/wishlist/")
+    suspend fun addToWishlistById(@Path("bookId") bookId: String): Response<Unit>
+
+    @DELETE("library/books/{bookId}/wishlist/")
+    suspend fun removeFromWishlistById(@Path("bookId") bookId: String): Response<Unit>
 }

@@ -4,6 +4,15 @@ import com.example.librarytogether.feature.library.data.*
 import retrofit2.Response
 
 class FakeLibraryApi : LibraryApi {
+
+    override suspend fun searchBooks(query: String): Response<List<Book>> {
+        return Response.success(emptyList())
+    }
+
+    override suspend fun addBook(book: PostBook): Response<Unit> {
+        return Response.success(Unit)
+    }
+
     override suspend fun getMyReviews(): Response<ReviewResponse> {
         return Response.success(ReviewResponse(results = emptyList()))
     }

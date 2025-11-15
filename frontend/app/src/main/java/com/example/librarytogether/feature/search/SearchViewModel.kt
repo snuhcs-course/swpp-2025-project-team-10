@@ -30,7 +30,7 @@ class SearchViewModel @Inject constructor(
             try {
                 _results.value = repository.search(query.trim())
             } catch (e: Exception) {
-                _error.value = "검색 중 오류가 발생했습니다."
+                //_error.value = "검색 중 오류가 발생했습니다."
             } finally {
                 _isLoading.value = false
             }

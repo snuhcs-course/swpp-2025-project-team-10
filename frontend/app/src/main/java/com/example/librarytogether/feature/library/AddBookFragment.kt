@@ -7,10 +7,10 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 import com.google.android.material.search.SearchView
-import com.google.android.material.search.SearchBar
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.librarytogether.R
 import com.example.librarytogether.databinding.FragmentAddBookBinding
@@ -27,6 +27,8 @@ class AddBookFragment : Fragment(R.layout.fragment_add_book) {
 
     private val viewModel: LibraryViewModel by activityViewModels()
 
+    private val args by navArgs<AddBookFragmentArgs>()
+
     private val searchAdapter by lazy {
         SearchBookAdapter(::onBookSearchResultClicked) // 클릭 시 onBookSearchResultClicked 함수 호출
     }
@@ -34,40 +36,92 @@ class AddBookFragment : Fragment(R.layout.fragment_add_book) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentAddBookBinding.bind(view)
+        binding.imgCover.loadCover(null)
 
         setupClickListeners()
         setupSearchHandler()
+        setupUiByMode()
         observeViewModel()
     }
 
-    private fun setupClickListeners() {
-        binding.imgCover.loadCover(null)
-        binding.btnSaveBook.setOnClickListener {
-            val title = binding.etTitle.text.toString()
-            val author = binding.etAuthor.text.toString()
-            val publisher = binding.etPublisher.text.toString()
-            val isbn = binding.etIsbn.text.toString()
-            val isBarterAvailable = binding.switchBarterAvailable.isChecked
-
-            if (title.isBlank() || author.isBlank()) {
-                Toast.makeText(requireContext(), "책 제목과 저자는 필수입니다.", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
+    private fun setupUiByMode() = with(binding) {
+        when (args.mode) {
+            AddBookMode.BOOKSHELF -> {
+                btnSaveBook.text = "내 책장에 저장"
+                switchBarterAvailable.visibility = View.VISIBLE
+                switchBarterAvailable.isEnabled = true
             }
+            AddBookMode.WISHLIST -> {
+                btnSaveBook.text = "위시리스트에 추가"
+                switchBarterAvailable.isChecked = false
+                switchBarterAvailable.visibility = View.GONE
+            }
+        }
+    }
 
-            val newBook = PostBook(
-                title = title,
-                author = author,
-                publisher = publisher.takeIf { it.isNotBlank() },
-                isbn = isbn.takeIf { it.isNotBlank() },
-                isForBarter = isBarterAvailable
-            )
-
-            viewModel.addNewBook(newBook)
+    private fun setupClickListeners() {
+        binding.btnSaveBook.setOnClickListener {
+            when (args.mode) {
+                AddBookMode.BOOKSHELF -> saveToBookshelf()
+                AddBookMode.WISHLIST -> addToWishlist()
+            }
         }
 
         binding.fabEditCover.setOnClickListener {
             // TODO: 갤러리/카메라 열어서 이미지 선택
         }
+    }
+
+    private fun saveToBookshelf() {
+        val title = binding.etTitle.text.toString()
+        val authors = binding.etAuthor.text.toString()
+        val publisher = binding.etPublisher.text.toString()
+        val isbn = binding.etIsbn.text.toString()
+        val isBarterAvailable = binding.switchBarterAvailable.isChecked
+
+        if (title.isBlank() || authors.isBlank()) {
+            Toast.makeText(requireContext(), "책 제목과 저자는 필수입니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val postBook = PostBook(
+            title = title,
+            authors = authors,
+            publisher = publisher.takeIf { it.isNotBlank() },
+            isbn = isbn.takeIf { it.isNotBlank() },
+            is_for_barter = isBarterAvailable,
+            //coverUrl =
+        )
+        viewModel.addNewBook(postBook)
+    }
+
+    private fun addToWishlist() {
+        val title = binding.etTitle.text.toString()
+        val authors = binding.etAuthor.text.toString()
+        val publisher = binding.etPublisher.text.toString()
+        val isbn = binding.etIsbn.text.toString()
+
+        if (title.isBlank() || authors.isBlank()) {
+            Toast.makeText(requireContext(), "책 제목과 저자는 필수입니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val postBook = Book(
+            id = "",
+            title = title,
+            authors = authors,
+            publisher = publisher.takeIf { it.isNotBlank() },
+            isbn = isbn.takeIf { it.isNotBlank() },
+            cover_image = ""
+        )
+
+        viewModel.addToWishlist(postBook)
+
+        findNavController().previousBackStackEntry
+            ?.savedStateHandle
+            ?.set("switch_tab", "PROFILE")
+
+        findNavController().popBackStack()
     }
 
     private fun setupSearchHandler() {
@@ -99,10 +153,10 @@ class AddBookFragment : Fragment(R.layout.fragment_add_book) {
 
     private fun onBookSearchResultClicked(book: Book) {
         binding.etTitle.setText(book.title)
-        binding.etAuthor.setText(book.author)
-         binding.etPublisher.setText(book.publisher)
-         binding.etIsbn.setText(book.isbn)
-         binding.imgCover.loadCover(book.coverUrl)
+        binding.etAuthor.setText(book.authors)
+        binding.etPublisher.setText(book.publisher)
+        binding.etIsbn.setText(book.isbn)
+        binding.imgCover.loadCover(book.cover_image)
 
         binding.searchView.hide()
     }

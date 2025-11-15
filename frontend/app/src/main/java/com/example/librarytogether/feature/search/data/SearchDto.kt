@@ -1,11 +1,13 @@
 package com.example.librarytogether.feature.search.data
 
 data class SearchItem(
-    val id: Int,
-    val bookTitle: String,
-    val authorName: String,
-    val coverUrl: String? = null,
-    val userBookId: Int? = null
+    val id: String,
+    val title: String,
+    val authors: String,
+    val publisher: String?,
+    val isbn: String?,
+    val coverImage: String? = null,
+    val isForBarter: Boolean?
 )
 
 data class SearchResponse(

@@ -89,16 +89,17 @@ class HomeRepositoryTest {
     fun toggleLike_returns_post_on_200() = runTest {
         val liked = Post(
             id = 7,
+            posterId = 0,
             bookTitle = "BX",
             authorName = "AX",
             posterName = "UX",
             posterProfile = "",
             content = "CX",
-            userBookId = 77,
             imageUrls = listOf("u1", "u2"),
             likeCount = 9,
             createdAt = "2025-10-10T00:00:00Z",
-            isLiked = true
+            isLiked = true,
+            userBookId = 77
         )
         val body = LikeResponse(post = liked)
         whenever(api.togglePostLike(7)).thenReturn(Response.success(body))

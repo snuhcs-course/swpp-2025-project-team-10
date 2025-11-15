@@ -13,15 +13,15 @@ object PostFixtures {
         createdAt: String? = "2025-10-%02dT00:00:00Z".format(30 - id) // id가 작을수록 최신이 되게 예시
     ) = Post(
         id = id,
+        posterId = 0,
         bookTitle = title,
         authorName = author,
         posterName = poster,
         posterProfile = "",
         content = "C$id",
-        imageUrls = emptyList(),
         likeCount = likeCount,
         createdAt = createdAt,
-        userBookId = 1,
-        isLiked = liked
+        isLiked = liked,
+        userBookId = 1
     )
 }

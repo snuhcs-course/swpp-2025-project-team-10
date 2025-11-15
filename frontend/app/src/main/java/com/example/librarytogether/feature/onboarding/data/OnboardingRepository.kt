@@ -2,6 +2,7 @@ package com.example.librarytogether.feature.onboarding.data
 
 import android.util.Log
 import javax.inject.Inject
+import javax.inject.Singleton
 
 class OnboardingRepository @Inject constructor(
     private val api: OnboardingApi

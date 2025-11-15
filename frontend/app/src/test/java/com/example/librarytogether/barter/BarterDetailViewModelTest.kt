@@ -1,9 +1,8 @@
-package com.example.librarytogether.feature.barter
+package com.example.librarytogether.feature.barter_approve
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.example.librarytogether.feature.barter.data.BarterDetailResponse
-import com.example.librarytogether.feature.barter.data.BarterOfferRequest
-import com.example.librarytogether.feature.barter.data.BarterRepository
+import com.example.librarytogether.feature.barter_approve.data.BarterDetailResponse
+import com.example.librarytogether.feature.barter_approve.data.BarterRepository
 import com.example.librarytogether.feature.library.data.Book
 import com.example.librarytogether.feature.library.data.UserPreferences
 import com.example.librarytogether.feature.library.data.UserProfile
@@ -28,7 +27,7 @@ class BarterDetailViewModelTest {
     @get:Rule val main = MainDispatcherRule()
 
     private lateinit var repo: BarterRepository
-    private lateinit var vm: BarterDetailViewModel
+    private lateinit var vm: BarterRequestViewModel
 
     private fun detail(bookId: Int = 1) = BarterDetailResponse(
         book = Book(bookId, "T$bookId", "A", coverUrl = null, isbn = null, publisher = null),
@@ -47,7 +46,7 @@ class BarterDetailViewModelTest {
     @Before
     fun setUp() {
         repo = mock()
-        vm = BarterDetailViewModel(repo)
+        vm = BarterRequestViewModel(repo)
     }
 
     @Test

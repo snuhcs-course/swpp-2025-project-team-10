@@ -5,15 +5,12 @@ import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.constraintlayout.widget.ConstraintSet
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
-import com.bumptech.glide.Glide
 import com.example.librarytogether.R
 import com.example.librarytogether.databinding.FeedPostBinding
 import com.example.librarytogether.feature.home.data.Post
@@ -160,12 +157,30 @@ class FeedAdapter(
                 tvContent.ellipsize = TextUtils.TruncateAt.END
             }
 
-            val likeIconColor = if (post.isLiked) {
+            val IconColor = if (post.isLiked) {
                 ContextCompat.getColor(itemView.context, R.color.red)
             } else {
                 ContextCompat.getColor(itemView.context, R.color.black)
             }
-            binding.btnLike.iconTint = ColorStateList.valueOf(likeIconColor)
+            btnLike.iconTint = ColorStateList.valueOf(IconColor)
+
+            if (post.isLiked) {
+                btnLike.setIconResource(R.drawable.filled_like_icon)
+            } else {
+                btnLike.setIconResource(R.drawable.like_icon)
+            }
+
+            val barterAvailable = post.bookAvailableForBarter
+
+            btnExchange.isEnabled = barterAvailable
+
+            val exchangeColor = if (barterAvailable) {
+                ContextCompat.getColor(itemView.context, R.color.black)
+            } else {
+                ContextCompat.getColor(itemView.context, android.R.color.darker_gray)
+            }
+            btnExchange.iconTint = ColorStateList.valueOf(exchangeColor)
+            btnExchange.setTextColor(exchangeColor)
         }
 
         fun cleanup() = with(binding) {

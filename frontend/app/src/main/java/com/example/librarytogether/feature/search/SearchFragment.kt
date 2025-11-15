@@ -6,11 +6,21 @@ import android.view.inputmethod.EditorInfo
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.librarytogether.R
 import com.example.librarytogether.databinding.FragmentSearchBinding
+import com.example.librarytogether.feature.bookdetail.BookDetailFragmentDirections
+import com.example.librarytogether.feature.bookdetail.EntrySource
 import com.example.librarytogether.feature.search.data.SearchItem
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
+import reactivecircus.flowbinding.android.widget.textChanges
 
 @AndroidEntryPoint
 class SearchFragment : Fragment(R.layout.fragment_search) {
@@ -30,6 +40,15 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         setupRecyclerView()
         setupSearchUi()
         observeViewModel()
+
+        lifecycleScope.launch {
+            binding.searchView.editText.textChanges()
+                .debounce(300)
+                .map { it.toString().trim() }
+                .distinctUntilChanged()
+                .filter { it.isNotEmpty() }
+                .collect { viewModel.search(it) }
+        }
     }
 
     private fun setupRecyclerView() = with(binding) {
@@ -66,7 +85,12 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
     }
 
     private fun onClickResult(item: SearchItem) {
-        // TODO: 상세/교환 화면으로 이동
+        val dir = BookDetailFragmentDirections
+            .actionGlobalBookDetail(
+                bookId = item.id,
+                source = EntrySource.SEARCH
+            )
+        findNavController().navigate(dir)
     }
 
     override fun onDestroyView() {

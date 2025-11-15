@@ -3,6 +3,7 @@ package com.example.librarytogether.feature.library
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.map
 import androidx.lifecycle.viewModelScope
 import com.example.librarytogether.feature.library.data.Book
 import com.example.librarytogether.feature.library.data.LibraryRepository
@@ -92,6 +93,44 @@ class LibraryViewModel @Inject constructor(
         }
     }
 
+    fun isWishlisted(bookId: String): LiveData<Boolean> =
+        myWishlist.map { list -> list.any { it.id == bookId } }
+
+    fun toggleWishlistById(bookId: String) = viewModelScope.launch {
+        val exists = _myWishlist.value?.any { it.id == bookId } == true
+
+        val ok = try {
+            if (exists) {
+                repository.removeFromWishlistById(bookId)
+            } else {
+                repository.addToWishlistById(bookId)
+            }
+        } catch (e: Exception) {
+            _error.value = "위시리스트 변경에 실패했어요."
+            false
+        }
+
+        if (ok) {
+            _myWishlist.value = repository.getMyWishlist().orEmpty()
+        } else if (_error.value.isNullOrBlank()) {
+            _error.value = if (exists) "위시리스트에서 제거하지 못했어요." else "위시리스트에 추가하지 못했어요."
+        }
+    }
+
+    fun addToWishlist(book: Book) = viewModelScope.launch {
+        if (_myWishlist.value?.any { it.id == book.id } == true) {
+            _error.value = "이미 위시리스트에 있어요."
+            return@launch
+        }
+
+        val ok = repository.addToWishlist(book)
+        if (ok) {
+             _myWishlist.value = repository.getMyWishlist().orEmpty()
+        } else {
+            _error.value = "위시리스트 추가에 실패했어요."
+        }
+    }
+
     fun onErrorShown() {
         _error.value = null
     }
@@ -141,17 +180,13 @@ class LibraryViewModel @Inject constructor(
 
     fun toggleLike(review: Review) {
         viewModelScope.launch {
-            val updatedReview = repository.toggleReviewLike(review.id)
-            if (updatedReview != null) {
-                val currentList = _myReviews.value?.toMutableList() ?: mutableListOf()
-                val index = currentList.indexOfFirst { it.id == review.id }
-                if (index != -1) {
-                    currentList[index] = updatedReview
-                    _myReviews.value = currentList
-                    //refreshMyReviews()
-                }
-            } else {
-                _error.value = "좋아요 처리에 실패했습니다."
+            try{
+                val updated = repository.toggleLike(review.id)
+                _myReviews.value =
+                    _myReviews.value?.map { if (it.id == updated.id) updated else it }
+            }
+            catch (e: Exception) {
+                _error.value = "좋아요를 토글하는 데 실패했습니다."
             }
         }
     }

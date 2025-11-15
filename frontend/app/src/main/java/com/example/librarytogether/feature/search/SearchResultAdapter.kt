@@ -30,9 +30,9 @@ class SearchResultAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: SearchItem) {
-            binding.tvTitle.text = item.bookTitle
-            binding.tvAuthor.text = item.authorName
-            Glide.with(binding.imgCover).load(item.coverUrl).into(binding.imgCover)
+            binding.tvTitle.text = item.title
+            binding.tvAuthor.text = item.authors
+            Glide.with(binding.imgCover).load(item.coverImage).into(binding.imgCover)
 
             binding.root.setOnClickListener { onClick(item) }
         }
