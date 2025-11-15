@@ -54,8 +54,6 @@ class TokenAuthenticator (
         )
 
         return response.request.newBuilder()
-            .removeHeader("Authorization")
-            .addHeader("Authorization", "Bearer $newAccess")
-            .build()
+            .removeHeader("Authorization").addHeader("Authorization", "Bearer $newAccess").build()
     }
 }

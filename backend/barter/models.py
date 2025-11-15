@@ -26,7 +26,7 @@ class BarterRequest(models.Model):
     ]
 
     # Basic Information
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    id = models.AutoField(primary_key=True, default=uuid.uuid4, editable=False)
     requester = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="sent_barter_requests"
     )
@@ -93,6 +93,14 @@ class BarterRequest(models.Model):
             models.Index(fields=["status"]),
             models.Index(fields=["created_at"]),
         ]
+
+    def create_transaction(self):
+        if hasattr(self, "transaction"):
+            #...
+            return self.transaction 
+        
+        return BarterTransaction.objects.create(barter_request=self, meeting_type=self.preferred_meeting_type,)
+
 
     def __str__(self):
         return f"Barter Request from {self.requester.username} to {self.recipient.username}"

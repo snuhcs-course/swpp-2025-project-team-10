@@ -15,6 +15,7 @@ from notify.models import Notification
 from barter.models import BarterRequest
 from books.models import Book
 
+from notify.utils import create_notification
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
@@ -158,6 +159,10 @@ def like_post(request, post_id):
                 message=f"{request.user.username} liked your post.",
                 content_object=post,
             )
+
+    else:
+        if request.user != post.author:
+            create_notification(request, 'post_like', post_id=post.id)
 
     # Return updated post
     serializer = PostSerializer(post, context={"request": request})

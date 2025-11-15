@@ -136,6 +136,9 @@ class ReviewLikeView(APIView):
         else:
             # Like: add a new like
             ReviewHelpfulVote.objects.create(review=review, user=request.user)
+            if request.user != review.reviewer:
+                create_notification(request,type_of_notification='review_like',review_id=review.id)
+
 
         # Refresh the review to get updated helpful_votes
         review.refresh_from_db()

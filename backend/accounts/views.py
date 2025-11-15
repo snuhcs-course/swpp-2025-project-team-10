@@ -14,6 +14,7 @@ from django.utils.crypto import get_random_string
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import permissions, serializers, status
 from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.views import APIView
@@ -1086,3 +1087,45 @@ class KakaoSignupView(APIView):
             return Response(data, status=status.HTTP_200_OK)
 
         return response
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def follow_user(request, user_id):
+    try:
+        target_user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+    if target_user == request.user:
+        return Response({"detail": "You cannot follow yourself."}, status=status.HTTP_400_BAD_REQUEST)
+
+    follow, created = Follow.objects.get_or_create(follower=request.user, followed=target_user)
+    if not created:
+        return Response({"detail": "Already following."}, status=status.HTTP_400_BAD_REQUEST)
+
+    return Response({"detail": f"You are now following {target_user.username}."}, status=status.HTTP_201_CREATED)
+
+@api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
+def unfollow_user(request, user_id):
+    try:
+        follow = Follow.objects.get(follower=request.user, followed_id=user_id)
+    except Follow.DoesNotExist:
+        return Response({"detail": "You are not following this user."}, status=status.HTTP_400_BAD_REQUEST)
+
+    follow.delete()
+    return Response({"detail": "Unfollowed successfully."}, status=status.HTTP_204_NO_CONTENT)
+
+@api_view(["GET"])
+def list_followers(request, user_id):
+    followers = Follow.objects.filter(followed_id=user_id).select_related("follower")
+    data = [{"id": f.follower.id, "username": f.follower.username} for f in followers]
+    return Response(data)
+
+@api_view(["GET"])
+def list_following(request, user_id):
+    following = Follow.objects.filter(follower_id=user_id).select_related("followed")
+    data = [{"id": f.followed.id, "username": f.followed.username} for f in following]
+    return Response(data)
+
+
