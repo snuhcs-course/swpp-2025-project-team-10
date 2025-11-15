@@ -14,11 +14,9 @@ class BarterRequest(models.Model):
 
     STATUS_CHOICES = [
         ("pending", "Pending"),
-        ("accepted", "Accepted"),
+        ("counter_proposed", "Counter Proposed"),
         ("rejected", "Rejected"),
-        ("cancelled", "Cancelled"),
         ("completed", "Completed"),
-        ("disputed", "Disputed"),
     ]
 
     MEETING_TYPE_CHOICES = [

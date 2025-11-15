@@ -24,6 +24,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     userName = serializers.CharField(
         source="reviewer.username", read_only=True
     )
+    userId = serializers.IntegerField(source="reviewer.id", read_only=True)
     userProfile = serializers.SerializerMethodField()
     content = serializers.CharField(read_only=True)
     imageUrls = serializers.ListField(
@@ -39,6 +40,7 @@ class ReviewSerializer(serializers.ModelSerializer):
             "id",
             "bookTitle",
             "authorName",
+            "userId",
             "userName",
             "userProfile",
             "content",
@@ -80,7 +82,7 @@ class BookSummarySerializer(serializers.ModelSerializer):
             "id",
             "title",
             "authorNames",
-            "availability",
+            "trade_status",
             "is_for_barter",
         ]
 

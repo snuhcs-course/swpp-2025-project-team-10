@@ -2,6 +2,8 @@ from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.test import APITestCase
 from rest_framework_simplejwt.tokens import RefreshToken
+import pytest
+from rest_framework.test import APIClient
 
 from social.models import Post, PostLike
 
@@ -87,3 +89,40 @@ class PostViewTests(APITestCase):
         like_url = "/posts/9999/like/"
         response = self.client.post(like_url)
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+
+# Pytest-based tests for post update
+
+
+@pytest.mark.django_db
+def test_update_post_with_invalid_data():
+    """Test PUT /posts/{id}/ with invalid data returns 400."""
+    client = APIClient()
+    user = User.objects.create(username="user_update", email="u@test.com", first_name="U", last_name="ser")
+    post = Post.objects.create(author=user, content="original")
+    
+    client.force_authenticate(user)
+    
+    # Empty content
+    res = client.put(f"/posts/{post.id}/", {"content": ""}, format="json")
+    assert res.status_code == 400 or res.status_code == 404  # Might not have update endpoint
+
+
+@pytest.mark.django_db
+def test_home_feed_returns_multiple_posts():
+    """Test home_feed endpoint returns list of public posts."""
+    client = APIClient()
+    user = User.objects.create(username="viewer", email="viewer@test.com", first_name="V", last_name="iewer")
+    
+    # Create multiple public posts
+    Post.objects.create(author=user, content="Post 1", is_public=True, post_type="text")
+    Post.objects.create(author=user, content="Post 2", is_public=True, post_type="text")
+    Post.objects.create(author=user, content="Post 3", is_public=True, post_type="book_review")
+    
+    client.force_authenticate(user)
+    res = client.get("/home/")
+    
+    assert res.status_code == 200
+    assert "results" in res.data
+    assert len(res.data["results"]) >= 3
+

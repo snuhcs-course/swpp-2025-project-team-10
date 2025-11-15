@@ -4,9 +4,9 @@ data class NotificationDto(
     val id: Int,
     val title: String,
     val body: String,
-    val date: String,
+    val created_at: String,
     val is_read: Boolean,
     val deepLink: String?,
-    val notification_type: String?
+    val type: String?
 )
 

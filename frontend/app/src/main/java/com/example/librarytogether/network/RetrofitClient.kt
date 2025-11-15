@@ -18,6 +18,7 @@ object MockConfig {
 object RetrofitClient {
     // Use 192.0.0.2 for physical device on same network
     // Use 10.0.2.2 for emulator
+    // Use 15.165.200.135:8000 for AWS server
     private const val BASE_URL = "http://15.165.200.135:8000/"
 
     @Volatile

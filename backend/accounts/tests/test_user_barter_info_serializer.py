@@ -20,8 +20,6 @@ def test_user_barter_info_includes_full_taste_and_counts():
         email="me@example.com",
         first_name="Me",
         last_name="User",
-        latitude=37.5665,
-        longitude=126.9780,
     )
     other = User.objects.create(
         username="other",
@@ -30,8 +28,6 @@ def test_user_barter_info_includes_full_taste_and_counts():
         last_name="User",
         bio="Hello",
         location="Seoul",
-        latitude=37.5660,
-        longitude=126.9770,
     )
 
     # Taste (full)
@@ -45,8 +41,6 @@ def test_user_barter_info_includes_full_taste_and_counts():
         reading_purposes=[ReadingPurpose.HEALING, ReadingPurpose.CULTURE, ReadingPurpose.ESCAPISM],
         trade_place_name="Cafe",
         trade_address="Gangnam-gu",
-        trade_latitude=37.5,
-        trade_longitude=127.0,
         current_step=7,
     )
 
@@ -59,7 +53,7 @@ def test_user_barter_info_includes_full_taste_and_counts():
     b2.authors.add(author)
     BookWishlist.objects.create(user=other, book=b1)
 
-    # Serialize with request context (so distance_km can be computed)
+    # Serialize with request context
     factory = APIRequestFactory()
     request = factory.get("/")
     request.user = me
@@ -79,15 +73,10 @@ def test_user_barter_info_includes_full_taste_and_counts():
     assert data["taste"]["preferred_length"] == BookLength.MEDIUM
     assert data["taste"]["trade_place_name"] == "Cafe"
     assert data["taste"]["trade_address"] == "Gangnam-gu"
-    assert "trade_latitude" not in data["taste"]
-    assert "trade_longitude" not in data["taste"]
 
     # Collections
     assert isinstance(data["library"], list) and len(data["library"]) >= 2
     assert isinstance(data["wishlist"], list) and len(data["wishlist"]) >= 1
-
-    # Distance computed
-    assert data["distance_km"] is not None
 
     # Reviews info present even if none exist
     assert data["reviewCount"] == 0

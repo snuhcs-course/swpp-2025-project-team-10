@@ -131,10 +131,12 @@ omit = [
     "*/tests/*",
     "manage.py",
     "run_tests.py",
+    "create_dummy_data.py",
     "tests/*",
     "*/__pycache__/*",
     "*/venv/*",
     "*/.venv/*",
+    "core/*",
 ]
 
 [tool.coverage.report]

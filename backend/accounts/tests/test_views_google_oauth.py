@@ -257,3 +257,14 @@ class GoogleSignupViewTestCase(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertFalse(response.data["ok"])
+
+    @patch("google.oauth2.id_token.verify_oauth2_token")
+    def test_google_signup_request_exception(self, mock_verify):
+        """Test Google signup when exception occurs during verification."""
+        mock_verify.side_effect = Exception("Network error")
+
+        data = {"idToken": "valid_token"}
+        response = self.client.post(self.google_signup_url, data, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertFalse(response.data["ok"])

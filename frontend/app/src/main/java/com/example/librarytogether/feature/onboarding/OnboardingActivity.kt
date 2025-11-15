@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatActivity
 import com.example.librarytogether.R
 import dagger.hilt.android.AndroidEntryPoint
 
-
 @AndroidEntryPoint
 class OnboardingActivity : AppCompatActivity() {
 

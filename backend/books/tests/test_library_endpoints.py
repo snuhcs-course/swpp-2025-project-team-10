@@ -207,3 +207,56 @@ class LibraryWishlistEndpointTestCase(TestCase):
         response = self.client.get(self.url)
         
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+
+class BookWishlistToggleTestCase(TestCase):
+    """Test cases for wishlist add/remove functionality."""
+
+    def setUp(self):
+        """Set up test data."""
+        self.client = APIClient()
+        self.user = User.objects.create_user(
+            username="wisher",
+            email="wish@example.com",
+            password="testpass123",
+        )
+        self.publisher = Publisher.objects.create(name="Test Publisher")
+        self.author = Author.objects.create(name="Test Author")
+        self.book = Book.objects.create(
+            title="Wishlist Book",
+            owner=self.user,
+            publisher=self.publisher,
+        )
+        self.book.authors.add(self.author)
+        self.client.force_authenticate(user=self.user)
+
+    def test_remove_from_wishlist_success(self):
+        """Test removing a book from wishlist."""
+        # Add to wishlist first
+        BookWishlist.objects.create(user=self.user, book=self.book)
+        
+        url = f"/library/books/{self.book.id}/wishlist/"
+        response = self.client.delete(url)
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertFalse(BookWishlist.objects.filter(user=self.user, book=self.book).exists())
+
+    def test_remove_from_wishlist_not_in_list(self):
+        """Test removing a book that's not in wishlist."""
+        url = f"/library/books/{self.book.id}/wishlist/"
+        response = self.client.delete(url)
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIn("Not in wishlist", response.data["message"])
+
+    def test_add_to_wishlist_duplicate(self):
+        """Test adding book to wishlist when already in list."""
+        # Add to wishlist first
+        BookWishlist.objects.create(user=self.user, book=self.book)
+        
+        url = f"/library/books/{self.book.id}/wishlist/"
+        response = self.client.post(url)
+        
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # Should not create duplicate
+        self.assertEqual(BookWishlist.objects.filter(user=self.user, book=self.book).count(), 1)

@@ -289,3 +289,134 @@ class ProfileUpdateSerializerTestCase(TestCase):
             self.user, data=data, partial=True
         )
         self.assertTrue(serializer.is_valid())
+
+
+class CustomTokenObtainPairSerializerTestCase(TestCase):
+    """Test cases for CustomTokenObtainPairSerializer."""
+
+    def setUp(self):
+        """Set up test data."""
+        self.user = User.objects.create_user(
+            username="activeuser",
+            email="active@test.com",
+            password="pass123",
+            first_name="Active",
+            last_name="User",
+        )
+
+    def test_inactive_user_login(self):
+        """Test login with inactive user account."""
+        from accounts.serializers import CustomTokenObtainPairSerializer
+        
+        # Deactivate user
+        self.user.is_active = False
+        self.user.save()
+
+        serializer = CustomTokenObtainPairSerializer(data={
+            "username": "activeuser",
+            "password": "pass123",
+        })
+
+        with self.assertRaises(Exception):
+            serializer.validate({"username": "activeuser", "password": "pass123"})
+
+    def test_missing_credentials(self):
+        """Test login without username or password."""
+        from accounts.serializers import CustomTokenObtainPairSerializer
+        
+        serializer = CustomTokenObtainPairSerializer(data={})
+
+        with self.assertRaises(Exception):
+            serializer.validate({})
+
+
+class SocialAuthSerializerTestCase(TestCase):
+    """Test cases for SocialAuthSerializer."""
+
+    def test_valid_social_auth_data(self):
+        """Test serializer with valid social auth data."""
+        data = {
+            "provider": "google",
+            "access_token": "valid_token_123"
+        }
+        serializer = SocialAuthSerializer(data=data)
+        self.assertTrue(serializer.is_valid())
+
+    def test_missing_provider(self):
+        """Test serializer with missing provider."""
+        data = {
+            "access_token": "valid_token_123"
+        }
+        serializer = SocialAuthSerializer(data=data)
+        self.assertFalse(serializer.is_valid())
+
+    def test_missing_access_token(self):
+        """Test serializer with missing access token."""
+        data = {
+            "provider": "google"
+        }
+        serializer = SocialAuthSerializer(data=data)
+        self.assertFalse(serializer.is_valid())
+
+    def test_invalid_provider(self):
+        """Test serializer with invalid provider."""
+        data = {
+            "provider": "invalid_provider",
+            "access_token": "valid_token_123"
+        }
+        serializer = SocialAuthSerializer(data=data)
+        self.assertFalse(serializer.is_valid())
+
+
+class GoogleAuthSerializerTestCase(TestCase):
+    """Test cases for GoogleAuthSerializer."""
+
+    def test_valid_id_token(self):
+        """Test serializer with valid ID token."""
+        data = {"idToken": "valid_google_id_token"}
+        serializer = GoogleAuthSerializer(data=data)
+        self.assertTrue(serializer.is_valid())
+
+    def test_missing_id_token(self):
+        """Test serializer with missing ID token."""
+        data = {}
+        serializer = GoogleAuthSerializer(data=data)
+        self.assertFalse(serializer.is_valid())
+
+    def test_empty_id_token(self):
+        """Test serializer with empty ID token."""
+        data = {"idToken": ""}
+        serializer = GoogleAuthSerializer(data=data)
+        self.assertFalse(serializer.is_valid())
+
+
+class PasswordResetSerializerTestCase(TestCase):
+    """Test cases for password reset serializers."""
+
+    def test_password_too_short(self):
+        """Test password validation for too short password."""
+        from accounts.serializers import UserRegistrationSerializer
+        
+        data = {
+            "username": "testuser",
+            "email": "test@test.com",
+            "password": "short",  # Less than 6 chars
+            "first_name": "Test",
+            "last_name": "User"
+        }
+        serializer = UserRegistrationSerializer(data=data)
+        self.assertFalse(serializer.is_valid())
+
+    def test_password_no_letter(self):
+        """Test password validation for password without letters."""
+        from accounts.serializers import UserRegistrationSerializer
+        
+        data = {
+            "username": "testuser",
+            "email": "test@test.com",
+            "password": "123456",  # No letters
+            "first_name": "Test",
+            "last_name": "User"
+        }
+        serializer = UserRegistrationSerializer(data=data)
+        self.assertFalse(serializer.is_valid())

@@ -34,10 +34,10 @@ class NotificationAdapter(
             tvUser.text = item.title
             tvBody.text = item.body
 
-            tvTime.text = TimeUtils.relativeTime(itemView.context, item.createdAt)
+            tvTime.text = TimeUtils.relativeTime(itemView.context, item.created_at)
 
             btnAction.text = "교환"
-            tvUser.setTypeface(null, if (item.isRead) Typeface.NORMAL else Typeface.BOLD)
+            tvUser.setTypeface(null, if (item.is_read) Typeface.NORMAL else Typeface.BOLD)
             Glide.with(itemView).load(R.drawable.sample_profile).into(imgProfile)
 
             itemView.setOnClickListener { clicks.onClickItem(item) }

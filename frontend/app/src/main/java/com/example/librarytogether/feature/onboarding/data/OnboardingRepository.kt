@@ -1,12 +1,12 @@
 package com.example.librarytogether.feature.onboarding.data
 
 import android.util.Log
-import com.example.librarytogether.feature.onboarding.data.*
 import javax.inject.Inject
 
 class OnboardingRepository @Inject constructor(
     private val api: OnboardingApi
 ) {
+
     private val selectedBooks = mutableListOf<Int>()
     private val selectedAuthors = mutableListOf<Int>()
     private val selectedGenres = mutableListOf<Int>()
@@ -28,11 +28,14 @@ class OnboardingRepository @Inject constructor(
     )
 
     fun getGenres() = listOf(
-        LabelId(1, "판타지"),
-        LabelId(2, "로맨스"),
-        LabelId(3, "추리"),
-        LabelId(4, "SF"),
-        LabelId(5, "에세이")
+        LabelId(1, "현대소설"),
+        LabelId(2, "고전소설"),
+        LabelId(3, "에세이"),
+        LabelId(4, "시/희곡"),
+        LabelId(5, "과학·기술"),
+        LabelId(6, "인문·사회"),
+        LabelId(7, "역사·철학"),
+        LabelId(8, "예술·언어")
     )
 
     fun saveSelection(step: Int, ids: List<Int>) {
@@ -52,7 +55,6 @@ class OnboardingRepository @Inject constructor(
         }
     }
 
-
     suspend fun submitSelections(): Boolean {
         val req = OnboardingSubmitRequest(
             book_ids = selectedBooks,
@@ -67,36 +69,3 @@ class OnboardingRepository @Inject constructor(
         }
     }
 }
-
-
-// Upgrade 할 버전. But not now
-//** class OnboardingRepository @Inject constructor(
-//    private val api: OnboardingApi
-//) {
-//    // State is can be REMOVED from the repository.
-//
-//    fun getBooks(): List<LabelId> { ... }
-//    fun getAuthors(): List<LabelId> { ... }
-//    fun getGenres(): List<LabelId> { ... }
-//
-//    // This function now takes all selections at once.
-//    suspend fun submitSelections(
-//        bookIds: List<Int>,
-//        authorIds: List<Int>,
-//        genreIds: List<Int>
-//    ): Boolean {
-//        val req = OnboardingSubmitRequest(
-//            book_ids = bookIds,
-//            author_ids = authorIds,
-//            genre_ids = genreIds
-//        )
-//        return try {
-//            val response = api.submit(req)
-//            Log.d("OnboardingRepo", "Submit successful: ${response.isSuccessful}")
-//            response.isSuccessful
-//        } catch (e: Exception) {
-//            Log.e("OnboardingRepo", "submitSelections failed", e)
-//            false
-//        }
-//    }
-//}
