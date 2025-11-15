@@ -154,6 +154,7 @@ class UserSerializer(serializers.ModelSerializer):
     follower_count = serializers.ReadOnlyField()
     following_count = serializers.ReadOnlyField()
     books_count = serializers.ReadOnlyField()
+    has_initial_taste = serializers.BooleanField(read_only=True)
 
     class Meta:
         model = User
@@ -177,12 +178,15 @@ class UserSerializer(serializers.ModelSerializer):
             "books_count",
             "created_at",
             "last_active",
+            "has_initial_taste",
         )
         read_only_fields = (
             "id",
             "reputation_score",
             "successful_trades",
             "created_at",
+            "has_initial_taste",
+
         )
 
 

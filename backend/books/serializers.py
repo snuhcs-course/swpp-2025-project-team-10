@@ -6,7 +6,7 @@ Handles book reviews and related data serialization.
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
-from .models import Book, BookReview
+from .models import Book, BookReview, BookCollection, ReadingStatus
 
 User = get_user_model()
 
@@ -129,3 +129,59 @@ class ReviewLikeResponseSerializer(serializers.Serializer):
 
     class Meta:
         fields = ["review"]
+
+class BookSerializer(serializers.ModelSerializer):
+
+    # Make owner read-only so it's set automatically in the view
+    owner = serializers.ReadOnlyField(source='owner.username')
+
+    class Meta:
+        model = Book
+        fields = [
+            "id",
+            "title",
+            "authors",
+            "publisher",
+            "publication_date",
+            "isbn_13",
+            "description",
+            "cover_image",
+            "is_for_barter",
+            "owner",
+        ]
+        read_only_fields = ['id', 'owner']  # owner is set in the view
+
+class BookCollectionSerializer(serializers.ModelSerializer):
+    books = BookSerializer(many=True, read_only=True)
+    book_count = serializers.ReadOnlyField()
+
+    class Meta:
+        model = BookCollection
+        fields = [
+            "id", "name", "description", "is_public",
+            "books", "book_count", "created_at", "updated_at"
+        ]
+
+class ReadingStatusSerializer(serializers.ModelSerializer):
+    book_title = serializers.CharField(source="book.title", read_only=True)
+
+    # Explicitly use PrimaryKeyRelatedField for writing and make it WRITE_ONLY
+    # This clearly documents that 'book' is only for input (POST/PATCH)
+    book = serializers.PrimaryKeyRelatedField(
+        queryset=Book.objects.all(),
+        write_only=True
+    )
+
+    class Meta:
+        model = ReadingStatus
+        fields = [
+            "id",
+            "book", #Write-only for input ID
+            "book_title", #Read-only for output title
+            "status",
+            "pages_read",
+            "start_date",
+            "finish_date",
+            "personal_rating",
+            "notes",
+        ]

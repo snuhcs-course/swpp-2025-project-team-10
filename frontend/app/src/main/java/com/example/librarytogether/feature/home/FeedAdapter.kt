@@ -86,6 +86,19 @@ class FeedAdapter(
         }
 
         fun bind(post: Post) = with(binding) {
+
+            // UI Initialize (재활용 잔상 제거)
+            tvAuthor.text = ""
+            tvPoster.text = ""
+            tvTitle.text = ""
+            tvContent.text = ""
+            ivProfileImage.setImageDrawable(null)
+            vpImages.adapter = null
+            tabDots.removeAllTabs()
+            mcPostImage.isVisible = false
+            tvContent.maxLines = MAX_LINES
+            tvContent.ellipsize = TextUtils.TruncateAt.END
+
             current = post
 
             tvAuthor.text = post.authorName
@@ -190,6 +203,9 @@ object PostDiff : DiffUtil.ItemCallback<Post>() {
     override fun areItemsTheSame(oldItem: Post, newItem: Post): Boolean =
         oldItem.id == newItem.id
 
-    override fun areContentsTheSame(oldItem: Post, newItem: Post): Boolean =
-        oldItem == newItem
+
+    override fun areContentsTheSame(oldItem: Post, newItem: Post): Boolean {
+        return oldItem == newItem
+    }
+
 }

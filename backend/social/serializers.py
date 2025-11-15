@@ -20,6 +20,9 @@ class PostSerializer(serializers.ModelSerializer):
     posterName = serializers.CharField(
         source="author.username", read_only=True
     )
+    # Added: posterId and posterLocation for profile navigation
+    posterId = serializers.IntegerField(source="author.id", read_only=True)
+    posterLocation = serializers.CharField(source="author.location", read_only=True)
     posterProfile = serializers.SerializerMethodField()
     bookTitle = serializers.SerializerMethodField()
     authorName = serializers.SerializerMethodField()
@@ -46,7 +49,9 @@ class PostSerializer(serializers.ModelSerializer):
         model = Post
         fields = [
             "id",
+            "posterId",
             "posterName",
+            "posterLocation",
             "posterProfile",
             "bookTitle",
             "authorName",
@@ -62,7 +67,9 @@ class PostSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = [
             "id",
+            "posterId",
             "posterName",
+            "posterLocation",
             "posterProfile",
             "likeCount",
             "commentCount",

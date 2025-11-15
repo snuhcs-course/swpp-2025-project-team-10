@@ -13,7 +13,8 @@ object MockConfig {
     // JWT 흐름까지 테스트할 건지
     const val TEST_JWT_FLOW = false
 }
-
+// user1~20@example.com
+// testpass123
 object RetrofitClient {
     // Use 192.0.0.2 for physical device on same network
     // Use 10.0.2.2 for emulator

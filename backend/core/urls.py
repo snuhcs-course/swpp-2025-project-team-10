@@ -9,7 +9,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import include, path
-from accounts.views import UserProfileMeView
+from accounts.views import UserProfileMeView, follow_view
 from drf_spectacular.views import (
     SpectacularAPIView,
     SpectacularRedocView,
@@ -58,6 +58,8 @@ urlpatterns = [
     path("library/", include("books.urls")),  # User's library (reviews, books)
     path("", include("social.urls")),  # Social features (home feed, posts)
     path("barter/", include("barter.urls")),  # Barter requests
+    # Follow API to match frontend expectations
+    path("users/follow/<int:user_id>/", follow_view, name="follow_user"),
     # path("api/v1/notifications/", include("notify.urls")),
 ]
 

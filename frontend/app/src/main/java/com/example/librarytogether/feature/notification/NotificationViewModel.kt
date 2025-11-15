@@ -32,9 +32,9 @@ class NotificationViewModel @Inject constructor(
 
     fun markAsRead(item: NotificationDto) {
         viewModelScope.launch {
-            if (!item.isRead && repo.markAsRead(item.id)) {
+            if (!item.is_read && repo.markAsRead(item.id)) {
                 _items.value = _items.value?.map {
-                    if (it.id == item.id) it.copy(isRead = true) else it
+                    if (it.id == item.id) it.copy(is_read = true) else it
                 }
             }
         }
