@@ -18,6 +18,83 @@ from notify.models import Notification
 User = get_user_model()
 
 
+# ============== Helper Functions ==============
+
+
+def create_barter_request(client, user, recipient_id, requested_book_id, message=None):
+    """Helper function to create a barter request."""
+    client.force_authenticate(user)
+    data = {
+        "recipient_id": recipient_id,
+        "requested_book_id": str(requested_book_id),
+    }
+    if message:
+        data["message"] = message
+    res = client.post(
+        reverse("barter:create-request"),
+        data,
+        format="json",
+    )
+    return res
+
+
+def counter_propose_barter(client, user, request_id, offered_book_id, response_message=None):
+    """Helper function to counter-propose a barter."""
+    client.force_authenticate(user)
+    data = {"offered_book_id": str(offered_book_id)}
+    if response_message:
+        data["response_message"] = response_message
+    res = client.post(
+        reverse("barter:counter-propose", kwargs={"request_id": request_id}),
+        data,
+        format="json",
+    )
+    return res
+
+
+def accept_barter_request(client, user, request_id, response_message=None):
+    """Helper function to accept a barter request."""
+    client.force_authenticate(user)
+    data = {}
+    if response_message:
+        data["response_message"] = response_message
+    res = client.post(
+        reverse("barter:accept-request", kwargs={"request_id": request_id}),
+        data,
+        format="json",
+    )
+    return res
+
+
+def reject_barter_request(client, user, request_id, response_message=None):
+    """Helper function to reject a barter request."""
+    client.force_authenticate(user)
+    data = {}
+    if response_message:
+        data["response_message"] = response_message
+    res = client.post(
+        reverse("barter:reject-request", kwargs={"request_id": request_id}),
+        data,
+        format="json",
+    )
+    return res
+
+
+def assert_notification_created(recipient, notification_type, count=1):
+    """Helper function to assert notification creation."""
+    actual_count = Notification.objects.filter(
+        recipient=recipient,
+        notification_type=notification_type
+    ).count()
+    assert actual_count == count, (
+        f"Expected {count} notification(s) of type '{notification_type}' "
+        f"for {recipient.username}, but found {actual_count}"
+    )
+
+
+# ============== Fixtures ==============
+
+
 @pytest.fixture
 def setup_users_and_books():
     """Create test users and books for barter scenarios."""
@@ -102,15 +179,9 @@ def test_successful_barter_flow(setup_users_and_books):
     book_b1 = data["book_b1"]
     
     # Step 1: A requests B's book (without specifying offered book)
-    client.force_authenticate(user_a)
-    res = client.post(
-        reverse("barter:create-request"),
-        {
-            "recipient_id": user_b.id,
-            "requested_book_id": str(book_b1.id),
-            "message": "I want your book!"
-        },
-        format="json",
+    res = create_barter_request(
+        client, user_a, user_b.id, book_b1.id,
+        message="I want your book!"
     )
     assert res.status_code == 201
     barter_id = res.data["barter"]["id"]
@@ -128,24 +199,16 @@ def test_successful_barter_flow(setup_users_and_books):
     assert book_b1.trade_status == "not_available"
     
     # Verify notification sent to B
-    assert Notification.objects.filter(
-        recipient=user_b,
-        notification_type="barter_request"
-    ).exists()
+    assert_notification_created(user_b, "barter_request", count=1)
     
     # Verify phone numbers are NOT exposed in pending status
     assert res.data["barter"]["requester_phone"] is None
     assert res.data["barter"]["recipient_phone"] is None
     
     # Step 2: B counter-proposes with book from A's library
-    client.force_authenticate(user_b)
-    res = client.post(
-        reverse("barter:counter-propose", kwargs={"request_id": barter_id}),
-        {
-            "offered_book_id": str(book_a1.id),
-            "response_message": "I want your Book A1 in exchange"
-        },
-        format="json",
+    res = counter_propose_barter(
+        client, user_b, barter_id, book_a1.id,
+        response_message="I want your Book A1 in exchange"
     )
     assert res.status_code == 200
     
@@ -160,21 +223,16 @@ def test_successful_barter_flow(setup_users_and_books):
     assert book_a1.trade_status == "not_available"
     
     # Verify notification sent to A
-    assert Notification.objects.filter(
-        recipient=user_a,
-        notification_type="barter_counter_proposed"
-    ).exists()
+    assert_notification_created(user_a, "barter_counter_proposed", count=1)
     
     # Verify phone numbers still NOT exposed in counter_proposed status
     assert res.data["barter"]["requester_phone"] is None
     assert res.data["barter"]["recipient_phone"] is None
     
     # Step 3: A accepts counter-proposal
-    client.force_authenticate(user_a)
-    res = client.post(
-        reverse("barter:accept-request", kwargs={"request_id": barter_id}),
-        {"response_message": "Deal!"},
-        format="json",
+    res = accept_barter_request(
+        client, user_a, barter_id,
+        response_message="Deal!"
     )
     assert res.status_code == 200
     
@@ -198,10 +256,7 @@ def test_successful_barter_flow(setup_users_and_books):
     assert book_b1.is_for_barter is False
     
     # Verify notification sent to B
-    assert Notification.objects.filter(
-        recipient=user_b,
-        notification_type="barter_completed"
-    ).exists()
+    assert_notification_created(user_b, "barter_completed", count=1)
     
     # Verify phone numbers ARE exposed in completed status
     assert res.data["barter"]["requester_phone"] == user_a.phone_number
@@ -218,23 +273,13 @@ def test_reject_initial_request(setup_users_and_books):
     book_b1 = data["book_b1"]
     
     # A creates request
-    client.force_authenticate(user_a)
-    res = client.post(
-        reverse("barter:create-request"),
-        {
-            "recipient_id": user_b.id,
-            "requested_book_id": str(book_b1.id),
-        },
-        format="json",
-    )
+    res = create_barter_request(client, user_a, user_b.id, book_b1.id)
     barter_id = res.data["barter"]["id"]
     
     # B rejects
-    client.force_authenticate(user_b)
-    res = client.post(
-        reverse("barter:reject-request", kwargs={"request_id": barter_id}),
-        {"response_message": "Not interested"},
-        format="json",
+    res = reject_barter_request(
+        client, user_b, barter_id,
+        response_message="Not interested"
     )
     assert res.status_code == 200
     
@@ -247,10 +292,7 @@ def test_reject_initial_request(setup_users_and_books):
     assert book_b1.trade_status == "available"
     
     # Verify notification sent to A
-    assert Notification.objects.filter(
-        recipient=user_a,
-        notification_type="barter_rejected"
-    ).exists()
+    assert_notification_created(user_a, "barter_rejected", count=1)
 
 
 @pytest.mark.django_db
@@ -264,28 +306,16 @@ def test_reject_counter_proposal(setup_users_and_books):
     book_b1 = data["book_b1"]
     
     # A creates request
-    client.force_authenticate(user_a)
-    res = client.post(
-        reverse("barter:create-request"),
-        {"recipient_id": user_b.id, "requested_book_id": str(book_b1.id)},
-        format="json",
-    )
+    res = create_barter_request(client, user_a, user_b.id, book_b1.id)
     barter_id = res.data["barter"]["id"]
     
     # B counter-proposes
-    client.force_authenticate(user_b)
-    client.post(
-        reverse("barter:counter-propose", kwargs={"request_id": barter_id}),
-        {"offered_book_id": str(book_a1.id)},
-        format="json",
-    )
+    counter_propose_barter(client, user_b, barter_id, book_a1.id)
     
     # A rejects counter-proposal
-    client.force_authenticate(user_a)
-    res = client.post(
-        reverse("barter:reject-request", kwargs={"request_id": barter_id}),
-        {"response_message": "Don't like your choice"},
-        format="json",
+    res = reject_barter_request(
+        client, user_a, barter_id,
+        response_message="Don't like your choice"
     )
     assert res.status_code == 200
     
@@ -309,15 +339,7 @@ def test_cannot_request_book_not_for_barter(setup_users_and_books):
     user_b = data["user_b"]
     book_b2 = data["book_b2"]  # is_for_barter=False
     
-    client.force_authenticate(user_a)
-    res = client.post(
-        reverse("barter:create-request"),
-        {
-            "recipient_id": user_b.id,
-            "requested_book_id": str(book_b2.id),
-        },
-        format="json",
-    )
+    res = create_barter_request(client, user_a, user_b.id, book_b2.id)
     assert res.status_code == 400
     assert "owner disabled trading" in res.data["error"]
 
@@ -337,21 +359,11 @@ def test_cannot_counter_propose_book_not_for_barter(setup_users_and_books):
     book_a1.save()
     
     # A creates request
-    client.force_authenticate(user_a)
-    res = client.post(
-        reverse("barter:create-request"),
-        {"recipient_id": user_b.id, "requested_book_id": str(book_b1.id)},
-        format="json",
-    )
+    res = create_barter_request(client, user_a, user_b.id, book_b1.id)
     barter_id = res.data["barter"]["id"]
     
     # B tries to counter-propose with non-tradeable book
-    client.force_authenticate(user_b)
-    res = client.post(
-        reverse("barter:counter-propose", kwargs={"request_id": barter_id}),
-        {"offered_book_id": str(book_a1.id)},
-        format="json",
-    )
+    res = counter_propose_barter(client, user_b, barter_id, book_a1.id)
     assert res.status_code == 400
     assert "owner disabled trading" in res.data["error"]
 
@@ -369,12 +381,7 @@ def test_cannot_request_book_in_pending_trade(setup_users_and_books):
     book_b1.trade_status = "not_available"
     book_b1.save()
     
-    client.force_authenticate(user_a)
-    res = client.post(
-        reverse("barter:create-request"),
-        {"recipient_id": user_b.id, "requested_book_id": str(book_b1.id)},
-        format="json",
-    )
+    res = create_barter_request(client, user_a, user_b.id, book_b1.id)
     assert res.status_code == 400
     assert "already in a pending trade" in res.data["error"]
 
@@ -390,27 +397,14 @@ def test_only_requester_can_accept(setup_users_and_books):
     book_b1 = data["book_b1"]
     
     # A creates request
-    client.force_authenticate(user_a)
-    res = client.post(
-        reverse("barter:create-request"),
-        {"recipient_id": user_b.id, "requested_book_id": str(book_b1.id)},
-        format="json",
-    )
+    res = create_barter_request(client, user_a, user_b.id, book_b1.id)
     barter_id = res.data["barter"]["id"]
     
     # B counter-proposes
-    client.force_authenticate(user_b)
-    client.post(
-        reverse("barter:counter-propose", kwargs={"request_id": barter_id}),
-        {"offered_book_id": str(book_a1.id)},
-        format="json",
-    )
+    counter_propose_barter(client, user_b, barter_id, book_a1.id)
     
     # B tries to accept (should fail)
-    res = client.post(
-        reverse("barter:accept-request", kwargs={"request_id": barter_id}),
-        format="json",
-    )
+    res = accept_barter_request(client, user_b, barter_id)
     assert res.status_code == 403
 
 
@@ -425,20 +419,11 @@ def test_only_recipient_can_counter_propose(setup_users_and_books):
     book_b1 = data["book_b1"]
     
     # A creates request
-    client.force_authenticate(user_a)
-    res = client.post(
-        reverse("barter:create-request"),
-        {"recipient_id": user_b.id, "requested_book_id": str(book_b1.id)},
-        format="json",
-    )
+    res = create_barter_request(client, user_a, user_b.id, book_b1.id)
     barter_id = res.data["barter"]["id"]
     
     # A tries to counter-propose (should fail)
-    res = client.post(
-        reverse("barter:counter-propose", kwargs={"request_id": barter_id}),
-        {"offered_book_id": str(book_a1.id)},
-        format="json",
-    )
+    res = counter_propose_barter(client, user_a, barter_id, book_a1.id)
     assert res.status_code == 403
 
 
@@ -452,19 +437,11 @@ def test_cannot_accept_without_counter_proposal(setup_users_and_books):
     book_b1 = data["book_b1"]
     
     # A creates request
-    client.force_authenticate(user_a)
-    res = client.post(
-        reverse("barter:create-request"),
-        {"recipient_id": user_b.id, "requested_book_id": str(book_b1.id)},
-        format="json",
-    )
+    res = create_barter_request(client, user_a, user_b.id, book_b1.id)
     barter_id = res.data["barter"]["id"]
     
     # A tries to accept immediately (should fail - status is pending, not counter_proposed)
-    res = client.post(
-        reverse("barter:accept-request", kwargs={"request_id": barter_id}),
-        format="json",
-    )
+    res = accept_barter_request(client, user_a, barter_id)
     assert res.status_code == 400
     assert "expected 'counter_proposed'" in res.data["error"]
 
@@ -480,19 +457,13 @@ def test_both_parties_can_reject(setup_users_and_books):
     book_b1 = data["book_b1"]
     
     # Scenario 1: A rejects after creating request (changes mind)
-    client.force_authenticate(user_a)
-    res = client.post(
-        reverse("barter:create-request"),
-        {"recipient_id": user_b.id, "requested_book_id": str(book_b1.id)},
-        format="json",
-    )
+    res = create_barter_request(client, user_a, user_b.id, book_b1.id)
     barter_id = res.data["barter"]["id"]
     
     # A changes mind and cancels
-    res = client.post(
-        reverse("barter:reject-request", kwargs={"request_id": barter_id}),
-        {"response_message": "Changed my mind"},
-        format="json",
+    res = reject_barter_request(
+        client, user_a, barter_id,
+        response_message="Changed my mind"
     )
     assert res.status_code == 200
     assert BarterRequest.objects.get(pk=barter_id).status == "rejected"
@@ -509,32 +480,15 @@ def test_cannot_reject_already_completed(setup_users_and_books):
     book_b1 = data["book_b1"]
     
     # Complete a trade
-    client.force_authenticate(user_a)
-    res = client.post(
-        reverse("barter:create-request"),
-        {"recipient_id": user_b.id, "requested_book_id": str(book_b1.id)},
-        format="json",
-    )
+    res = create_barter_request(client, user_a, user_b.id, book_b1.id)
     barter_id = res.data["barter"]["id"]
     
-    client.force_authenticate(user_b)
-    client.post(
-        reverse("barter:counter-propose", kwargs={"request_id": barter_id}),
-        {"offered_book_id": str(book_a1.id)},
-        format="json",
-    )
+    counter_propose_barter(client, user_b, barter_id, book_a1.id)
     
-    client.force_authenticate(user_a)
-    client.post(
-        reverse("barter:accept-request", kwargs={"request_id": barter_id}),
-        format="json",
-    )
+    accept_barter_request(client, user_a, barter_id)
     
     # Try to reject completed trade (should fail)
-    res = client.post(
-        reverse("barter:reject-request", kwargs={"request_id": barter_id}),
-        format="json",
-    )
+    res = reject_barter_request(client, user_a, barter_id)
     assert res.status_code == 400
     assert "already completed" in res.data["error"]
 
@@ -549,12 +503,7 @@ def test_message_includes_location(setup_users_and_books):
     book_b1 = data["book_b1"]
     
     # A creates request without custom message
-    client.force_authenticate(user_a)
-    res = client.post(
-        reverse("barter:create-request"),
-        {"recipient_id": user_b.id, "requested_book_id": str(book_b1.id)},
-        format="json",
-    )
+    res = create_barter_request(client, user_a, user_b.id, book_b1.id)
     
     barter = BarterRequest.objects.get(pk=res.data["barter"]["id"])
     assert "Seoul" in barter.message  # user_a's location

@@ -23,7 +23,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
-from .models import UserPreferences, UserTaste
+from .models import UserPreferences, UserTaste, Follow
 from .serializers import (
     CustomTokenObtainPairSerializer,
     GoogleAuthSerializer,
@@ -1088,44 +1088,52 @@ class KakaoSignupView(APIView):
 
         return response
 
-@api_view(['POST'])
-@permission_classes([IsAuthenticated])
-def follow_user(request, user_id):
+
+@api_view(["POST", "DELETE"])
+@permission_classes([permissions.IsAuthenticated])
+def follow_view(request, user_id: int):
+    """
+    Follow/unfollow a user by ID.
+
+    - POST /users/follow/{userId}/    -> follow
+    - DELETE /users/follow/{userId}/  -> unfollow
+
+    Returns 200 on success. Body is optional (frontend expects Unit).
+    """
     try:
-        target_user = User.objects.get(id=user_id)
+        target = User.objects.get(pk=user_id)
     except User.DoesNotExist:
-        return Response({"detail": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+        return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
 
-    if target_user == request.user:
-        return Response({"detail": "You cannot follow yourself."}, status=status.HTTP_400_BAD_REQUEST)
+    if target.id == request.user.id:
+        return Response({"error": "Cannot follow yourself"}, status=status.HTTP_400_BAD_REQUEST)
 
-    follow, created = Follow.objects.get_or_create(follower=request.user, followed=target_user)
-    if not created:
-        return Response({"detail": "Already following."}, status=status.HTTP_400_BAD_REQUEST)
+    if request.method == "POST":
+        # Create follow if not exists
+        _, created = Follow.objects.get_or_create(
+            follower=request.user,
+            following=target,
+        )
 
-    return Response({"detail": f"You are now following {target_user.username}."}, status=status.HTTP_201_CREATED)
+        # Optionally notify the target user on first follow
+        if created:
+            try:
+                from notify.models import Notification
 
-@api_view(["DELETE"])
-@permission_classes([IsAuthenticated])
-def unfollow_user(request, user_id):
-    try:
-        follow = Follow.objects.get(follower=request.user, followed_id=user_id)
-    except Follow.DoesNotExist:
-        return Response({"detail": "You are not following this user."}, status=status.HTTP_400_BAD_REQUEST)
+                Notification.objects.create(
+                    recipient=target,
+                    sender=request.user,
+                    notification_type="user_followed",
+                    title=f"{request.user.username} started following you",
+                    message=f"{request.user.username} is now following you.",
+                )
+            except Exception:
+                # Notification failures should not break the API contract
+                pass
 
-    follow.delete()
-    return Response({"detail": "Unfollowed successfully."}, status=status.HTTP_204_NO_CONTENT)
+        return Response({}, status=status.HTTP_200_OK)
 
-@api_view(["GET"])
-def list_followers(request, user_id):
-    followers = Follow.objects.filter(followed_id=user_id).select_related("follower")
-    data = [{"id": f.follower.id, "username": f.follower.username} for f in followers]
-    return Response(data)
-
-@api_view(["GET"])
-def list_following(request, user_id):
-    following = Follow.objects.filter(follower_id=user_id).select_related("followed")
-    data = [{"id": f.followed.id, "username": f.followed.username} for f in following]
-    return Response(data)
-
+    # DELETE -> unfollow
+    Follow.objects.filter(follower=request.user, following=target).delete()
+    return Response({}, status=status.HTTP_200_OK)
 

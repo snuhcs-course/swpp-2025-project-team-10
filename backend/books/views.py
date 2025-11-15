@@ -20,6 +20,7 @@ from .serializers import (
     ReviewLikeResponseSerializer,
     ReviewSerializer, BookReview, BookSerializer, BookCollectionSerializer, ReadingStatusSerializer
 )
+from accounts.serializers import UserSerializer
 
 User = get_user_model()
 
@@ -155,6 +156,64 @@ class ReviewLikeView(APIView):
         return Response({"review": serializer.data}, status=status.HTTP_200_OK)
 
 
+@api_view(["GET"]) 
+@permission_classes([permissions.IsAuthenticated])
+def user_profile_detail(request, user_id: int):
+    """
+    Get public profile of a specific user by ID.
+    Returns same structure as UserProfileMeView for consistency.
+
+    GET /library/profile/{user_id}/
+    """
+    try:
+        user = User.objects.get(pk=user_id)
+    except User.DoesNotExist:
+        return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    # Build frontend-compatible profile (same as UserProfileMeView)
+    profile_url = None
+    if user.profile_picture:
+        profile_url = request.build_absolute_uri(user.profile_picture.url)
+
+    # Taste and preferences
+    favorite_genres = []
+    trade_location1 = None
+    trade_spot1 = None
+    try:
+        taste = user.taste
+        favorite_genres = taste.favorite_genres or []
+        trade_location1 = taste.trade_place_name or None
+        trade_spot1 = taste.trade_address or None
+    except Exception:
+        pass
+
+    # Compute counts
+    review_count = BookReview.objects.filter(reviewer=user).count()
+    follower_count = user.follower_relationships.count()
+    following_count = user.following_relationships.count()
+
+    return Response({
+        "username": user.username,
+        "bio": user.bio,
+        "profileUrl": profile_url,
+        "reviewCount": review_count,
+        "followerCount": follower_count,
+        "followingCount": following_count,
+        "favoriteGenres": favorite_genres,
+        "preferences": {
+            "tradeLocation1": trade_location1,
+            "tradeLocation2": None,
+            "tradeSpot1": trade_spot1,
+            "tradeSpot2": None,
+            "favBook": None,
+            "favBookNote": None,
+            "favAuthor": None,
+            "favAuthorNote": None,
+            "readingHabit": None,
+        },
+    }, status=status.HTTP_200_OK)
+
+
 @api_view(["GET"])
 @permission_classes([permissions.IsAuthenticated])
 def user_books_list(request):
@@ -177,6 +236,39 @@ def user_books_list(request):
             "coverUrl": request.build_absolute_uri(book.cover_image.url) if book.cover_image else None,
         })
     
+    return Response(results, status=status.HTTP_200_OK)
+
+
+@api_view(["GET"]) 
+@permission_classes([permissions.IsAuthenticated])
+def user_books_list_by_id(request, user_id: int):
+    """
+    Get list of books owned by a specific user.
+
+    GET /library/books/{user_id}/
+    """
+    try:
+        owner = User.objects.get(pk=user_id)
+    except User.DoesNotExist:
+        return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    books = (
+        Book.objects.filter(owner=owner)
+        .select_related("publisher")
+        .prefetch_related("authors")
+    )
+
+    results = []
+    for book in books:
+        results.append(
+            {
+                "id": str(book.id),
+                "title": book.title,
+                "author": book.author_names if hasattr(book, "author_names") else ", ".join([a.name for a in book.authors.all()]),
+                "coverUrl": request.build_absolute_uri(book.cover_image.url) if book.cover_image else None,
+            }
+        )
+
     return Response(results, status=status.HTTP_200_OK)
 
 
@@ -204,6 +296,64 @@ def user_wishlist_list(request):
         })
     
     return Response(results, status=status.HTTP_200_OK)
+
+
+@api_view(["GET"]) 
+@permission_classes([permissions.IsAuthenticated])
+def user_wishlist_by_id(request, user_id: int):
+    """
+    Get list of books in a specific user's wishlist.
+
+    GET /library/wishlist/{user_id}/
+    """
+    try:
+        target_user = User.objects.get(pk=user_id)
+    except User.DoesNotExist:
+        return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    wishlist_items = (
+        BookWishlist.objects.filter(user=target_user)
+        .select_related("book__publisher")
+        .prefetch_related("book__authors")
+    )
+
+    results = []
+    for item in wishlist_items:
+        book = item.book
+        results.append(
+            {
+                "id": str(book.id),
+                "title": book.title,
+                "author": book.author_names if hasattr(book, "author_names") else ", ".join([a.name for a in book.authors.all()]),
+                "coverUrl": request.build_absolute_uri(book.cover_image.url) if book.cover_image else None,
+            }
+        )
+
+    return Response(results, status=status.HTTP_200_OK)
+
+
+@api_view(["GET"]) 
+@permission_classes([permissions.IsAuthenticated])
+def user_reviews_by_id(request, user_id: int):
+    """
+    Get reviews written by a specific user.
+
+    GET /library/reviews/{user_id}/
+    """
+    try:
+        reviewer = User.objects.get(pk=user_id)
+    except User.DoesNotExist:
+        return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    queryset = (
+        BookReview.objects.filter(reviewer=reviewer)
+        .select_related("reviewer")
+        .prefetch_related("helpful_votes")
+    )
+
+    serializer = ReviewSerializer(queryset, many=True, context={"request": request})
+    # Return plain list to match frontend ProfileApi expectations
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(["POST", "DELETE"])
