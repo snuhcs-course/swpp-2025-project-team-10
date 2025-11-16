@@ -50,9 +50,9 @@ urlpatterns = [
         name="user-profile-by-id",
     ),
     # User's books list
-    path("books/", user_books_list, name="user-books-list"),
+    #path("books/", user_books_list, name="user-books-list"),
     # Other user's books by ID
-    path("books/<int:user_id>/", user_books_list_by_id, name="user-books-list-by-id"),
+    path("<int:user_id>/books/", user_books_list_by_id, name="user-books-list-by-id"),
    
     # User's wishlist
     path("wishlist/", user_wishlist_list, name="user-wishlist-list"),

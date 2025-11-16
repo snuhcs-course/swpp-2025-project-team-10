@@ -151,14 +151,14 @@ class BookSerializer(serializers.ModelSerializer):
             "authors_display",
             "publisher_name",
             "isbn",
-            "publisher",
-            "publication_date",
-            "isbn_13",
             "description",
             "cover_image",
             "is_for_barter",
             "owner",
         ]
+        extra_kwargs = {
+            "publisher": {"required": False},
+        }
     
     def get_authors_display(self, obj):
         return [author.name for author in obj.authors.all()]

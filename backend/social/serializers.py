@@ -145,7 +145,7 @@ class PostSerializer(serializers.ModelSerializer):
         if not obj.related_book:
             return False
         # Check both is_for_barter (owner wants to trade) and trade_status (not locked in trade)
-        return (
+        return ( 
             obj.related_book.is_for_barter and 
             obj.related_book.trade_status == "available"
         )

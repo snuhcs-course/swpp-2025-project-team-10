@@ -471,7 +471,7 @@ def book_list(request):
     # print("book_list reached with method:", request.method)
     
     if request.method == "GET":
-        books = Book.objects.all().prefetch_related("authors")
+        books = Book.objects.filter(owner=request.user).select_related("publisher").prefetch_related("authors")
         serializer = BookSerializer(books, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     

@@ -330,7 +330,8 @@ def create_books(users, genres, authors, publishers, count=50):
     ]
     
     conditions = ["new", "like_new", "very_good", "good", "acceptable"]
-    trade_statuses = ["available", "available", "available", "pending", "not_available"]
+    trade_statuses = ["available", "available", "available", "available", "available", "available", "available", "available" 
+                      "pending", "not_available"]
     
     books = []
     for i in range(count):

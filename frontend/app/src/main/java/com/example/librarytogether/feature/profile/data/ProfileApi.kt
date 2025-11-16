@@ -16,7 +16,7 @@ interface ProfileApi {
     @GET("library/profile/{userId}/")
     suspend fun getUserProfile(@Path("userId") userId: Int): Response<UserProfile>
 
-    @GET("library/books/{userId}/")
+    @GET("library/{userId}/books/")
     suspend fun getUserBooks(@Path("userId") userId: Int): Response<List<Book>>
 
     @GET("library/wishlist/{userId}/")
