@@ -160,10 +160,6 @@ def like_post(request, post_id):
                 content_object=post,
             )
 
-    else:
-        if request.user != post.author:
-            create_notification(request, 'post_like', post_id=post.id)
-
     # Return updated post
     serializer = PostSerializer(post, context={"request": request})
 

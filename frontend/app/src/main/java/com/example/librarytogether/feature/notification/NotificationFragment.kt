@@ -2,9 +2,11 @@ package com.example.librarytogether.feature.notification
 
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.librarytogether.R
 import com.example.librarytogether.databinding.FragmentNotificationBinding
@@ -34,7 +36,25 @@ class NotificationFragment : Fragment(R.layout.fragment_notification) {
                     }
                 },
                 onClickAction = { item ->
-                    // Barter button handler
+                    //vm.markAsRead(item)
+                    //if (item.deepLink == "BARTER") {
+                    Log.d("NotificationFragment", "onClickAction called. item = $item")
+                    val requestId = item.related_object_id
+                    if (requestId.isNullOrEmpty()) {
+                        //return@NotificationClicks
+                        NotificationFragmentDirections
+                            .actionNotificationToBarterApprovalFragment(
+                                requestId = "22333ea0-7b84-4583-816e-8924e1635936"
+                            )
+                    }
+
+                    val action =
+                        NotificationFragmentDirections
+                            .actionNotificationToBarterApprovalFragment(
+                                requestId = requestId!!
+                            )
+
+                    findNavController().navigate(action)
                 }
             )
         )

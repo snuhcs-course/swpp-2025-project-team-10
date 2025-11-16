@@ -17,7 +17,7 @@ class NotificationRepository @Inject constructor(
         }
     }
 
-    suspend fun markAsRead(id: Int): Boolean {
+    suspend fun markAsRead(id: String): Boolean {
         return try {
             val res = api.markAsRead(id)
             res.isSuccessful

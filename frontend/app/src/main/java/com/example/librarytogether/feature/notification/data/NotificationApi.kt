@@ -10,5 +10,5 @@ interface NotificationApi {
     suspend fun getNotifications(): Response<List<NotificationDto>>
 
     @PATCH("notifications/{id}/read/")
-    suspend fun markAsRead(@Path("id") id: Int): Response<Unit>
+    suspend fun markAsRead(@Path("id") id: String): Response<Unit>
 }

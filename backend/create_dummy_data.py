@@ -451,11 +451,17 @@ def create_posts(users, books, count=40):
         author = random.choice(users)
         post_type = random.choice(post_types)
         
+        # Get books owned by the author for related_book
+        author_books = [book for book in books if book.owner == author]
+        related_book = None
+        if author_books and random.choice([True, False]):
+            related_book = random.choice(author_books)
+        
         post = Post.objects.create(
             author=author,
             post_type=post_type,
             content=random.choice(contents),
-            related_book=random.choice(books) if random.choice([True, False]) else None,
+            related_book=related_book,
             is_public=True,
             created_at=random_date_in_past(90),
         )
@@ -632,7 +638,7 @@ def create_reading_statuses(users, books):
     print(f"  Created {len(reading_statuses)} reading statuses")
     return reading_statuses
 
-def create_barter_requests(users, books):
+'''def create_barter_requests(users, books):
     """Create barter requests."""
     print("Creating barter requests...")
     
@@ -714,7 +720,7 @@ def create_barter_requests(users, books):
         barter_requests.append(barter)
     
     print(f"  Created {len(barter_requests)} barter requests")
-    return barter_requests
+    return barter_requests'''
 
 def create_book_clubs(users, books):
     """Create book clubs."""
@@ -807,7 +813,7 @@ def main():
         create_reading_statuses(users, books)
         
         # Create barter requests
-        create_barter_requests(users, books)
+        #create_barter_requests(users, books)
         
         # Create book clubs
         create_book_clubs(users, books)
