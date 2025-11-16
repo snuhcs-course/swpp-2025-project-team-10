@@ -8,13 +8,15 @@ from django.urls import path
 from .views import (
     ReviewLikeView,
     UserReviewListCreateView,
+    user_profile_detail,
     toggle_book_for_barter,
     toggle_wishlist,
     book_list,
     book_detail,
     user_wishlist_list,
     collection_list_view,
-    modify_collection_books, reading_status_view, modify_reading_status,
+    modify_collection_books, reading_status_view, modify_reading_status, user_reviews_by_id,
+    user_wishlist_by_id,
     )
 
 
@@ -25,6 +27,12 @@ app_name = "books"
 urlpatterns = [
     # User's book reviews
     path("reviews/", UserReviewListCreateView.as_view(), name="user-reviews"),
+    # Other user's book reviews by ID
+    path(
+        "reviews/<int:user_id>/",
+        user_reviews_by_id,
+        name="user-reviews-by-id",
+    ),
     # Like/unlike a review
     path(
         "reviews/<int:pk>/like/",
@@ -34,6 +42,12 @@ urlpatterns = [
    
     # User's wishlist
     path("wishlist/", user_wishlist_list, name="user-wishlist-list"),
+    # Other user's wishlist by ID
+    path(
+        "wishlist/<int:user_id>/",
+        user_wishlist_by_id,
+        name="user-wishlist-by-id",
+    ),
     # Add/remove book from wishlist
     path(
         "books/<uuid:id>/wishlist/",
@@ -54,7 +68,7 @@ urlpatterns = [
     path("books/", book_list, name="books-list"),
 
     #Book detail API.
-    path("books/<uuid:id>/", book_detail, name="book-detail"),
+    path("books/<uuid:pk>/", book_detail, name="book-detail"),
 
     #Collection API
     path("collections/", collection_list_view, name="collection-view"),  # List or modify collections

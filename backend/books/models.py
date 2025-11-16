@@ -100,6 +100,7 @@ class Book(models.Model):
     title = models.CharField(max_length=200)
     subtitle = models.CharField(max_length=200, blank=True)
     authors = models.ManyToManyField(Author, related_name="books")
+
     publisher = models.ForeignKey(
         Publisher, on_delete=models.SET_NULL, null=True, blank=True
     )
