@@ -31,6 +31,9 @@ class BarterApprovalViewModel @Inject constructor(
     private val _state = MutableLiveData<UiState>(UiState.Loading)
     val state: LiveData<UiState> = _state
 
+    private val _selectedBook = MutableLiveData<Book?>(null)
+    val selectedBook: LiveData<Book?> = _selectedBook
+
     init {
         load()
     }
@@ -48,6 +51,11 @@ class BarterApprovalViewModel @Inject constructor(
         }
     }
 
+    fun toggleSelectedBook(book: Book) {
+        _selectedBook.value =
+            if (_selectedBook.value?.id == book.id) null else book
+    }
+
     fun acceptBook(book: Book) {
         viewModelScope.launch {
             val current = _state.value
@@ -62,6 +70,9 @@ class BarterApprovalViewModel @Inject constructor(
                 )
             }.onFailure { e ->
                 // TODO: 스낵바/토스트는 Fragment에서
+                _state.value = UiState.Error(
+                    e.message ?: "교환 요청을 승인하지 못했습니다."
+                )
             }
         }
     }

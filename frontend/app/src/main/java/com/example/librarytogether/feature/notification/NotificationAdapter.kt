@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.TextView
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -21,7 +22,15 @@ data class NotificationClicks(
 
 class NotificationAdapter(
     private val clicks: NotificationClicks
-) : ListAdapter<NotificationDto, NotificationAdapter.NotiVH>(NotificationDiff()) {
+) : ListAdapter<NotificationDto, NotificationAdapter.NotiVH>(Diff) {
+
+    companion object Diff : DiffUtil.ItemCallback<NotificationDto>() {
+        override fun areItemsTheSame(oldItem: NotificationDto, newItem: NotificationDto): Boolean =
+            oldItem.id == newItem.id
+
+        override fun areContentsTheSame(oldItem: NotificationDto, newItem: NotificationDto): Boolean =
+            oldItem == newItem
+    }
 
     inner class NotiVH(v: View) : RecyclerView.ViewHolder(v) {
         private val imgProfile = v.findViewById<CircleImageView>(R.id.imgProfile)
@@ -33,12 +42,14 @@ class NotificationAdapter(
         fun bind(item: NotificationDto) {
             tvUser.text = item.title
             tvBody.text = item.body
-
             tvTime.text = TimeUtils.relativeTime(itemView.context, item.created_at)
+            tvUser.setTypeface(null, if (item.is_read) Typeface.NORMAL else Typeface.BOLD)
+
+            Glide.with(itemView)
+                .load(R.drawable.sample_profile)
+                .into(imgProfile)
 
             btnAction.text = "교환"
-            tvUser.setTypeface(null, if (item.is_read) Typeface.NORMAL else Typeface.BOLD)
-            Glide.with(itemView).load(R.drawable.sample_profile).into(imgProfile)
 
             itemView.setOnClickListener { clicks.onClickItem(item) }
             btnAction.setOnClickListener { clicks.onClickAction(item) }

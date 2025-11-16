@@ -18,7 +18,8 @@ enum class BookListMode { TILE, ROW }
 
 data class BookClicks(
     val onClickItem: (Book) -> Unit,
-    val onClickMore: (Book, View) -> Unit = { _, _ -> }
+    val onClickMore: (Book, View) -> Unit = { _, _ -> },
+    val onSelect: (Book) -> Unit = {},
 )
 
 class BookAdapter(
@@ -81,7 +82,7 @@ class BookAdapter(
             tvTitle.text  = item.title
             tvAuthor.text = item.authors.orEmpty()
 
-            itemView.setOnClickListener { clicks.onClickItem(item) }
+            itemView.setOnClickListener { clicks.onSelect(item) }
             btnMore?.setOnClickListener { v -> clicks.onClickMore(item, v) }
         }
     }
