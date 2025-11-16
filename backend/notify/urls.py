@@ -6,5 +6,5 @@ from . import views
 
 urlpatterns = [
     path('', views.notifications, name='notifications'),
-    path('read/<int:pk>/', views.read_notification, name='read_notification'),
+    path('<int:pk>/read/', views.read_notification, name='read_notification'),
 ]

@@ -15,6 +15,12 @@ urlpatterns = [
         name="create-request",
     ),
     path(
+        "requests/<uuid:request_id>/",
+        views.get_barter_request_detail,
+        name="get-request-detail",
+    ),
+
+    path(
         "requests/<uuid:request_id>/counter-propose/",
         views.counter_propose,
         name="counter-propose",

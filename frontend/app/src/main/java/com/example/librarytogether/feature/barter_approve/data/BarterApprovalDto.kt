@@ -6,7 +6,7 @@ data class BarterApprovalDetail(
     val id: String,
     val requesterName: String,
     val requesterAvatarUrl: String?,
-    val message: String?,
     val createdAt: String,
-    val books: List<Book>
+    val books: List<Book>,
+    val message: List<String>,
 )

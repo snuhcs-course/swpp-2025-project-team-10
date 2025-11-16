@@ -10,7 +10,7 @@ def notifications(request):
     serializer = NotificationSerializer(received_notifications, many=True)
     return JsonResponse(serializer.data, safe=False)
 
-@api_view(['POST'])
+@api_view(['PATCH'])
 def read_notification(request, pk):
     try:
         notification = Notification.objects.get(pk=pk, recipient=request.user)

@@ -16,10 +16,84 @@ from barter.serializers import (
     BarterRequestSerializer,
 )
 from books.models import Book
+from books.serializers import BookSummarySerializer
+from accounts.serializers import UserBarterInfoSerializer
 from notify.models import Notification
 
 User = get_user_model()
 
+
+@api_view(["GET"])
+@permission_classes([permissions.IsAuthenticated])
+def get_barter_request_detail(request, request_id):
+    """
+    Get barter request detail for approval screen.
+    Returns different data based on who is viewing:
+    - If recipient (B): shows requester info and requester's books (for counter-propose)
+    - If requester (A) after counter-propose: shows recipient info and the selected book
+    
+    GET /barter/requests/<uuid:request_id>/
+    """
+    try:
+        barter_request = BarterRequest.objects.select_related(
+            "requester", "recipient", "offered_book", "requested_book"
+        ).get(pk=request_id)
+    except BarterRequest.DoesNotExist:
+        return Response(
+            {"error": "Barter request not found"},
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
+    # Check permission - only requester or recipient can view
+    if request.user.id not in [barter_request.requester_id, barter_request.recipient_id]:
+        return Response(
+            {"error": "You don't have permission to view this request"},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
+    # Determine who is viewing
+    is_recipient = request.user.id == barter_request.recipient_id
+    
+    if is_recipient:
+        # B viewing: show A's info and A's available books for counter-propose
+        other_user = barter_request.requester
+        # Get requester's available books
+        available_books = Book.objects.filter(
+            owner=other_user,
+            is_for_barter=True,
+            trade_status="available"
+        ).select_related('publisher').prefetch_related('authors', 'genres')
+        
+        books_data = BookSummarySerializer(available_books, many=True).data
+        messages = [barter_request.message] if barter_request.message else []
+    else:
+        # A viewing after counter-propose: show B's info and selected book
+        other_user = barter_request.recipient
+        if barter_request.offered_book:
+            # Counter-propose received, show the offered book
+            books_data = [BookSummarySerializer(barter_request.offered_book).data]
+        else:
+            # No counter-propose yet
+            books_data = []
+        
+        messages = []
+        if barter_request.message:
+            messages.append(barter_request.message)
+        if barter_request.response_message:
+            messages.append(barter_request.response_message)
+
+    user_serializer = UserBarterInfoSerializer(other_user)
+    
+    response_data = {
+        "id": str(barter_request.id),
+        "requesterName": other_user.username,
+        "requesterAvatarUrl": user_serializer.data.get('profile_picture'),
+        "createdAt": barter_request.created_at.isoformat(),
+        "books": books_data,
+        "message": messages,
+    }
+
+    return Response(response_data, status=status.HTTP_200_OK)
 
 @api_view(["POST"])
 @permission_classes([permissions.IsAuthenticated])

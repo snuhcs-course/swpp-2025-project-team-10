@@ -123,7 +123,7 @@ class BarterApprovalFragment : Fragment(R.layout.fragment_barter_approval) {
 
         tvRequesterName.text = detail.requesterName
         tvCreatedAt.text = detail.createdAt
-        tvMessage.text = detail.message.orEmpty()
+        tvMessage.text = detail.message.orEmpty().joinToString("\n")
         binding.imgAvatar.loadAvatar(detail.requesterAvatarUrl)
         adapter.submitList(detail.books)
     }

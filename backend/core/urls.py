@@ -60,7 +60,7 @@ urlpatterns = [
     path("barter/", include("barter.urls")),  # Barter requests
     # Follow API to match frontend expectations
     path("users/follow/<int:user_id>/", follow_view, name="follow_user"),
-    # path("api/v1/notifications/", include("notify.urls")),
+    path("notifications/", include("notify.urls")),  # Notifications
 ]
 
 # Serve media files in development

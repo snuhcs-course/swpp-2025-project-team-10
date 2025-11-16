@@ -1,7 +1,7 @@
 package com.example.librarytogether.feature.notification.data
 
 data class NotificationDto(
-    val id: Int,
+    val id: String,
     val title: String,
     val body: String,
     val created_at: String,
