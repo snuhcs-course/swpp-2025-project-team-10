@@ -10,6 +10,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.librarytogether.R
 import com.example.librarytogether.databinding.FragmentHomeBinding
+import com.example.librarytogether.feature.comment.CommentBottomSheet
 import com.example.librarytogether.feature.home.data.Post
 import com.example.librarytogether.feature.library.LibraryViewModel
 import com.example.librarytogether.feature.library.data.Book
@@ -129,8 +130,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     }
 
     private fun navigateToReview(post: Post) {
-        Toast.makeText(requireContext(), "서평", Toast.LENGTH_SHORT).show()
+        //Toast.makeText(requireContext(), "서평", Toast.LENGTH_SHORT).show()
         // TODO: 서평 댓글 화면으로 이동
+        CommentBottomSheet().show(parentFragmentManager, "comments")
     }
 
     private fun onClickExchange(post: Post) {

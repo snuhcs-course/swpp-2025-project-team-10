@@ -46,7 +46,7 @@
     <string name="verify_button">인증하기</string>
     <string name="resend_email">인증메일 재전송</string>
 
-    <string name="review">서평</string>
+    <string name="review">댓글</string>
     <string name="like">좋아요</string>
     <string name="exchange">교환</string>
     <string name="bookmark">찜하기</string>
