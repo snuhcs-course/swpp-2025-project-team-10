@@ -181,5 +181,3 @@ class SocialAuthAPITest(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertFalse(response.data["ok"])
-
-

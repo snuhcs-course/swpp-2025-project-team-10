@@ -5,8 +5,8 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from social.models import Post
 from PIL import Image
+from social.models import Post
 from taggit.managers import TaggableManager
 
 User = get_user_model()
@@ -252,7 +252,7 @@ class BookCopy(models.Model):
     # Even if availability="available", barter requests will be rejected if is_for_barter=False.
     is_for_barter = models.BooleanField(
         default=True,
-        help_text="Whether the owner wants to trade this book (user setting)"
+        help_text="Whether the owner wants to trade this book (user setting)",
     )
     preferred_genres_for_trade = models.ManyToManyField(
         Genre,
@@ -328,7 +328,7 @@ class BookCopy(models.Model):
     def is_available_for_barter(self):
         """Check if book is available for bartering."""
         return self.is_for_barter and self.trade_status == "available"
-    
+
     @property
     def availability(self):
         """Backward-compatible alias for legacy column name."""
@@ -570,7 +570,8 @@ class ReadingStatus(models.Model):
         if self.book.pages and self.pages_read:
             return min(100, (self.pages_read / self.book.pages) * 100)
         return 0
-    
+
+
 # --- Signal: Create Post when BookReview is created ---
 @receiver(post_save, sender=BookReview)
 def create_post_for_review(sender, instance, created, **kwargs):

@@ -5,19 +5,25 @@ Barter flow tests for the current 2-step exchange API:
 """
 
 import pytest
+from barter.models import BarterRequest
+from books.models import Author as BookAuthor
+from books.models import (
+    BookCopy,
+    BookPublication,
+    Publisher,
+)
 from django.contrib.auth import get_user_model
 from django.urls import reverse
-from rest_framework.test import APIClient
-
-from books.models import Author as BookAuthor, BookCopy, BookPublication, Publisher
-from barter.models import BarterRequest
 from notify.models import Notification
+from rest_framework.test import APIClient
 
 User = get_user_model()
 
 
 def make_copy(title, owner, publisher, author, **kwargs):
-    publication = BookPublication.objects.create(title=title, publisher=publisher)
+    publication = BookPublication.objects.create(
+        title=title, publisher=publisher
+    )
     publication.authors.add(author)
     return BookCopy.objects.create(
         publication=publication,

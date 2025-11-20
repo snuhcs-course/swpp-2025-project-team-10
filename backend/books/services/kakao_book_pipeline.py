@@ -6,8 +6,9 @@ from __future__ import annotations
 
 import logging
 import re
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any
 
 import requests
 from django.conf import settings
@@ -31,20 +32,20 @@ class ExternalBook:
     """
 
     title: str
-    authors: List[str]
-    translators: List[str]
-    categories: List[str]
+    authors: list[str]
+    translators: list[str]
+    categories: list[str]
     description: str
-    thumbnail_url: Optional[str]
-    isbn: Optional[str]
-    publisher: Optional[str]
-    url: Optional[str]
-    publication_date: Optional[str]
-    price: Optional[int]
-    sale_price: Optional[int]
-    status: Optional[str]
+    thumbnail_url: str | None
+    isbn: str | None
+    publisher: str | None
+    url: str | None
+    publication_date: str | None
+    price: int | None
+    sale_price: int | None
+    status: str | None
 
-    def to_payload(self) -> Dict[str, Any]:
+    def to_payload(self) -> dict[str, Any]:
         """
         Return a serialisable payload that matches frontend expectations.
         """
@@ -78,8 +79,8 @@ class KakaoBookPipeline:
 
     def __init__(
         self,
-        api_key: Optional[str] = None,
-        session: Optional[requests.Session] = None,
+        api_key: str | None = None,
+        session: requests.Session | None = None,
     ) -> None:
         self.api_key = api_key or getattr(settings, "KAKAO_REST_API_KEY", None)
         if not self.api_key:
@@ -96,7 +97,7 @@ class KakaoBookPipeline:
         *,
         page: int = 1,
         size: int = DEFAULT_SIZE,
-    ) -> List[ExternalBook]:
+    ) -> list[ExternalBook]:
         """
         Fetch and normalise book search results for the provided query.
         """
@@ -138,14 +139,14 @@ class KakaoBookPipeline:
         *,
         page: int = 1,
         size: int = DEFAULT_SIZE,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Fetch book data and return a serialisable payload.
         """
         books = self.fetch(query, page=page, size=size)
         return [book.to_payload() for book in books]
 
-    def _normalise_document(self, document: Dict[str, Any]) -> ExternalBook:
+    def _normalise_document(self, document: dict[str, Any]) -> ExternalBook:
         """
         Convert a raw Kakao document into the ExternalBook dataclass.
         """
@@ -187,12 +188,12 @@ class KakaoBookPipeline:
         return HTML_TAG_PATTERN.sub("", value).strip()
 
     @staticmethod
-    def _parse_categories(value: str) -> List[str]:
+    def _parse_categories(value: str) -> list[str]:
         parts = [part.strip() for part in value.split(">")]
         return [part for part in parts if part]
 
     @staticmethod
-    def _ensure_list_of_str(values: Iterable[Any]) -> List[str]:
+    def _ensure_list_of_str(values: Iterable[Any]) -> list[str]:
         return [str(value).strip() for value in values if str(value).strip()]
 
     @staticmethod
@@ -200,7 +201,7 @@ class KakaoBookPipeline:
         return str(value).strip() if value else ""
 
     @staticmethod
-    def _select_isbn(value: str) -> Optional[str]:
+    def _select_isbn(value: str) -> str | None:
         if not value:
             return None
 

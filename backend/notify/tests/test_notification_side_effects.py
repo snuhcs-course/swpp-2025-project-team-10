@@ -1,6 +1,10 @@
 import pytest
 from books.models import Author as BookAuthor
-from books.models import BookCopy, BookPublication, Publisher
+from books.models import (
+    BookCopy,
+    BookPublication,
+    Publisher,
+)
 from django.contrib.auth import get_user_model
 from notify.models import Notification
 from rest_framework.test import APIClient

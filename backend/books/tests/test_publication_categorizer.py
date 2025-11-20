@@ -1,8 +1,7 @@
 import json
 
-from accounts.models import BookGenre, BookLength, BookMood, ReadingPurpose
-
 import books.services.publication_categories as publication_categories
+from accounts.models import BookGenre, BookLength, BookMood, ReadingPurpose
 from books.services.publication_categories import (
     PublicationCategorizer,
     PublicationClassification,

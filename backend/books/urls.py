@@ -5,28 +5,26 @@ Maps URLs to views for book review endpoints.
 
 from django.urls import path
 
+from .book_search_api import book_search
 from .views import (
     ReviewLikeView,
     UserReviewListCreateView,
-    user_profile_detail,
     book_detail,
     book_list,
     collection_list_view,
     modify_collection_books,
     modify_reading_status,
-    reading_status_view,
+    nearby_owners,
     publication_recommendations,
+    reading_status_view,
     toggle_book_for_barter,
     toggle_wishlist,
-    nearby_owners,
     user_books_list_by_id,
+    user_profile_detail,
     user_reviews_by_id,
     user_wishlist_by_id,
     user_wishlist_list,
 )
-
-
-from .book_search_api import book_search
 
 app_name = "books"
 
@@ -52,10 +50,13 @@ urlpatterns = [
         name="user-profile-by-id",
     ),
     # User's books list
-    #path("books/", user_books_list, name="user-books-list"),
+    # path("books/", user_books_list, name="user-books-list"),
     # Other user's books by ID
-    path("<int:user_id>/books/", user_books_list_by_id, name="user-books-list-by-id"),
-   
+    path(
+        "<int:user_id>/books/",
+        user_books_list_by_id,
+        name="user-books-list-by-id",
+    ),
     # User's wishlist
     path("wishlist/", user_wishlist_list, name="user-wishlist-list"),
     # Other user's wishlist by ID
@@ -81,26 +82,33 @@ urlpatterns = [
         nearby_owners,
         name="nearby-owners",
     ),
-
-    #Book search API
+    # Book search API
     path("books/search/", book_search, name="book-search"),
     path(
         "publications/recommendations/",
         publication_recommendations,
         name="publication-recommendations",
     ),
-
-    #User's book list.
+    # User's book list.
     path("books/", book_list, name="books-list"),
-
-    #Book detail API.
+    # Book detail API.
     path("books/<uuid:pk>/", book_detail, name="book-detail"),
-
-    #Collection API
-    path("collections/", collection_list_view, name="collection-view"),  # List or modify collections
-    path("collections/<int:pk>/", modify_collection_books, name="collection-detail"),  # Single collection actions
-
+    # Collection API
+    path(
+        "collections/", collection_list_view, name="collection-view"
+    ),  # List or modify collections
+    path(
+        "collections/<int:pk>/",
+        modify_collection_books,
+        name="collection-detail",
+    ),  # Single collection actions
     # Reading status API
-    path("reading-status/", reading_status_view, name="reading-status-view"),  # Add or update reading status
-    path("reading-status/<int:pk>/", modify_reading_status, name="reading-status-detail"),  # Single book status
+    path(
+        "reading-status/", reading_status_view, name="reading-status-view"
+    ),  # Add or update reading status
+    path(
+        "reading-status/<int:pk>/",
+        modify_reading_status,
+        name="reading-status-detail",
+    ),  # Single book status
 ]

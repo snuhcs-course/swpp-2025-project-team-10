@@ -21,7 +21,9 @@ class PostSerializer(serializers.ModelSerializer):
     )
     # Added: posterId and posterLocation for profile navigation
     posterId = serializers.IntegerField(source="author.id", read_only=True)
-    posterLocation = serializers.CharField(source="author.location", read_only=True)
+    posterLocation = serializers.CharField(
+        source="author.location", read_only=True
+    )
     posterProfile = serializers.SerializerMethodField()
     bookTitle = serializers.SerializerMethodField()
     authorName = serializers.SerializerMethodField()

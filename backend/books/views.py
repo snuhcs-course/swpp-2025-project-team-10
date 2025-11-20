@@ -25,16 +25,15 @@ from .models import (
     ReadingStatus,
     ReviewHelpfulVote,
 )
-from .services.publication_categories import PublicationCategorizer
 from .serializers import (
     BookCollectionSerializer,
     BookSerializer,
-    BookSummarySerializer,
     CreateReviewSerializer,
     ReadingStatusSerializer,
     ReviewLikeResponseSerializer,
     ReviewSerializer,
 )
+from .services.publication_categories import PublicationCategorizer
 
 User = get_user_model()
 
@@ -335,7 +334,9 @@ def user_reviews_by_id(request, user_id: int):
         .select_related("reviewer")
         .prefetch_related("helpful_votes")
     )
-    serializer = ReviewSerializer(queryset, many=True, context={"request": request})
+    serializer = ReviewSerializer(
+        queryset, many=True, context={"request": request}
+    )
     return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -408,7 +409,9 @@ def toggle_book_for_barter(request, book_id):
 
     book.is_for_barter = not book.is_for_barter
     book.save(update_fields=["is_for_barter"])
-    return Response({"is_for_barter": book.is_for_barter}, status=status.HTTP_200_OK)
+    return Response(
+        {"is_for_barter": book.is_for_barter}, status=status.HTTP_200_OK
+    )
 
 
 @api_view(["GET", "PUT", "DELETE"])
@@ -443,20 +446,22 @@ def book_list(request):
     """List all book copies or create a new one owned by the authenticated user."""
 
     if request.method == "GET":
-        books = (
-            BookCopy.objects.filter(owner=request.user)
-            .select_related("publication", "owner")
+        books = BookCopy.objects.filter(owner=request.user).select_related(
+            "publication", "owner"
         )
         serializer = BookSerializer(
             books, many=True, context={"request": request}
         )
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    serializer = BookSerializer(data=request.data, context={"request": request})
+    serializer = BookSerializer(
+        data=request.data, context={"request": request}
+    )
     if serializer.is_valid():
         serializer.save(owner=request.user)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 # --- Create & List collections ---
 @api_view(["GET", "POST"])
@@ -503,7 +508,8 @@ def modify_collection_books(request, pk):
     book_id = request.data.get("id")
     if not book_id:
         return Response(
-            {"error": "book_id is required"}, status=status.HTTP_400_BAD_REQUEST
+            {"error": "book_id is required"},
+            status=status.HTTP_400_BAD_REQUEST,
         )
 
     book = get_object_or_404(BookCopy, id=book_id)
@@ -529,14 +535,17 @@ def reading_status_view(request):
 
     user = request.user
     if request.method == "GET":
-        statuses = ReadingStatus.objects.filter(user=user).select_related("book")
+        statuses = ReadingStatus.objects.filter(user=user).select_related(
+            "book"
+        )
         serializer = ReadingStatusSerializer(statuses, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     book_id = request.data.get("book_id") or request.data.get("id")
     if not book_id:
         return Response(
-            {"error": "book_id is required."}, status=status.HTTP_400_BAD_REQUEST
+            {"error": "book_id is required."},
+            status=status.HTTP_400_BAD_REQUEST,
         )
 
     book = get_object_or_404(BookCopy, id=book_id)

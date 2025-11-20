@@ -2,19 +2,20 @@
 Tests for library books and wishlist endpoints.
 """
 
-from django.test import TestCase
-from django.contrib.auth import get_user_model
-from rest_framework.test import APIClient
-from rest_framework import status
+import uuid
+
 from books.models import (
+    Author,
     BookCopy,
     BookPublication,
     BookWishlist,
     Genre,
-    Author,
     Publisher,
 )
-import uuid
+from django.contrib.auth import get_user_model
+from django.test import TestCase
+from rest_framework import status
+from rest_framework.test import APIClient
 
 User = get_user_model()
 
@@ -36,7 +37,7 @@ class LibraryBooksEndpointTestCase(TestCase):
             password="testpass123",
         )
         self.client.force_authenticate(user=self.user)
-        
+
         # Create test publisher and author
         self.publisher = Publisher.objects.create(name="Test Publisher")
         self.author = Author.objects.create(name="Test Author")
@@ -48,24 +49,26 @@ class LibraryBooksEndpointTestCase(TestCase):
                 publisher=self.publisher,
             )
             publication.authors.add(self.author)
-            return BookCopy.objects.create(publication=publication, owner=owner)
-        
+            return BookCopy.objects.create(
+                publication=publication, owner=owner
+            )
+
         # Create books owned by user
         self.book1 = make_copy("My Book 1", self.user)
         self.book2 = make_copy("My Book 2", self.user)
-        
+
         # Create book owned by other user
         self.other_book = make_copy("Other Book", self.other_user)
-        
+
         self.url = "/library/books/"
 
     def test_get_my_books_success(self):
         """Test GET /library/books/ returns user's books."""
         response = self.client.get(self.url)
-        
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
-        
+
         # Verify response structure
         book_data = response.data[0]
         self.assertIn("id", book_data)
@@ -76,10 +79,10 @@ class LibraryBooksEndpointTestCase(TestCase):
     def test_get_my_books_only_returns_owned_books(self):
         """Test that only user's own books are returned."""
         response = self.client.get(self.url)
-        
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         titles = [book["title"] for book in response.data]
-        
+
         self.assertIn("My Book 1", titles)
         self.assertIn("My Book 2", titles)
         self.assertNotIn("Other Book", titles)
@@ -93,18 +96,18 @@ class LibraryBooksEndpointTestCase(TestCase):
             password="testpass123",
         )
         self.client.force_authenticate(user=empty_user)
-        
+
         response = self.client.get(self.url)
-        
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 0)
 
     def test_get_my_books_requires_authentication(self):
         """Test that unauthenticated requests are rejected."""
         self.client.force_authenticate(user=None)
-        
+
         response = self.client.get(self.url)
-        
+
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
@@ -125,7 +128,7 @@ class LibraryWishlistEndpointTestCase(TestCase):
             password="testpass123",
         )
         self.client.force_authenticate(user=self.user)
-        
+
         # Create test publisher and author
         self.publisher = Publisher.objects.create(name="Test Publisher")
         self.author = Author.objects.create(name="Test Author")
@@ -136,29 +139,31 @@ class LibraryWishlistEndpointTestCase(TestCase):
                 publisher=self.publisher,
             )
             publication.authors.add(self.author)
-            return BookCopy.objects.create(publication=publication, owner=owner)
-        
+            return BookCopy.objects.create(
+                publication=publication, owner=owner
+            )
+
         # Create books
         self.book1 = make_copy("Wishlist Book 1", self.other_user)
         self.book2 = make_copy("Wishlist Book 2", self.other_user)
-        
+
         # Add books to user's wishlist
         BookWishlist.objects.create(user=self.user, book=self.book1)
         BookWishlist.objects.create(user=self.user, book=self.book2)
-        
+
         # Add book to other user's wishlist (should not appear in response)
         self.book3 = make_copy("Other Wishlist Book", self.other_user)
         BookWishlist.objects.create(user=self.other_user, book=self.book3)
-        
+
         self.url = "/library/wishlist/"
 
     def test_get_my_wishlist_success(self):
         """Test GET /library/wishlist/ returns user's wishlist."""
         response = self.client.get(self.url)
-        
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
-        
+
         # Verify response structure
         book_data = response.data[0]
         self.assertIn("id", book_data)
@@ -169,10 +174,10 @@ class LibraryWishlistEndpointTestCase(TestCase):
     def test_get_my_wishlist_only_returns_user_wishlist(self):
         """Test that only user's own wishlist is returned."""
         response = self.client.get(self.url)
-        
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         titles = [book["title"] for book in response.data]
-        
+
         self.assertIn("Wishlist Book 1", titles)
         self.assertIn("Wishlist Book 2", titles)
         self.assertNotIn("Other Wishlist Book", titles)
@@ -186,18 +191,18 @@ class LibraryWishlistEndpointTestCase(TestCase):
             password="testpass123",
         )
         self.client.force_authenticate(user=new_user)
-        
+
         response = self.client.get(self.url)
-        
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 0)
 
     def test_get_my_wishlist_requires_authentication(self):
         """Test that unauthenticated requests are rejected."""
         self.client.force_authenticate(user=None)
-        
+
         response = self.client.get(self.url)
-        
+
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
@@ -229,18 +234,22 @@ class BookWishlistToggleTestCase(TestCase):
         """Test removing a book from wishlist."""
         # Add to wishlist first
         BookWishlist.objects.create(user=self.user, book=self.book)
-        
+
         url = f"/library/books/{self.book.id}/wishlist/"
         response = self.client.delete(url)
-        
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertFalse(BookWishlist.objects.filter(user=self.user, book=self.book).exists())
+        self.assertFalse(
+            BookWishlist.objects.filter(
+                user=self.user, book=self.book
+            ).exists()
+        )
 
     def test_remove_from_wishlist_not_in_list(self):
         """Test removing a book that's not in wishlist."""
         url = f"/library/books/{self.book.id}/wishlist/"
         response = self.client.delete(url)
-        
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("Not in wishlist", response.data["message"])
 
@@ -248,10 +257,15 @@ class BookWishlistToggleTestCase(TestCase):
         """Test adding book to wishlist when already in list."""
         # Add to wishlist first
         BookWishlist.objects.create(user=self.user, book=self.book)
-        
+
         url = f"/library/books/{self.book.id}/wishlist/"
         response = self.client.post(url)
-        
+
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         # Should not create duplicate
-        self.assertEqual(BookWishlist.objects.filter(user=self.user, book=self.book).count(), 1)
+        self.assertEqual(
+            BookWishlist.objects.filter(
+                user=self.user, book=self.book
+            ).count(),
+            1,
+        )

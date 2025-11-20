@@ -52,11 +52,13 @@ import pytest
 def test_create_post_with_invalid_data():
     """Test POST /posts/create/ with invalid data returns 400."""
     from rest_framework.test import APIClient
-    
+
     client = APIClient()
-    user = User.objects.create(username="user", email="u@test.com", first_name="U", last_name="ser")
+    user = User.objects.create(
+        username="user", email="u@test.com", first_name="U", last_name="ser"
+    )
     client.force_authenticate(user)
-    
+
     # Missing content
     res = client.post("/posts/create/", {}, format="json")
     assert res.status_code == 400
@@ -67,17 +69,22 @@ def test_create_post_with_invalid_data():
 def test_home_feed_success():
     """Test home_feed view returns posts."""
     from rest_framework.test import APIClient
-    
+
     client = APIClient()
-    user = User.objects.create(username="user_feed", email="ufeed@test.com", first_name="U", last_name="ser")
-    
+    user = User.objects.create(
+        username="user_feed",
+        email="ufeed@test.com",
+        first_name="U",
+        last_name="ser",
+    )
+
     # Create some public posts
     Post.objects.create(author=user, content="Post 1", is_public=True)
     Post.objects.create(author=user, content="Post 2", is_public=True)
-    
+
     client.force_authenticate(user)
     res = client.get("/home/")
-    
+
     assert res.status_code == 200
     assert "results" in res.data
     assert len(res.data["results"]) >= 2
@@ -87,11 +94,16 @@ def test_home_feed_success():
 def test_create_post_with_content_only():
     """Test create_post with just content."""
     from rest_framework.test import APIClient
-    
+
     client = APIClient()
-    user = User.objects.create(username="user_post", email="upost@test.com", first_name="U", last_name="ser")
+    user = User.objects.create(
+        username="user_post",
+        email="upost@test.com",
+        first_name="U",
+        last_name="ser",
+    )
     client.force_authenticate(user)
-    
+
     res = client.post(
         "/posts/create/",
         {"content": "Test post content"},
@@ -99,18 +111,30 @@ def test_create_post_with_content_only():
     )
     assert res.status_code == 201
     assert "post" in res.data
-    assert Post.objects.filter(author=user, content="Test post content").exists()
+    assert Post.objects.filter(
+        author=user, content="Test post content"
+    ).exists()
 
 
 @pytest.mark.django_db
 def test_create_post_with_related_book():
     """Test create_post with related_book."""
+    from books.models import Author as BookAuthor
+    from books.models import (
+        BookCopy,
+        BookPublication,
+        Publisher,
+    )
     from rest_framework.test import APIClient
-    from books.models import Author as BookAuthor, BookCopy, BookPublication, Publisher
-    
+
     client = APIClient()
-    user = User.objects.create(username="user_book_post", email="ubpost@test.com", first_name="U", last_name="ser")
-    
+    user = User.objects.create(
+        username="user_book_post",
+        email="ubpost@test.com",
+        first_name="U",
+        last_name="ser",
+    )
+
     publisher = Publisher.objects.create(name="Pub2")
     auth = BookAuthor.objects.create(name="Auth2")
     publication = BookPublication.objects.create(
@@ -124,7 +148,7 @@ def test_create_post_with_related_book():
         is_for_barter=True,
         trade_status="available",
     )
-    
+
     client.force_authenticate(user)
     res = client.post(
         "/posts/create/",
@@ -135,7 +159,7 @@ def test_create_post_with_related_book():
         format="json",
     )
     assert res.status_code == 201
-    
+
     post = Post.objects.get(author=user, content="Post about my book")
     assert post.related_book == book
 
@@ -144,14 +168,16 @@ def test_create_post_with_related_book():
 def test_create_post_invalid_data():
     """Test creating post with invalid data."""
     from rest_framework.test import APIClient
-    
+
     client = APIClient()
-    user = User.objects.create(username="user", email="user@test.com", first_name="U", last_name="ser")
+    user = User.objects.create(
+        username="user", email="user@test.com", first_name="U", last_name="ser"
+    )
     user.set_password("pass123")
     user.save()
-    
+
     client.force_authenticate(user)
-    
+
     # Missing required content
     res = client.post(
         "/posts/create/",
@@ -165,14 +191,19 @@ def test_create_post_invalid_data():
 def test_create_post_empty_content():
     """Test creating post with empty content."""
     from rest_framework.test import APIClient
-    
+
     client = APIClient()
-    user = User.objects.create(username="user2", email="user2@test.com", first_name="U", last_name="ser")
+    user = User.objects.create(
+        username="user2",
+        email="user2@test.com",
+        first_name="U",
+        last_name="ser",
+    )
     user.set_password("pass123")
     user.save()
-    
+
     client.force_authenticate(user)
-    
+
     res = client.post(
         "/posts/create/",
         {"content": ""},

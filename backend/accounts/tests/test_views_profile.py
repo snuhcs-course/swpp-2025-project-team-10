@@ -217,21 +217,21 @@ import pytest
 @pytest.mark.django_db
 def test_user_profile_me_view():
     """Test /auth/me/ endpoint."""
-    from rest_framework.test import APIClient
     from django.urls import reverse
-    
+    from rest_framework.test import APIClient
+
     client = APIClient()
     user = User.objects.create(
         username="user4",
         email="u4@test.com",
         first_name="Test",
         last_name="User",
-        location="Seoul"
+        location="Seoul",
     )
     client.force_authenticate(user)
-    
+
     res = client.get(reverse("accounts:user_profile"))
-    
+
     assert res.status_code == 200
     assert res.data["username"] == "user4"
 
@@ -239,31 +239,37 @@ def test_user_profile_me_view():
 @pytest.mark.django_db
 def test_user_profile_view_other_user():
     """Test viewing another user's profile."""
-    from rest_framework.test import APIClient
     from django.urls import reverse
-    
+    from rest_framework.test import APIClient
+
     client = APIClient()
-    user1 = User.objects.create(username="user5", email="u5@test.com", first_name="U", last_name="1")
-    user2 = User.objects.create(username="user6", email="u6@test.com", first_name="U", last_name="2")
+    user1 = User.objects.create(
+        username="user5", email="u5@test.com", first_name="U", last_name="1"
+    )
+    user2 = User.objects.create(
+        username="user6", email="u6@test.com", first_name="U", last_name="2"
+    )
     client.force_authenticate(user1)
-    
+
     # Note: Current implementation doesn't support viewing other user's profile by ID
     # This test may need to be updated based on actual API design
     res = client.get(reverse("accounts:user_profile"))
-    
+
     assert res.status_code == 200
 
 
 @pytest.mark.django_db
 def test_update_profile_with_location():
     """Test updating profile with location."""
-    from rest_framework.test import APIClient
     from django.urls import reverse
-    
+    from rest_framework.test import APIClient
+
     client = APIClient()
-    user = User.objects.create(username="user7", email="u7@test.com", first_name="U", last_name="ser")
+    user = User.objects.create(
+        username="user7", email="u7@test.com", first_name="U", last_name="ser"
+    )
     client.force_authenticate(user)
-    
+
     res = client.patch(
         reverse("accounts:update_profile"),
         {
@@ -272,7 +278,7 @@ def test_update_profile_with_location():
         },
         format="json",
     )
-    
+
     assert res.status_code == 200
     user.refresh_from_db()
     assert user.location == "Busan"
@@ -281,17 +287,19 @@ def test_update_profile_with_location():
 @pytest.mark.django_db
 def test_user_preferences_get_and_update():
     """Test user preferences GET and PATCH."""
-    from rest_framework.test import APIClient
     from django.urls import reverse
-    
+    from rest_framework.test import APIClient
+
     client = APIClient()
-    user = User.objects.create(username="user8", email="u8@test.com", first_name="U", last_name="ser")
+    user = User.objects.create(
+        username="user8", email="u8@test.com", first_name="U", last_name="ser"
+    )
     client.force_authenticate(user)
-    
+
     # GET - should create preferences if not exists
     res = client.get(reverse("accounts:user_preferences"))
     assert res.status_code == 200
-    
+
     # PATCH - update preferences
     res = client.patch(
         reverse("accounts:user_preferences"),

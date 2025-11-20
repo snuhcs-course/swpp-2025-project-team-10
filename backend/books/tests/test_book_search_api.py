@@ -1,9 +1,8 @@
 import pytest
+from books.models import Author, BookCopy, BookPublication
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework.test import APIClient
-
-from books.models import Author, BookCopy, BookPublication
 
 User = get_user_model()
 

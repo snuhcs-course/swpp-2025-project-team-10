@@ -5,8 +5,9 @@ from __future__ import annotations
 import json
 import logging
 import re
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
-from typing import Any, Iterable, Sequence
+from typing import Any
 
 from accounts.models import BookGenre, BookLength, BookMood, ReadingPurpose
 
@@ -266,11 +267,20 @@ class PublicationClassification:
             self.category_scores = [
                 {"label": "General Interest", "score": 0.45}
             ]
-        if "genres" not in self.taste_profile or not self.taste_profile["genres"]:
+        if (
+            "genres" not in self.taste_profile
+            or not self.taste_profile["genres"]
+        ):
             self.taste_profile["genres"] = [str(BookGenre.NOVEL)]
-        if "moods" not in self.taste_profile or not self.taste_profile["moods"]:
+        if (
+            "moods" not in self.taste_profile
+            or not self.taste_profile["moods"]
+        ):
             self.taste_profile["moods"] = [str(BookMood.SERIOUS)]
-        if "purposes" not in self.taste_profile or not self.taste_profile["purposes"]:
+        if (
+            "purposes" not in self.taste_profile
+            or not self.taste_profile["purposes"]
+        ):
             self.taste_profile["purposes"] = [str(ReadingPurpose.INSPIRATION)]
         if not self.taste_profile.get("length"):
             self.taste_profile["length"] = str(BookLength.MEDIUM)
@@ -362,7 +372,9 @@ class PublicationCategorizer:
             try:
                 return self._classify_with_llm(publication)
             except Exception as exc:  # pragma: no cover - defensive logging
-                logger.warning("LLM classification failed: %s", exc, exc_info=True)
+                logger.warning(
+                    "LLM classification failed: %s", exc, exc_info=True
+                )
         return self._heuristic_classification(publication)
 
     def classify_many(
@@ -432,7 +444,9 @@ class PublicationCategorizer:
                 ),
                 Message(role="user", content=self._build_prompt(publication)),
             ]
-        raw = self.llm_client.generate(messages, temperature=0.2, max_tokens=400)
+        raw = self.llm_client.generate(
+            messages, temperature=0.2, max_tokens=400
+        )
         logger.debug(
             "LLM response (single) for %s: %s",
             publication.identifier,
@@ -487,7 +501,9 @@ class PublicationCategorizer:
             ),
             Message(role="user", content=prompt),
         ]
-        raw = self.llm_client.generate(messages, temperature=0.2, max_tokens=max_tokens)
+        raw = self.llm_client.generate(
+            messages, temperature=0.2, max_tokens=max_tokens
+        )
         logger.debug(
             "LLM response (batch size %s): %s",
             len(publications),
@@ -530,8 +546,8 @@ class PublicationCategorizer:
 
         for payload in publications:
             if payload.identifier not in classifications:
-                classifications[payload.identifier] = self._heuristic_classification(
-                    payload
+                classifications[payload.identifier] = (
+                    self._heuristic_classification(payload)
                 )
 
         return classifications
@@ -581,7 +597,9 @@ class PublicationCategorizer:
                 or payload.get("scores")
                 or payload.get("labels")
             )
-            taste_raw = payload.get("tasteProfile") or payload.get("taste") or {}
+            taste_raw = (
+                payload.get("tasteProfile") or payload.get("taste") or {}
+            )
             categories = self._normalise_category_scores(categories_raw)
             taste = self._normalise_taste_profile(taste_raw)
             if not categories:
@@ -619,7 +637,9 @@ class PublicationCategorizer:
         haystack = self._haystack(publication)
         matches: list[dict[str, float]] = []
         for label, keywords in self.KEYWORD_MAP.items():
-            keyword_hits = sum(haystack.count(keyword.lower()) for keyword in keywords)
+            keyword_hits = sum(
+                haystack.count(keyword.lower()) for keyword in keywords
+            )
             genre_bonus = sum(
                 1
                 for genre in publication.genres
@@ -724,13 +744,18 @@ class PublicationCategorizer:
     def _normalise_taste_profile(self, payload: Any) -> dict[str, object]:
         if not isinstance(payload, dict):
             return {}
-        genres = self._normalise_multi_choice(payload.get("genres"), BOOK_GENRE_KEYS)
-        moods = self._normalise_multi_choice(payload.get("moods"), BOOK_MOOD_KEYS)
+        genres = self._normalise_multi_choice(
+            payload.get("genres"), BOOK_GENRE_KEYS
+        )
+        moods = self._normalise_multi_choice(
+            payload.get("moods"), BOOK_MOOD_KEYS
+        )
         purposes = self._normalise_multi_choice(
             payload.get("purposes"), READING_PURPOSE_KEYS
         )
         length = self._normalise_choice(
-            payload.get("length") or payload.get("bookLength"), BOOK_LENGTH_KEYS
+            payload.get("length") or payload.get("bookLength"),
+            BOOK_LENGTH_KEYS,
         )
         taste: dict[str, object] = {}
         if genres:

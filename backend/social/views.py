@@ -3,14 +3,11 @@ Views for the social app.
 """
 
 from barter.models import BarterRequest
-from books.models import BookCopy
 from notify.models import Notification
-from notify.utils import create_notification
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-
 from social.models import Comment, Post, PostLike
 from social.serializers import PostCreateSerializer, PostSerializer
 
@@ -48,7 +45,9 @@ def create_post(request):
     )
     if serializer.is_valid():
         serializer.save()
-        return Response({"post": serializer.data}, status=status.HTTP_201_CREATED)
+        return Response(
+            {"post": serializer.data}, status=status.HTTP_201_CREATED
+        )
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -72,7 +71,9 @@ def like_post(request, post_id):
             {"error": "Post not found"}, status=status.HTTP_404_NOT_FOUND
         )
 
-    like, created = PostLike.objects.get_or_create(post=post, user=request.user)
+    like, created = PostLike.objects.get_or_create(
+        post=post, user=request.user
+    )
 
     if not created:
         like.delete()
@@ -100,7 +101,8 @@ def comment_post(request, post_id):
     content = request.data.get("content", "").strip()
     if not content:
         return Response(
-            {"error": "Content is required"}, status=status.HTTP_400_BAD_REQUEST
+            {"error": "Content is required"},
+            status=status.HTTP_400_BAD_REQUEST,
         )
 
     try:
@@ -213,4 +215,6 @@ def barter_post(request, post_id):
     from barter.serializers import BarterRequestSerializer
 
     serializer = BarterRequestSerializer(barter, context={"request": request})
-    return Response({"barter": serializer.data}, status=status.HTTP_201_CREATED)
+    return Response(
+        {"barter": serializer.data}, status=status.HTTP_201_CREATED
+    )

@@ -3,12 +3,16 @@ Tests for user taste survey functionality.
 """
 
 import pytest
+from accounts.models import (
+    BookGenre,
+    BookLength,
+    BookMood,
+    ReadingPurpose,
+    UserTaste,
+)
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework.test import APIClient
-
-from accounts.models import UserTaste, BookGenre, BookMood, ReadingPurpose, BookLength
-
 
 User = get_user_model()
 
@@ -17,9 +21,11 @@ User = get_user_model()
 def test_taste_survey_validation_errors():
     """Test taste survey with insufficient selections."""
     client = APIClient()
-    user = User.objects.create(username="user", email="u@test.com", first_name="U", last_name="ser")
+    user = User.objects.create(
+        username="user", email="u@test.com", first_name="U", last_name="ser"
+    )
     client.force_authenticate(user)
-    
+
     # Step 1: Less than 3 genres
     res = client.post(
         reverse("accounts:user_taste"),
@@ -29,56 +35,56 @@ def test_taste_survey_validation_errors():
     assert res.status_code == 400
     # Check if message exists in response, could be in 'message' or 'errors'
     assert "3개 이상" in str(res.data) or res.status_code == 400
-    
+
     # Step 2: Less than 3 authors
     taste = UserTaste.objects.get(user=user)
     taste.current_step = 2
     taste.save()
-    
+
     res = client.post(
         reverse("accounts:user_taste"),
         {"favorite_authors": ["Author 1"]},
         format="json",
     )
     assert res.status_code == 400
-    
+
     # Step 3: Less than 3 books
     taste.current_step = 3
     taste.save()
-    
+
     res = client.post(
         reverse("accounts:user_taste"),
         {"favorite_books": ["Book 1"]},
         format="json",
     )
     assert res.status_code == 400
-    
+
     # Step 4: Missing preferred_length
     taste.current_step = 4
     taste.save()
-    
+
     res = client.post(
         reverse("accounts:user_taste"),
         {"preferred_length": ""},
         format="json",
     )
     assert res.status_code == 400
-    
+
     # Step 5: Less than 3 moods
     taste.current_step = 5
     taste.save()
-    
+
     res = client.post(
         reverse("accounts:user_taste"),
         {"preferred_moods": [BookMood.WARM]},
         format="json",
     )
     assert res.status_code == 400
-    
+
     # Step 6: Less than 3 purposes
     taste.current_step = 6
     taste.save()
-    
+
     res = client.post(
         reverse("accounts:user_taste"),
         {"reading_purposes": [ReadingPurpose.HEALING]},
@@ -91,12 +97,14 @@ def test_taste_survey_validation_errors():
 def test_taste_survey_creates_if_not_exists():
     """Test taste survey GET creates UserTaste if it doesn't exist."""
     client = APIClient()
-    user = User.objects.create(username="user", email="u@test.com", first_name="U", last_name="ser")
+    user = User.objects.create(
+        username="user", email="u@test.com", first_name="U", last_name="ser"
+    )
     client.force_authenticate(user)
-    
+
     # Verify no taste exists
     assert not UserTaste.objects.filter(user=user).exists()
-    
+
     # GET should create it
     res = client.get(reverse("accounts:user_taste"))
     assert res.status_code == 200
@@ -107,9 +115,11 @@ def test_taste_survey_creates_if_not_exists():
 def test_taste_survey_invalid_serializer():
     """Test taste survey with invalid data."""
     client = APIClient()
-    user = User.objects.create(username="user", email="u@test.com", first_name="U", last_name="ser")
+    user = User.objects.create(
+        username="user", email="u@test.com", first_name="U", last_name="ser"
+    )
     client.force_authenticate(user)
-    
+
     # Invalid data type
     res = client.post(
         reverse("accounts:user_taste"),
@@ -123,57 +133,88 @@ def test_taste_survey_invalid_serializer():
 def test_taste_survey_complete_flow():
     """Test complete taste survey flow through all 7 steps."""
     client = APIClient()
-    user = User.objects.create(username="user_flow", email="uflow@test.com", first_name="U", last_name="ser")
+    user = User.objects.create(
+        username="user_flow",
+        email="uflow@test.com",
+        first_name="U",
+        last_name="ser",
+    )
     client.force_authenticate(user)
-    
+
     # Create authors and books for the test
-    from books.models import Author as BookAuthor, BookCopy, BookPublication, Publisher
-    from accounts.models import Author, Book as BookChoice
-    
+    from accounts.models import Author
+    from accounts.models import Book as BookChoice
+    from books.models import Author as BookAuthor
+    from books.models import (
+        BookCopy,
+        BookPublication,
+        Publisher,
+    )
+
     publisher = Publisher.objects.create(name="Test Publisher")
-    
+
     # Create physical author objects (not used for taste - taste uses enum)
     auth1 = BookAuthor.objects.create(name="Author 1")
     auth2 = BookAuthor.objects.create(name="Author 2")
     auth3 = BookAuthor.objects.create(name="Author 3")
-    
+
     for title in ["Book 1", "Book 2", "Book 3"]:
-        publication = BookPublication.objects.create(title=title, publisher=publisher)
+        publication = BookPublication.objects.create(
+            title=title, publisher=publisher
+        )
         publication.authors.add(auth1)
         BookCopy.objects.create(
             publication=publication,
             owner=user,
             is_for_barter=False,
         )
-    
+
     # Step 1: Genres (valid - need 3+)
     res = client.post(
         reverse("accounts:user_taste"),
-        {"favorite_genres": [BookGenre.NOVEL, BookGenre.ESSAY, BookGenre.SELF_HELP]},
+        {
+            "favorite_genres": [
+                BookGenre.NOVEL,
+                BookGenre.ESSAY,
+                BookGenre.SELF_HELP,
+            ]
+        },
         format="json",
     )
     assert res.status_code == 200
     assert res.data["ok"] is True
     assert res.data["step"] == 2
-    
+
     # Step 2: Authors (valid - need 3+) - Use Author enum from models, not book Author IDs
     res = client.post(
         reverse("accounts:user_taste"),
-        {"favorite_authors": [Author.HAN_KANG, Author.KIM_YOUNG_HA, Author.JUNG_JAE_SEUNG]},
+        {
+            "favorite_authors": [
+                Author.HAN_KANG,
+                Author.KIM_YOUNG_HA,
+                Author.JUNG_JAE_SEUNG,
+            ]
+        },
         format="json",
     )
     assert res.status_code == 200
     assert res.data["step"] == 3
-    
+
     # Step 3: Books (valid - need 3+) - Use Book enum from models, not book IDs
     res = client.post(
         reverse("accounts:user_taste"),
-        {"favorite_books": [BookChoice.DEMIAN, BookChoice.SAPIENS, BookChoice.NINETEEN_EIGHTY_FOUR]},
+        {
+            "favorite_books": [
+                BookChoice.DEMIAN,
+                BookChoice.SAPIENS,
+                BookChoice.NINETEEN_EIGHTY_FOUR,
+            ]
+        },
         format="json",
     )
     assert res.status_code == 200
     assert res.data["step"] == 4
-    
+
     # Step 4: Preferred length (valid)
     res = client.post(
         reverse("accounts:user_taste"),
@@ -182,25 +223,37 @@ def test_taste_survey_complete_flow():
     )
     assert res.status_code == 200
     assert res.data["step"] == 5
-    
+
     # Step 5: Moods (valid - need 3+)
     res = client.post(
         reverse("accounts:user_taste"),
-        {"preferred_moods": [BookMood.WARM, BookMood.CALM, BookMood.IMMERSIVE]},
+        {
+            "preferred_moods": [
+                BookMood.WARM,
+                BookMood.CALM,
+                BookMood.IMMERSIVE,
+            ]
+        },
         format="json",
     )
     assert res.status_code == 200
     assert res.data["step"] == 6
-    
+
     # Step 6: Purposes (valid - need 3+)
     res = client.post(
         reverse("accounts:user_taste"),
-        {"reading_purposes": [ReadingPurpose.HEALING, ReadingPurpose.CULTURE, ReadingPurpose.ESCAPISM]},
+        {
+            "reading_purposes": [
+                ReadingPurpose.HEALING,
+                ReadingPurpose.CULTURE,
+                ReadingPurpose.ESCAPISM,
+            ]
+        },
         format="json",
     )
     assert res.status_code == 200
     assert res.data["step"] == 7
-    
+
     # Step 7: Trade location (optional fields, no strict validation)
     res = client.post(
         reverse("accounts:user_taste"),
@@ -208,7 +261,7 @@ def test_taste_survey_complete_flow():
         format="json",
     )
     assert res.status_code == 200
-    
+
     # Verify user has completed taste survey
     user.refresh_from_db()
     assert user.has_initial_taste is True
@@ -218,17 +271,18 @@ def test_taste_survey_complete_flow():
 def test_user_taste_get_creates_new_taste():
     """Test GET on user_taste creates new UserTaste if not exists."""
     client = APIClient()
-    user = User.objects.create(username="user2", email="u2@test.com", first_name="U", last_name="ser")
+    user = User.objects.create(
+        username="user2", email="u2@test.com", first_name="U", last_name="ser"
+    )
     client.force_authenticate(user)
-    
+
     # Ensure no taste exists
     assert not UserTaste.objects.filter(user=user).exists()
-    
+
     res = client.get(reverse("accounts:user_taste"))
-    
+
     assert res.status_code == 200
     assert res.data["ok"] is True
     assert res.data["step"] == 1
     assert res.data["is_complete"] is False
     assert UserTaste.objects.filter(user=user).exists()
-    

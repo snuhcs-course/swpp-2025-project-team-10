@@ -4,8 +4,6 @@ Import book metadata from the Kakao Books API and create local records.
 
 from __future__ import annotations
 
-from typing import Iterable, List, Optional
-
 from books.services.book_import_service import BookImportService
 from books.services.kakao_book_pipeline import (
     ExternalBookAPIError,
@@ -49,7 +47,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        queries: List[str] = options["queries"]
+        queries: list[str] = options["queries"]
         owner = self._resolve_owner(
             owner_id=options.get("owner_id"),
             owner_email=options.get("owner_email"),
@@ -114,8 +112,8 @@ class Command(BaseCommand):
     def _resolve_owner(
         self,
         *,
-        owner_id: Optional[int],
-        owner_email: Optional[str],
+        owner_id: int | None,
+        owner_email: str | None,
     ) -> User:
         if owner_id is None and owner_email is None:
             raise CommandError(

@@ -186,7 +186,6 @@ class UserSerializer(serializers.ModelSerializer):
             "successful_trades",
             "created_at",
             "has_initial_taste",
-
         )
 
 
@@ -454,9 +453,8 @@ class UserBarterInfoSerializer(serializers.ModelSerializer):
 
     def get_library(self, obj):
         # All books owned by the user (use reverse relation to avoid import ambiguity)
-        qs = (
-            obj.book_copies.select_related("publication")
-            .prefetch_related("publication__authors")
+        qs = obj.book_copies.select_related("publication").prefetch_related(
+            "publication__authors"
         )
         return BookSummarySerializer(qs, many=True, context=self.context).data
 
@@ -504,7 +502,7 @@ class UserBarterInfoSerializer(serializers.ModelSerializer):
             return None
 
         # Haversine formula
-        R = 6371.0  # Earth radius in km
+        earth_radius_km = 6371.0
         dlat = radians(lat2 - lat1)
         dlon = radians(lon2 - lon1)
         a = (
@@ -512,7 +510,7 @@ class UserBarterInfoSerializer(serializers.ModelSerializer):
             + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2) ** 2
         )
         c = 2 * atan2(sqrt(a), sqrt(1 - a))
-        km = R * c
+        km = earth_radius_km * c
         return round(km, 2)
 
     def get_reviews(self, obj):
@@ -533,8 +531,10 @@ class UserTasteSerializer(serializers.ModelSerializer):
     """
     Serializer for user's book preferences and taste information.
     """
+
     favorite_genres = serializers.ListField(
-        child=serializers.ChoiceField(choices=BookGenre.choices), required=False,
+        child=serializers.ChoiceField(choices=BookGenre.choices),
+        required=False,
     )
     favorite_authors = serializers.ListField(
         child=serializers.ChoiceField(choices=Author.choices), required=False

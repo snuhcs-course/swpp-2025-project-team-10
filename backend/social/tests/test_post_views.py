@@ -96,30 +96,48 @@ class PostViewTests(APITestCase):
 def test_update_post_with_invalid_data():
     """Test PUT /posts/{id}/ with invalid data returns 400."""
     client = APIClient()
-    user = User.objects.create(username="user_update", email="u@test.com", first_name="U", last_name="ser")
+    user = User.objects.create(
+        username="user_update",
+        email="u@test.com",
+        first_name="U",
+        last_name="ser",
+    )
     post = Post.objects.create(author=user, content="original")
-    
+
     client.force_authenticate(user)
-    
+
     # Empty content
     res = client.put(f"/posts/{post.id}/", {"content": ""}, format="json")
-    assert res.status_code == 400 or res.status_code == 404  # Might not have update endpoint
+    assert (
+        res.status_code == 400 or res.status_code == 404
+    )  # Might not have update endpoint
 
 
 @pytest.mark.django_db
 def test_home_feed_returns_multiple_posts():
     """Test home_feed endpoint returns list of public posts."""
     client = APIClient()
-    user = User.objects.create(username="viewer", email="viewer@test.com", first_name="V", last_name="iewer")
-    
+    user = User.objects.create(
+        username="viewer",
+        email="viewer@test.com",
+        first_name="V",
+        last_name="iewer",
+    )
+
     # Create multiple public posts
-    Post.objects.create(author=user, content="Post 1", is_public=True, post_type="text")
-    Post.objects.create(author=user, content="Post 2", is_public=True, post_type="text")
-    Post.objects.create(author=user, content="Post 3", is_public=True, post_type="book_review")
-    
+    Post.objects.create(
+        author=user, content="Post 1", is_public=True, post_type="text"
+    )
+    Post.objects.create(
+        author=user, content="Post 2", is_public=True, post_type="text"
+    )
+    Post.objects.create(
+        author=user, content="Post 3", is_public=True, post_type="book_review"
+    )
+
     client.force_authenticate(user)
     res = client.get("/home/")
-    
+
     assert res.status_code == 200
     assert "results" in res.data
     assert len(res.data["results"]) >= 3

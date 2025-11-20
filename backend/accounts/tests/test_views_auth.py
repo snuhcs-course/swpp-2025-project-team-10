@@ -254,11 +254,11 @@ import pytest
 @pytest.mark.django_db
 def test_user_registration_invalid_password():
     """Test user registration with invalid passwords."""
-    from rest_framework.test import APIClient
     from django.urls import reverse
-    
+    from rest_framework.test import APIClient
+
     client = APIClient()
-    
+
     # Password too short
     res = client.post(
         reverse("accounts:signup"),
@@ -272,7 +272,7 @@ def test_user_registration_invalid_password():
         format="json",
     )
     assert res.status_code == 400
-    
+
     # Password without letter
     res = client.post(
         reverse("accounts:signup"),
@@ -292,46 +292,52 @@ def test_user_registration_invalid_password():
 def test_user_registration_serializer_password_validation():
     """Test registration serializer validates password."""
     from accounts.serializers import UserRegistrationSerializer
-    
+
     # Valid password
-    serializer = UserRegistrationSerializer(data={
-        "username": "test",
-        "email": "test@test.com",
-        "password": "validpass123",
-        "first_name": "Test",
-        "last_name": "User",
-    })
+    serializer = UserRegistrationSerializer(
+        data={
+            "username": "test",
+            "email": "test@test.com",
+            "password": "validpass123",
+            "first_name": "Test",
+            "last_name": "User",
+        }
+    )
     assert serializer.is_valid()
-    
+
     # Too short
-    serializer = UserRegistrationSerializer(data={
-        "username": "test2",
-        "email": "test2@test.com",
-        "password": "short",
-        "first_name": "Test",
-        "last_name": "User",
-    })
+    serializer = UserRegistrationSerializer(
+        data={
+            "username": "test2",
+            "email": "test2@test.com",
+            "password": "short",
+            "first_name": "Test",
+            "last_name": "User",
+        }
+    )
     assert not serializer.is_valid()
-    
+
     # No letter
-    serializer = UserRegistrationSerializer(data={
-        "username": "test3",
-        "email": "test3@test.com",
-        "password": "123456789",
-        "first_name": "Test",
-        "last_name": "User",
-    })
+    serializer = UserRegistrationSerializer(
+        data={
+            "username": "test3",
+            "email": "test3@test.com",
+            "password": "123456789",
+            "first_name": "Test",
+            "last_name": "User",
+        }
+    )
     assert not serializer.is_valid()
 
 
 @pytest.mark.django_db
 def test_user_registration_success():
     """Test successful user registration via UserRegistrationView."""
-    from rest_framework.test import APIClient
     from django.urls import reverse
-    
+    from rest_framework.test import APIClient
+
     client = APIClient()
-    
+
     res = client.post(
         reverse("accounts:signup"),
         {
@@ -344,7 +350,7 @@ def test_user_registration_success():
         format="json",
     )
     assert res.status_code in [200, 201]
-    
+
     # Verify user was created
     user = User.objects.filter(username="newuser").first()
     assert user is not None
@@ -354,16 +360,21 @@ def test_user_registration_success():
 @pytest.mark.django_db
 def test_login_success():
     """Test successful login via CustomTokenObtainPairView."""
-    from rest_framework.test import APIClient
     from django.urls import reverse
-    
+    from rest_framework.test import APIClient
+
     client = APIClient()
-    
+
     # Create user
-    user = User.objects.create(username="testuser", email="test@test.com", first_name="Test", last_name="User")
+    user = User.objects.create(
+        username="testuser",
+        email="test@test.com",
+        first_name="Test",
+        last_name="User",
+    )
     user.set_password("testpass123")
     user.save()
-    
+
     # Login
     res = client.post(
         reverse("accounts:login"),
@@ -382,31 +393,36 @@ def test_login_success():
 @pytest.mark.django_db
 def test_token_refresh():
     """Test token refresh endpoint."""
-    from rest_framework.test import APIClient
     from django.urls import reverse
-    
+    from rest_framework.test import APIClient
+
     client = APIClient()
-    
+
     # Create and login user first
-    user = User.objects.create(username="testuser2", email="test2@test.com", first_name="Test", last_name="User")
+    user = User.objects.create(
+        username="testuser2",
+        email="test2@test.com",
+        first_name="Test",
+        last_name="User",
+    )
     user.set_password("testpass123")
     user.save()
-    
+
     login_res = client.post(
         reverse("accounts:login"),
         {"username": "testuser2", "password": "testpass123"},
         format="json",
     )
-    
+
     refresh_token = login_res.data["refreshToken"]
-    
+
     # Test refresh
     res = client.post(
         reverse("accounts:token_refresh"),
         {"refresh": refresh_token},
         format="json",
     )
-    
+
     assert res.status_code == 200
     assert "accessToken" in res.data
 
@@ -414,14 +430,19 @@ def test_token_refresh():
 @pytest.mark.django_db
 def test_user_registration_duplicate_username():
     """Test registration with duplicate username."""
-    from rest_framework.test import APIClient
     from django.urls import reverse
-    
+    from rest_framework.test import APIClient
+
     client = APIClient()
-    
+
     # Create existing user
-    User.objects.create(username="existing", email="existing@test.com", first_name="E", last_name="User")
-    
+    User.objects.create(
+        username="existing",
+        email="existing@test.com",
+        first_name="E",
+        last_name="User",
+    )
+
     res = client.post(
         reverse("accounts:signup"),
         {
@@ -434,28 +455,33 @@ def test_user_registration_duplicate_username():
         },
         format="json",
     )
-    
+
     assert res.status_code == 400
 
 
 @pytest.mark.django_db
 def test_login_with_email():
     """Test login using email instead of username."""
-    from rest_framework.test import APIClient
     from django.urls import reverse
-    
+    from rest_framework.test import APIClient
+
     client = APIClient()
-    user = User.objects.create(username="user9", email="test9@test.com", first_name="U", last_name="ser")
+    user = User.objects.create(
+        username="user9",
+        email="test9@test.com",
+        first_name="U",
+        last_name="ser",
+    )
     user.set_password("testpass123")
     user.save()
-    
+
     # Login with email
     res = client.post(
         reverse("accounts:login"),
         {"username": "test9@test.com", "password": "testpass123"},
         format="json",
     )
-    
+
     assert res.status_code == 200
     assert "accessToken" in res.data
 
@@ -463,18 +489,23 @@ def test_login_with_email():
 @pytest.mark.django_db
 def test_login_wrong_password():
     """Test login with wrong password."""
-    from rest_framework.test import APIClient
     from django.urls import reverse
-    
+    from rest_framework.test import APIClient
+
     client = APIClient()
-    user = User.objects.create(username="user10", email="u10@test.com", first_name="U", last_name="ser")
+    user = User.objects.create(
+        username="user10",
+        email="u10@test.com",
+        first_name="U",
+        last_name="ser",
+    )
     user.set_password("correctpass")
     user.save()
-    
+
     res = client.post(
         reverse("accounts:login"),
         {"username": "user10", "password": "wrongpass"},
         format="json",
     )
-    
+
     assert res.status_code == 400

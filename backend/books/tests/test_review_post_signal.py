@@ -2,15 +2,15 @@
 Tests for BookReview to Post signal.
 """
 
-from django.test import TestCase
-from django.contrib.auth import get_user_model
 from books.models import (
-    BookReview,
+    Author,
     BookCopy,
     BookPublication,
+    BookReview,
     Publisher,
-    Author,
 )
+from django.contrib.auth import get_user_model
+from django.test import TestCase
 from social.models import Post
 
 User = get_user_model()
@@ -26,10 +26,10 @@ class BookReviewPostSignalTestCase(TestCase):
             email="reviewer@example.com",
             password="testpass123",
         )
-        
+
         self.publisher = Publisher.objects.create(name="Test Publisher")
         self.author = Author.objects.create(name="Test Author")
-        
+
         publication = BookPublication.objects.create(
             title="Test Book",
             publisher=self.publisher,
@@ -43,7 +43,7 @@ class BookReviewPostSignalTestCase(TestCase):
     def test_post_created_when_review_created(self):
         """Test that Post is automatically created when BookReview is created."""
         initial_post_count = Post.objects.count()
-        
+
         # Create a book review
         review = BookReview.objects.create(
             book=self.book,
@@ -53,10 +53,10 @@ class BookReviewPostSignalTestCase(TestCase):
             content="Great book! Highly recommend.",
             rating=5,
         )
-        
+
         # Verify Post was created
         self.assertEqual(Post.objects.count(), initial_post_count + 1)
-        
+
         # Verify Post details
         post = Post.objects.latest("created_at")
         self.assertEqual(post.author, self.user)
@@ -68,7 +68,7 @@ class BookReviewPostSignalTestCase(TestCase):
     def test_post_created_for_standalone_review(self):
         """Test that Post is created even for reviews without Book object."""
         initial_post_count = Post.objects.count()
-        
+
         # Create a standalone review (no book FK)
         review = BookReview.objects.create(
             book=None,  # Standalone review
@@ -77,10 +77,10 @@ class BookReviewPostSignalTestCase(TestCase):
             author_name="Unknown Author",
             content="Review without book object.",
         )
-        
+
         # Verify Post was created
         self.assertEqual(Post.objects.count(), initial_post_count + 1)
-        
+
         # Verify Post details
         post = Post.objects.latest("created_at")
         self.assertEqual(post.author, self.user)
@@ -98,20 +98,20 @@ class BookReviewPostSignalTestCase(TestCase):
             author_name="Test Author",
             content="Initial content",
         )
-        
+
         initial_post_count = Post.objects.count()
-        
+
         # Update the review
         review.content = "Updated content"
         review.save()
-        
+
         # Verify no new Post was created
         self.assertEqual(Post.objects.count(), initial_post_count)
 
     def test_multiple_reviews_create_multiple_posts(self):
         """Test that multiple reviews create corresponding Posts."""
         initial_post_count = Post.objects.count()
-        
+
         # Create multiple reviews
         for i in range(3):
             BookReview.objects.create(
@@ -121,7 +121,7 @@ class BookReviewPostSignalTestCase(TestCase):
                 author_name="Test Author",
                 content=f"Review {i}",
             )
-        
+
         # Verify 3 Posts were created
         self.assertEqual(Post.objects.count(), initial_post_count + 3)
 
@@ -135,9 +135,9 @@ class BookReviewPostSignalTestCase(TestCase):
             author_name="Test Author",
             content="Test content",
         )
-        
+
         # Get the created Post
         post = Post.objects.latest("created_at")
-        
+
         # Verify id is an integer
         self.assertIsInstance(post.id, int)

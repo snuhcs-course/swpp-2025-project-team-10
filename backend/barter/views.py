@@ -2,14 +2,6 @@
 Views for the barter app.
 """
 
-from django.db import transaction
-from django.utils import timezone
-from rest_framework import permissions, status
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.response import Response
-
-from django.contrib.auth import get_user_model
-
 from accounts.serializers import UserBarterInfoSerializer
 from barter.models import BarterRequest
 from barter.serializers import (
@@ -19,7 +11,13 @@ from barter.serializers import (
 )
 from books.models import BookCopy
 from books.serializers import BookSummarySerializer
+from django.contrib.auth import get_user_model
+from django.db import transaction
+from django.utils import timezone
 from notify.models import Notification
+from rest_framework import permissions, status
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
 
 User = get_user_model()
 
@@ -136,7 +134,10 @@ def create_barter_request(request):
             status=status.HTTP_403_FORBIDDEN,
         )
 
-    if not requested_book.is_for_barter or requested_book.trade_status != "available":
+    if (
+        not requested_book.is_for_barter
+        or requested_book.trade_status != "available"
+    ):
         return Response(
             {"error": "Requested book is not available for barter"},
             status=status.HTTP_400_BAD_REQUEST,
@@ -174,9 +175,9 @@ def create_barter_request(request):
         requester=request.user,
         recipient=recipient,
         requested_book=requested_book,
-        offered_book_ids=[str(b.id) for b in offered_books]
-        if offered_books
-        else [],
+        offered_book_ids=(
+            [str(b.id) for b in offered_books] if offered_books else []
+        ),
         message="\n---\n".join(messages) if messages else "",
         status="pending",
     )
@@ -193,7 +194,9 @@ def create_barter_request(request):
     result_serializer = BarterRequestSerializer(
         barter, context={"request": request}
     )
-    return Response({"barter": result_serializer.data}, status=status.HTTP_201_CREATED)
+    return Response(
+        {"barter": result_serializer.data}, status=status.HTTP_201_CREATED
+    )
 
 
 @api_view(["POST"])
@@ -286,7 +289,9 @@ def accept_book_for_counter_propose(request, request_id, book_id):
         )
 
         non_selected_book_ids = [
-            bid for bid in barter_request.offered_book_ids if bid != book_id_str
+            bid
+            for bid in barter_request.offered_book_ids
+            if bid != book_id_str
         ]
         BookCopy.objects.filter(id__in=non_selected_book_ids).update(
             trade_status="available"
@@ -391,9 +396,14 @@ def reject_barter_request(request, request_id):
             status=status.HTTP_404_NOT_FOUND,
         )
 
-    if barter_request.recipient_id != request.user.id and barter_request.requester_id != request.user.id:
+    if (
+        barter_request.recipient_id != request.user.id
+        and barter_request.requester_id != request.user.id
+    ):
         return Response(
-            {"error": "Only the requester or recipient can reject this request"},
+            {
+                "error": "Only the requester or recipient can reject this request"
+            },
             status=status.HTTP_403_FORBIDDEN,
         )
 
@@ -446,4 +456,6 @@ def reject_barter_request(request, request_id):
     result_serializer = BarterRequestSerializer(
         barter_request, context={"request": request}
     )
-    return Response({"barter": result_serializer.data}, status=status.HTTP_200_OK)
+    return Response(
+        {"barter": result_serializer.data}, status=status.HTTP_200_OK
+    )

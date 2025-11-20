@@ -264,7 +264,9 @@ class GoogleSignupViewTestCase(TestCase):
         mock_verify.side_effect = Exception("Network error")
 
         data = {"idToken": "valid_token"}
-        response = self.client.post(self.google_signup_url, data, format="json")
+        response = self.client.post(
+            self.google_signup_url, data, format="json"
+        )
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertFalse(response.data["ok"])

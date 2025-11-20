@@ -1,8 +1,7 @@
 import pytest
+from books.services.publication_categories import PublicationClassification
 from django.urls import reverse
 from rest_framework.test import APIClient
-
-from books.services.publication_categories import PublicationClassification
 
 
 @pytest.mark.django_db
@@ -19,7 +18,9 @@ def test_publication_recommendations_returns_samples(monkeypatch):
                 },
             )
 
-    monkeypatch.setattr("books.views.PublicationCategorizer", lambda: _Categorizer())
+    monkeypatch.setattr(
+        "books.views.PublicationCategorizer", lambda: _Categorizer()
+    )
 
     client = APIClient()
     url = reverse("books:publication-recommendations")

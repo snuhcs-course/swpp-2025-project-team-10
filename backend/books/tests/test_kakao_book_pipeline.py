@@ -2,12 +2,11 @@ from __future__ import annotations
 
 import pytest
 import requests
-from django.test import override_settings
-
 from books.services.kakao_book_pipeline import (
     ExternalBookAPIError,
     KakaoBookPipeline,
 )
+from django.test import override_settings
 
 
 class _FakeResponse:

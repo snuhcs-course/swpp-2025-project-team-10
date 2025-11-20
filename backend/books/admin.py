@@ -13,7 +13,6 @@ from .models import (
     Translator,
 )
 
-
 admin.site.register(BookPublication)
 admin.site.register(BookCopy)
 admin.site.register(BookReview)

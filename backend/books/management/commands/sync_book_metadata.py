@@ -4,7 +4,7 @@ Management command to synchronise book metadata from the Kakao Books API.
 
 from __future__ import annotations
 
-from typing import Iterable, Optional
+from collections.abc import Iterable
 
 from books.models import BookPublication
 from books.services.book_metadata_sync import BookMetadataSynchronizer
@@ -56,7 +56,7 @@ class Command(BaseCommand):
         overwrite = options["overwrite"]
         limit = options["limit"]
         all_books = options["all"]
-        book_ids: Optional[Iterable[str]] = options.get("book_ids")
+        book_ids: Iterable[str] | None = options.get("book_ids")
         truncated_only = options["truncated_only"]
 
         if limit is not None and limit <= 0:
@@ -68,7 +68,9 @@ class Command(BaseCommand):
             queryset = queryset.filter(id__in=book_ids)
         if truncated_only:
             length_threshold = BookMetadataSynchronizer.DESCRIPTION_MIN_LENGTH
-            queryset = queryset.annotate(description_length=Length("description"))
+            queryset = queryset.annotate(
+                description_length=Length("description")
+            )
             queryset = queryset.filter(
                 Q(description__isnull=True)
                 | Q(description__exact="")

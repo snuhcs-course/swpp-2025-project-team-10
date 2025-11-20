@@ -1,10 +1,19 @@
-from .models import Notification
-from social.models import Post
 from accounts.models import Follow
-from barter.models import BarterRequest, BarterCounter
+from barter.models import BarterCounter, BarterRequest
 from books.models import BookReview
+from social.models import Post
 
-def create_notification(request, type_of_notification, post_id=None, follow_id=None, barter_id=None, review_id=None):
+from .models import Notification
+
+
+def create_notification(
+    request,
+    type_of_notification,
+    post_id=None,
+    follow_id=None,
+    barter_id=None,
+    review_id=None,
+):
     """
     Create a notification object aligned with the Notification model.
     """
@@ -15,7 +24,7 @@ def create_notification(request, type_of_notification, post_id=None, follow_id=N
     content_object = None
 
     # --- Post Like ---
-    if type_of_notification == 'post_like' and post_id:
+    if type_of_notification == "post_like" and post_id:
         post = Post.objects.get(pk=post_id)
         recipient = post.author
         title = "Post Liked"
@@ -23,15 +32,15 @@ def create_notification(request, type_of_notification, post_id=None, follow_id=N
         content_object = post
 
     # --- Post Comment ---
-    elif type_of_notification == 'post_comment' and post_id:
+    elif type_of_notification == "post_comment" and post_id:
         post = Post.objects.get(pk=post_id)
         recipient = post.author
         title = "Comment Received"
         message = f"{sender.first_name} commented on one of your posts!"
         content_object = post
-    
+
     # --- Review Like ---
-    elif type_of_notification == 'review_like' and review_id:
+    elif type_of_notification == "review_like" and review_id:
         review = BookReview.objects.get(pk=review_id)
         recipient = review.reviewer
         title = "Review Liked"
@@ -39,7 +48,7 @@ def create_notification(request, type_of_notification, post_id=None, follow_id=N
         content_object = review
 
     # --- New Follow ---
-    elif type_of_notification == 'new_follow' and follow_id:
+    elif type_of_notification == "new_follow" and follow_id:
         follow = Follow.objects.get(pk=follow_id)
         recipient = follow.following
         title = "User Followed"
@@ -47,7 +56,7 @@ def create_notification(request, type_of_notification, post_id=None, follow_id=N
         content_object = follow
 
     # --- Barter Request ---
-    elif type_of_notification == 'barter_request' and barter_id:
+    elif type_of_notification == "barter_request" and barter_id:
         barter = BarterRequest.objects.get(pk=barter_id)
         recipient = barter.recipient
         title = "Barter Request"
@@ -55,7 +64,7 @@ def create_notification(request, type_of_notification, post_id=None, follow_id=N
         content_object = barter
 
     # --- Barter Accepted ---
-    elif type_of_notification == 'barter_accepted' and barter_id:
+    elif type_of_notification == "barter_accepted" and barter_id:
         barter = BarterRequest.objects.get(pk=barter_id)
         recipient = barter.requester
         title = "Barter Accepted"
@@ -63,7 +72,7 @@ def create_notification(request, type_of_notification, post_id=None, follow_id=N
         content_object = barter
 
     # --- Barter Rejected ---
-    elif type_of_notification == 'barter_rejected' and barter_id:
+    elif type_of_notification == "barter_rejected" and barter_id:
         barter = BarterRequest.objects.get(pk=barter_id)
         recipient = barter.requester
         title = "Barter Rejected"
@@ -71,16 +80,15 @@ def create_notification(request, type_of_notification, post_id=None, follow_id=N
         content_object = barter
 
     # --- Barter Counter Offer ---
-    elif type_of_notification == 'barter_counter' and barter_id:
+    elif type_of_notification == "barter_counter" and barter_id:
         counter_offer = BarterCounter.objects.get(pk=barter_id)
         recipient = counter_offer.original_request.requester
         title = "Barter Counter Offered"
         message = f"{sender.first_name} made a counter offer!"
         content_object = counter_offer
 
-
     # --- Barter Completed ---
-    elif type_of_notification == 'barter_completed' and barter_id:
+    elif type_of_notification == "barter_completed" and barter_id:
         barter = BarterRequest.objects.get(pk=barter_id)
         # Notify the other participant
         if sender == barter.requester:
@@ -104,7 +112,7 @@ def create_notification(request, type_of_notification, post_id=None, follow_id=N
         notification_type=type_of_notification,
         title=title,
         message=message,
-        content_object=content_object
+        content_object=content_object,
     )
 
     return notification

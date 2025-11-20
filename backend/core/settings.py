@@ -25,14 +25,14 @@ SECRET_KEY = os.getenv(
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "True").lower() == "true"
 
-#ALLOWED_HOSTS = os.getenv(
+# ALLOWED_HOSTS = os.getenv(
 #    "ALLOWED_HOSTS",
 #    "localhost,127.0.0.1,10.0.2.2,192.0.0.2,testserver,10.149.193.219",
-#).split(",")
+# ).split(",")
 # Allow all hosts in 192.0.0.x network for development
-#if DEBUG:
+# if DEBUG:
 #    ALLOWED_HOSTS.append("192.0.0.*")
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ["*"]
 
 # Application definition
 DJANGO_APPS = [
@@ -128,17 +128,21 @@ SITE_ID = 1
 
 # Database Configuration
 DATABASE_URL = os.getenv("DATABASE_URL")
-USE_SQLITE = os.getenv("USE_SQLITE", "").strip().lower() in {"1", "true", "yes", "on"}
+USE_SQLITE = os.getenv("USE_SQLITE", "").strip().lower() in {
+    "1",
+    "true",
+    "yes",
+    "on",
+}
 
 try:
     DATABASE_CONN_MAX_AGE = int(os.getenv("DATABASE_CONN_MAX_AGE", "600"))
 except ValueError:
     DATABASE_CONN_MAX_AGE = 600
 
-DATABASE_SSL_REQUIRE = (
-    os.getenv("DATABASE_SSL_REQUIRE", "false").strip().lower()
-    in {"1", "true", "yes", "on"}
-)
+DATABASE_SSL_REQUIRE = os.getenv(
+    "DATABASE_SSL_REQUIRE", "false"
+).strip().lower() in {"1", "true", "yes", "on"}
 
 if USE_SQLITE:
     DATABASES = {

@@ -1,10 +1,7 @@
 from __future__ import annotations
 
 import json
-from typing import Iterable, Sequence
-
-from django.core.management.base import BaseCommand, CommandError
-from django.db import transaction
+from collections.abc import Iterable, Sequence
 
 from accounts.models import BookGenre
 from books.models import BookPublication, Genre
@@ -13,6 +10,8 @@ from books.services.publication_categories import (
     PublicationClassification,
     PublicationPayload,
 )
+from django.core.management.base import BaseCommand, CommandError
+from django.db import transaction
 
 
 class Command(BaseCommand):
@@ -138,7 +137,9 @@ class Command(BaseCommand):
         else:
             self.stdout.write(self.style.SUCCESS(summary))
 
-    def _build_payload(self, publication: BookPublication) -> PublicationPayload:
+    def _build_payload(
+        self, publication: BookPublication
+    ) -> PublicationPayload:
         authors = list(publication.authors.values_list("name", flat=True))
         genres = list(publication.genres.values_list("name", flat=True))
         description = publication.description or ""
@@ -206,13 +207,19 @@ class Command(BaseCommand):
     ) -> tuple[bool, bool]:
         changed_fields: list[str] = []
 
-        if overwrite or publication.category_scores != classification.category_scores:
+        if (
+            overwrite
+            or publication.category_scores != classification.category_scores
+        ):
             publication.category_scores = json.loads(
                 json.dumps(classification.category_scores)
             )
             changed_fields.append("category_scores")
 
-        if overwrite or publication.taste_profile != classification.taste_profile:
+        if (
+            overwrite
+            or publication.taste_profile != classification.taste_profile
+        ):
             publication.taste_profile = json.loads(
                 json.dumps(classification.taste_profile)
             )
@@ -241,7 +248,7 @@ class Command(BaseCommand):
         if not genre_keys:
             return False
 
-        label_map = {key: label for key, label in BookGenre.choices}
+        label_map = dict(BookGenre.choices)
         desired_labels = []
         for key in genre_keys:
             label = label_map.get(key)
@@ -249,9 +256,7 @@ class Command(BaseCommand):
                 label = key.replace("_", " ").title()
             desired_labels.append(label)
 
-        current_labels = set(
-            publication.genres.values_list("name", flat=True)
-        )
+        current_labels = set(publication.genres.values_list("name", flat=True))
         desired_set = set(desired_labels)
         if not overwrite and desired_set == current_labels:
             return False

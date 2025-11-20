@@ -47,7 +47,7 @@ class BarterRequest(models.Model):
     offered_book_ids = models.JSONField(
         default=list,
         blank=True,
-        help_text="List of 3 book IDs proposed by requester"
+        help_text="List of 3 book IDs proposed by requester",
     )
     requested_book = models.ForeignKey(
         "books.BookCopy",
@@ -102,11 +102,13 @@ class BarterRequest(models.Model):
 
     def create_transaction(self):
         if hasattr(self, "transaction"):
-            #...
-            return self.transaction 
-        
-        return BarterTransaction.objects.create(barter_request=self, meeting_type=self.preferred_meeting_type,)
+            # ...
+            return self.transaction
 
+        return BarterTransaction.objects.create(
+            barter_request=self,
+            meeting_type=self.preferred_meeting_type,
+        )
 
     def __str__(self):
         return f"Barter Request from {self.requester.username} to {self.recipient.username}"

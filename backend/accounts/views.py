@@ -14,16 +14,15 @@ from django.utils.crypto import get_random_string
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import permissions, serializers, status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
-from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
 
-from .models import UserPreferences, UserTaste, Follow
+from .models import Follow, UserPreferences, UserTaste
 from .serializers import (
     CustomTokenObtainPairSerializer,
     GoogleAuthSerializer,
@@ -677,6 +676,7 @@ class UserProfileMeView(APIView):
         # Store trade locations in UserTaste (closest existing fields)
         # Ensure taste exists
         from .models import UserTaste
+
         taste, _ = UserTaste.objects.get_or_create(user=request.user)
         # Map incoming fields to available fields
         trade_location1 = prefs.get("tradeLocation1")
@@ -692,7 +692,9 @@ class UserProfileMeView(APIView):
         taste.save()
 
         # Mark initial taste as present if any taste data exists
-        if (trade_location1 or trade_spot1 or favorite_genres) and not request.user.has_initial_taste:
+        if (
+            trade_location1 or trade_spot1 or favorite_genres
+        ) and not request.user.has_initial_taste:
             request.user.has_initial_taste = True
             request.user.save(update_fields=["has_initial_taste"])
 
@@ -705,7 +707,8 @@ class UserProfileMeView(APIView):
         if user.profile_picture:
             profile_url = (
                 request.build_absolute_uri(user.profile_picture.url)
-                if request else user.profile_picture.url
+                if request
+                else user.profile_picture.url
             )
 
         # Taste and preferences mapping
@@ -722,6 +725,7 @@ class UserProfileMeView(APIView):
 
         # Compute counts
         from books.models import BookReview
+
         review_count = BookReview.objects.filter(reviewer=user).count()
         follower_count = getattr(user, "follower_count", None)
         following_count = getattr(user, "following_count", None)
@@ -794,7 +798,7 @@ class GoogleLoginView(APIView):
                         "accessToken": str(refresh.access_token),
                         "refreshToken": str(refresh),
                         "message": "Google login successful",
-                        "user":UserSerializer(user).data,
+                        "user": UserSerializer(user).data,
                     },
                     status=status.HTTP_200_OK,
                 )
@@ -972,7 +976,7 @@ class KakaoLoginView(APIView):
                         "accessToken": str(refresh.access_token),
                         "refreshToken": str(refresh),
                         "message": "Kakao login successful",
-                        "user":UserSerializer(user).data
+                        "user": UserSerializer(user).data,
                     },
                     status=status.HTTP_200_OK,
                 )
@@ -1105,10 +1109,15 @@ def follow_view(request, user_id: int):
     try:
         target = User.objects.get(pk=user_id)
     except User.DoesNotExist:
-        return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        return Response(
+            {"error": "User not found"}, status=status.HTTP_404_NOT_FOUND
+        )
 
     if target.id == request.user.id:
-        return Response({"error": "Cannot follow yourself"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"error": "Cannot follow yourself"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     if request.method == "POST":
         # Create follow if not exists
@@ -1138,4 +1147,3 @@ def follow_view(request, user_id: int):
     # DELETE -> unfollow
     Follow.objects.filter(follower=request.user, following=target).delete()
     return Response({}, status=status.HTTP_200_OK)
-

@@ -6,8 +6,9 @@ from __future__ import annotations
 
 import logging
 import os
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
-from typing import Callable, Iterable, Optional
+from html.parser import HTMLParser
 from urllib.parse import urlsplit
 
 import requests
@@ -16,7 +17,6 @@ from django.core.files.base import ContentFile
 from django.db import transaction
 from django.db.models import QuerySet
 from django.utils.text import slugify
-from html.parser import HTMLParser
 
 from .kakao_book_pipeline import (
     ExternalBook,
@@ -47,8 +47,8 @@ class BookMetadataSynchronizer:
 
     def __init__(
         self,
-        pipeline: Optional[KakaoBookPipeline] = None,
-        session: Optional[requests.Session] = None,
+        pipeline: KakaoBookPipeline | None = None,
+        session: requests.Session | None = None,
     ) -> None:
         self.pipeline = pipeline or KakaoBookPipeline()
         self.session = session or requests.Session()
@@ -90,7 +90,7 @@ class BookMetadataSynchronizer:
         queryset: QuerySet[BookPublication],
         *,
         overwrite: bool = False,
-        limit: Optional[int] = None,
+        limit: int | None = None,
     ) -> SyncResult:
         """
         Loop through a queryset of books and enrich them sequentially.
@@ -118,7 +118,7 @@ class BookMetadataSynchronizer:
             processed=processed, updated=updated, failures=failures
         )
 
-    def _determine_query(self, publication: BookPublication) -> Optional[str]:
+    def _determine_query(self, publication: BookPublication) -> str | None:
         if publication.isbn_13:
             return publication.isbn_13
         if publication.isbn_10:
@@ -132,7 +132,7 @@ class BookMetadataSynchronizer:
         self,
         publication: BookPublication,
         candidates: Iterable[ExternalBook],
-    ) -> Optional[ExternalBook]:
+    ) -> ExternalBook | None:
         candidates = list(candidates)
         if not candidates:
             return None
@@ -167,7 +167,9 @@ class BookMetadataSynchronizer:
 
         # Sync description (contents from Kakao API, optionally crawling full text)
         description_source = metadata.description
-        if metadata.url and self._should_fetch_full_description(description_source):
+        if metadata.url and self._should_fetch_full_description(
+            description_source
+        ):
             full_description = self._fetch_external_description(metadata.url)
             if full_description:
                 description_source = full_description
@@ -324,7 +326,7 @@ class BookMetadataSynchronizer:
     def _sync_isbn(
         self,
         publication: BookPublication,
-        external_isbn: Optional[str],
+        external_isbn: str | None,
         overwrite: bool,
     ) -> set[str]:
         if not external_isbn:
@@ -339,29 +341,35 @@ class BookMetadataSynchronizer:
 
         fields = set()
 
-        if isbn13 and (overwrite or not publication.isbn_13):
-            if publication.isbn_13 != isbn13:
-                if self._isbn_in_use("isbn_13", isbn13, publication):
-                    logger.warning(
-                        "Skipping ISBN-13 %s for publication %s because another record already uses it.",
-                        isbn13,
-                        publication.pk,
-                    )
-                else:
-                    publication.isbn_13 = isbn13
-                    fields.add("isbn_13")
+        if (
+            isbn13
+            and (overwrite or not publication.isbn_13)
+            and publication.isbn_13 != isbn13
+        ):
+            if self._isbn_in_use("isbn_13", isbn13, publication):
+                logger.warning(
+                    "Skipping ISBN-13 %s for publication %s because another record already uses it.",
+                    isbn13,
+                    publication.pk,
+                )
+            else:
+                publication.isbn_13 = isbn13
+                fields.add("isbn_13")
 
-        if isbn10 and (overwrite or not publication.isbn_10):
-            if publication.isbn_10 != isbn10:
-                if self._isbn_in_use("isbn_10", isbn10, publication):
-                    logger.warning(
-                        "Skipping ISBN-10 %s for publication %s because another record already uses it.",
-                        isbn10,
-                        publication.pk,
-                    )
-                else:
-                    publication.isbn_10 = isbn10
-                    fields.add("isbn_10")
+        if (
+            isbn10
+            and (overwrite or not publication.isbn_10)
+            and publication.isbn_10 != isbn10
+        ):
+            if self._isbn_in_use("isbn_10", isbn10, publication):
+                logger.warning(
+                    "Skipping ISBN-10 %s for publication %s because another record already uses it.",
+                    isbn10,
+                    publication.pk,
+                )
+            else:
+                publication.isbn_10 = isbn10
+                fields.add("isbn_10")
 
         return fields
 
@@ -412,7 +420,7 @@ class BookMetadataSynchronizer:
     def _sync_cover(
         self,
         publication: BookPublication,
-        thumbnail_url: Optional[str],
+        thumbnail_url: str | None,
         overwrite: bool,
     ) -> bool:
         if not thumbnail_url:
@@ -442,7 +450,7 @@ class BookMetadataSynchronizer:
 
         return True
 
-    def _download_image(self, url: str) -> Optional[bytes]:
+    def _download_image(self, url: str) -> bytes | None:
         try:
             response = self.session.get(url, timeout=self.IMAGE_TIMEOUT)
             response.raise_for_status()
@@ -453,17 +461,20 @@ class BookMetadataSynchronizer:
             )
             return None
 
-    def _should_fetch_full_description(self, snippet: Optional[str]) -> bool:
+    def _should_fetch_full_description(self, snippet: str | None) -> bool:
         if not snippet:
             return True
 
         stripped = snippet.strip()
-        if any(marker in stripped for marker in self.DESCRIPTION_TRUNCATION_MARKERS):
+        if any(
+            marker in stripped
+            for marker in self.DESCRIPTION_TRUNCATION_MARKERS
+        ):
             return True
 
         return len(stripped) < self.DESCRIPTION_MIN_LENGTH
 
-    def _fetch_external_description(self, url: str) -> Optional[str]:
+    def _fetch_external_description(self, url: str) -> str | None:
         try:
             response = self.session.get(url, timeout=self.IMAGE_TIMEOUT)
             response.raise_for_status()
@@ -480,15 +491,14 @@ class BookMetadataSynchronizer:
         parser.close()
         return self._extract_description_from_dom(parser.root)
 
-    def _extract_description_from_dom(
-        self, root: "_HTMLNode"
-    ) -> Optional[str]:
+    def _extract_description_from_dom(self, root: _HTMLNode) -> str | None:
         tab_content = self._find_node(
             root,
-            lambda node: node.tag == "div" and node.attrs.get("id") == "tabContent",
+            lambda node: node.tag == "div"
+            and node.attrs.get("id") == "tabContent",
         )
 
-        def resolve_path(container: Optional["_HTMLNode"]) -> Optional[str]:
+        def resolve_path(container: _HTMLNode | None) -> str | None:
             if container is None:
                 return None
             first_section = self._nth_child(container, "div", 1)
@@ -508,7 +518,7 @@ class BookMetadataSynchronizer:
             return text
 
         # Fall back to the first paragraph whose class contains "desc"
-        def has_desc_class(node: "_HTMLNode") -> bool:
+        def has_desc_class(node: _HTMLNode) -> bool:
             cls = node.attrs.get("class") or ""
             return "desc" in cls
 
@@ -526,9 +536,9 @@ class BookMetadataSynchronizer:
 
     def _find_node(
         self,
-        node: "_HTMLNode",
-        predicate: Callable[["_HTMLNode"], bool],
-    ) -> Optional["_HTMLNode"]:
+        node: _HTMLNode,
+        predicate: Callable[[_HTMLNode], bool],
+    ) -> _HTMLNode | None:
         if predicate(node):
             return node
 
@@ -540,10 +550,10 @@ class BookMetadataSynchronizer:
 
     @staticmethod
     def _nth_child(
-        node: "_HTMLNode",
+        node: _HTMLNode,
         tag: str,
         index: int,
-    ) -> Optional["_HTMLNode"]:
+    ) -> _HTMLNode | None:
         count = 0
         for child in node.children:
             if child.tag == tag:
@@ -553,7 +563,7 @@ class BookMetadataSynchronizer:
         return None
 
     @staticmethod
-    def _parse_publication_date(datetime_str: str) -> Optional[object]:
+    def _parse_publication_date(datetime_str: str) -> object | None:
         """
         Parse ISO 8601 datetime string to date object.
         Format: [YYYY]-[MM]-[DD]T[hh]:[mm]:[ss].000+[tz]
@@ -578,7 +588,7 @@ class _HTMLNode:
     def __init__(self, tag: str, attrs: dict[str, str]):
         self.tag = tag
         self.attrs = attrs
-        self.children: list["_HTMLNode"] = []
+        self.children: list[_HTMLNode] = []
         self.text: list[str] = []
 
     def get_text(self) -> str:
@@ -622,7 +632,7 @@ def sync_book_metadata(
     queryset: QuerySet[BookPublication],
     *,
     overwrite: bool = False,
-    limit: Optional[int] = None,
+    limit: int | None = None,
 ) -> SyncResult:
     """
     Convenience function for bulk synchronisation.

@@ -9,10 +9,7 @@ import tempfile
 from unittest.mock import MagicMock, patch
 
 from books.models import BookCopy, BookPublication
-from books.services.book_import_service import (
-    BookImportService,
-    ImportSummary,
-)
+from books.services.book_import_service import BookImportService, ImportSummary
 from books.services.kakao_book_pipeline import (
     ExternalBook,
     ExternalBookAPIError,
@@ -228,4 +225,6 @@ class BookImportServiceTestCase(TestCase):
 
         self.assertEqual(summary.created, 1)
         self.assertFalse(BookCopy.objects.exists())
-        self.assertTrue(BookPublication.objects.filter(title="Copyless Book").exists())
+        self.assertTrue(
+            BookPublication.objects.filter(title="Copyless Book").exists()
+        )

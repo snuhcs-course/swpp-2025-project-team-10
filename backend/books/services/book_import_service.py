@@ -5,8 +5,8 @@ Services for importing new Book records from the Kakao Books API.
 from __future__ import annotations
 
 import logging
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Optional, Sequence, Tuple
 
 from books.models import BookCopy, BookPublication
 from django.contrib.auth import get_user_model
@@ -43,8 +43,8 @@ class BookImportService:
 
     def __init__(
         self,
-        pipeline: Optional[KakaoBookPipeline] = None,
-        synchronizer: Optional[BookMetadataSynchronizer] = None,
+        pipeline: KakaoBookPipeline | None = None,
+        synchronizer: BookMetadataSynchronizer | None = None,
         *,
         create_copies: bool = True,
     ) -> None:
@@ -57,7 +57,7 @@ class BookImportService:
     def import_from_query(
         self,
         query: str,
-        owner: Optional[User],
+        owner: User | None,
         *,
         size: int = KakaoBookPipeline.DEFAULT_SIZE,
         overwrite: bool = False,
@@ -121,7 +121,7 @@ class BookImportService:
         self,
         metadata: ExternalBook,
         *,
-        owner: Optional[User],
+        owner: User | None,
         overwrite: bool,
     ) -> str:
         publication, created_publication = self._ensure_publication(metadata)
@@ -155,7 +155,7 @@ class BookImportService:
     def _ensure_publication(
         self,
         metadata: ExternalBook,
-    ) -> Tuple[BookPublication, bool]:
+    ) -> tuple[BookPublication, bool]:
         isbn = metadata.isbn
         if isbn:
             publication = BookPublication.objects.filter(isbn_13=isbn).first()
@@ -190,7 +190,7 @@ class BookImportService:
 
 def import_books(
     queries: Sequence[str],
-    owner: Optional[User],
+    owner: User | None,
     *,
     size: int = KakaoBookPipeline.DEFAULT_SIZE,
     overwrite: bool = False,
