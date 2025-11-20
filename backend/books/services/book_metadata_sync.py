@@ -619,7 +619,7 @@ class _SimpleHTMLParser(HTMLParser):
 
 
 def sync_book_metadata(
-    queryset: QuerySet[Book],
+    queryset: QuerySet[BookPublication],
     *,
     overwrite: bool = False,
     limit: Optional[int] = None,

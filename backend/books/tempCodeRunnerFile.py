@@ -1,1 +1,0 @@
-print("Check if book added: ", serializer.data)

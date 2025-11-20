@@ -21,6 +21,7 @@ def test_like_and_comment_and_barter_create_notifications():
         username="actor", email="x@example.com", first_name="X", last_name="Y"
     )
 
+    publisher = Publisher.objects.create(name="Test Pub")
     publication = BookPublication.objects.create(title="T", publisher=publisher)
     publication.authors.add(BookAuthor.objects.create(name="Auth"))
     book = BookCopy.objects.create(publication=publication, owner=author)
