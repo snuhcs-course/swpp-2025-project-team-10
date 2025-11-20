@@ -121,7 +121,7 @@ def test_successful_barter_flow(setup_users_and_books):
 
     barter = BarterRequest.objects.get(pk=barter_id)
     assert barter.status == "completed"
-    assert barter.offered_book_id == offered_ids[0]
+    assert str(barter.offered_book_id) == str(offered_ids[0])
 
     # ownership swapped and trade statuses updated
     barter.offered_book.refresh_from_db()

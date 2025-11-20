@@ -209,6 +209,7 @@ class BookCopy(models.Model):
         ("traded", "Traded"),
         ("not_available", "Not Available"),
     ]
+    AVAILABILITY_CHOICES = TRADE_STATUS_CHOICES
 
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     publication = models.ForeignKey(

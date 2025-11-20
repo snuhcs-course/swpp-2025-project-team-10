@@ -25,6 +25,11 @@ urlpatterns = [
         name="accept-book",
     ),
     path(
+        "requests/<uuid:request_id>/accept/",
+        views.accept_barter_request,
+        name="accept-request",
+    ),
+    path(
         "requests/<uuid:request_id>/reject/",
         views.reject_barter_request,
         name="reject-request",

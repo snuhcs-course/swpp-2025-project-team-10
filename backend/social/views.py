@@ -183,10 +183,12 @@ def barter_post(request, post_id):
 
     message = request.data.get("message")
     if not message:
-        message = (
-            f"Hi {recipient.username}, I'd like to barter for "
-            f"'{requested_book.title}'."
-        )
+        parts = [
+            f"Hi {recipient.username}, I'd like to barter for '{requested_book.title}'."
+        ]
+        if requester.location:
+            parts.append(f"My location: {requester.location}")
+        message = " ".join(parts)
 
     requested_book.trade_status = "not_available"
     requested_book.save(update_fields=["trade_status"])

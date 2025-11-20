@@ -90,6 +90,20 @@ class User(AbstractUser):
     location = models.CharField(
         max_length=100, blank=True, help_text="Your city or region"
     )
+    latitude = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        null=True,
+        blank=True,
+        help_text="Current latitude coordinate",
+    )
+    longitude = models.DecimalField(
+        max_digits=9,
+        decimal_places=6,
+        null=True,
+        blank=True,
+        help_text="Current longitude coordinate",
+    )
     birth_date = models.DateField(null=True, blank=True)
 
     # Profile Picture

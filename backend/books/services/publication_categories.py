@@ -410,17 +410,28 @@ class PublicationCategorizer:
     def _classify_with_llm(
         self, publication: PublicationPayload
     ) -> PublicationClassification:
-        assert Message is not None, "LLM Message dataclass missing"
-        messages = [
-            Message(
-                role="system",
-                content=(
-                    "You are a book taxonomy expert helping a reading preference "
-                    "survey. Always reply with valid JSON."
+        if Message is None:
+            messages: list[dict[str, str]] = [
+                {
+                    "role": "system",
+                    "content": (
+                        "You are a book taxonomy expert helping a reading "
+                        "preference survey. Always reply with valid JSON."
+                    ),
+                },
+                {"role": "user", "content": self._build_prompt(publication)},
+            ]
+        else:
+            messages = [
+                Message(
+                    role="system",
+                    content=(
+                        "You are a book taxonomy expert helping a reading preference "
+                        "survey. Always reply with valid JSON."
+                    ),
                 ),
-            ),
-            Message(role="user", content=self._build_prompt(publication)),
-        ]
+                Message(role="user", content=self._build_prompt(publication)),
+            ]
         raw = self.llm_client.generate(messages, temperature=0.2, max_tokens=400)
         logger.debug(
             "LLM response (single) for %s: %s",

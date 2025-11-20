@@ -25,6 +25,7 @@ from .models import (
     ReadingStatus,
     ReviewHelpfulVote,
 )
+from .services.publication_categories import PublicationCategorizer
 from .serializers import (
     BookCollectionSerializer,
     BookSerializer,
@@ -369,10 +370,19 @@ def toggle_wishlist(request, book_id):
     deleted_count, _ = BookWishlist.objects.filter(
         user=request.user, book=book
     ).delete()
-    return Response(
-        {"wishlisted": False, "removed": bool(deleted_count)},
-        status=status.HTTP_200_OK,
-    )
+    if deleted_count > 0:
+        data = {
+            "wishlisted": False,
+            "removed": True,
+            "message": "Removed from wishlist",
+        }
+    else:
+        data = {
+            "wishlisted": False,
+            "removed": False,
+            "message": "Not in wishlist",
+        }
+    return Response(data, status=status.HTTP_200_OK)
 
 
 @api_view(["PATCH"])
@@ -383,7 +393,13 @@ def toggle_book_for_barter(request, book_id):
     Only the owner can toggle.
     """
 
-    book = get_object_or_404(BookCopy.objects.select_related("owner"), pk=book_id)
+    try:
+        book = BookCopy.objects.select_related("owner").get(pk=book_id)
+    except BookCopy.DoesNotExist:
+        return Response(
+            {"error": "Book not found"},
+            status=status.HTTP_404_NOT_FOUND,
+        )
     if book.owner_id != request.user.id:
         return Response(
             {"error": "Only the owner can toggle barter availability"},
@@ -580,14 +596,16 @@ def nearby_owners(request, book_id):
     )
     radius_km = float(request.query_params.get("radius", 20))
 
-    if not request.user.latitude or not request.user.longitude:
+    user_lat_val = getattr(request.user, "latitude", None)
+    user_lon_val = getattr(request.user, "longitude", None)
+    if not user_lat_val or not user_lon_val:
         return Response(
             {"error": "Your location is not set. Please update your profile."},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    user_lat = float(request.user.latitude)
-    user_lon = float(request.user.longitude)
+    user_lat = float(user_lat_val)
+    user_lon = float(user_lon_val)
 
     potential_owners = (
         BookCopy.objects.filter(
@@ -610,11 +628,13 @@ def nearby_owners(request, book_id):
     results = []
     for book_instance in potential_owners:
         owner = book_instance.owner
-        if not owner.latitude or not owner.longitude:
+        owner_lat = getattr(owner, "latitude", None)
+        owner_lon = getattr(owner, "longitude", None)
+        if not owner_lat or not owner_lon:
             continue
 
         distance = haversine(
-            user_lon, user_lat, float(owner.longitude), float(owner.latitude)
+            user_lon, user_lat, float(owner_lon), float(owner_lat)
         )
         if distance <= radius_km:
             owner_data = UserBarterInfoSerializer(
@@ -625,3 +645,27 @@ def nearby_owners(request, book_id):
 
     results.sort(key=lambda item: item["distance_km"])
     return Response({"owners": results}, status=status.HTTP_200_OK)
+
+
+@api_view(["GET"])
+@permission_classes([permissions.AllowAny])
+def publication_recommendations(request):
+    """
+    Return sample publication recommendations for exploration.
+    """
+    limit = int(request.query_params.get("limit", 4))
+    classifier = PublicationCategorizer()
+    classification = classifier.classify({})
+
+    results = []
+    for idx in range(limit):
+        results.append(
+            {
+                "id": str(idx),
+                "title": f"Sample Recommendation {idx + 1}",
+                "categoryScores": classification.category_scores,
+                "tasteProfile": classification.taste_profile,
+            }
+        )
+
+    return Response({"results": results}, status=status.HTTP_200_OK)

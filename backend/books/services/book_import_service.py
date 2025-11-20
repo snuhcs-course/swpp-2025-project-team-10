@@ -138,7 +138,7 @@ class BookImportService:
                 owner=owner,
                 defaults={
                     "is_for_barter": True,
-                    "availability": BookCopy.AVAILABILITY_CHOICES[0][0],
+                    "trade_status": BookCopy.TRADE_STATUS_CHOICES[0][0],
                 },
             )
 

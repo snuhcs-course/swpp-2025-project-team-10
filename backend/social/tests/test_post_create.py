@@ -106,21 +106,24 @@ def test_create_post_with_content_only():
 def test_create_post_with_related_book():
     """Test create_post with related_book."""
     from rest_framework.test import APIClient
-    from books.models import Author as BookAuthor, Book, Publisher
+    from books.models import Author as BookAuthor, BookCopy, BookPublication, Publisher
     
     client = APIClient()
     user = User.objects.create(username="user_book_post", email="ubpost@test.com", first_name="U", last_name="ser")
     
     publisher = Publisher.objects.create(name="Pub2")
     auth = BookAuthor.objects.create(name="Auth2")
-    book = Book.objects.create(
+    publication = BookPublication.objects.create(
         title="Test Book",
-        owner=user,
         publisher=publisher,
-        is_for_barter=True,
-        trade_status="available"
     )
-    book.authors.add(auth)
+    publication.authors.add(auth)
+    book = BookCopy.objects.create(
+        publication=publication,
+        owner=user,
+        is_for_barter=True,
+        trade_status="available",
+    )
     
     client.force_authenticate(user)
     res = client.post(

@@ -127,7 +127,7 @@ def test_taste_survey_complete_flow():
     client.force_authenticate(user)
     
     # Create authors and books for the test
-    from books.models import Author as BookAuthor, Book, Publisher
+    from books.models import Author as BookAuthor, BookCopy, BookPublication, Publisher
     from accounts.models import Author, Book as BookChoice
     
     publisher = Publisher.objects.create(name="Test Publisher")
@@ -137,9 +137,14 @@ def test_taste_survey_complete_flow():
     auth2 = BookAuthor.objects.create(name="Author 2")
     auth3 = BookAuthor.objects.create(name="Author 3")
     
-    book1 = Book.objects.create(title="Book 1", owner=user, publisher=publisher, is_for_barter=False)
-    book2 = Book.objects.create(title="Book 2", owner=user, publisher=publisher, is_for_barter=False)
-    book3 = Book.objects.create(title="Book 3", owner=user, publisher=publisher, is_for_barter=False)
+    for title in ["Book 1", "Book 2", "Book 3"]:
+        publication = BookPublication.objects.create(title=title, publisher=publisher)
+        publication.authors.add(auth1)
+        BookCopy.objects.create(
+            publication=publication,
+            owner=user,
+            is_for_barter=False,
+        )
     
     # Step 1: Genres (valid - need 3+)
     res = client.post(

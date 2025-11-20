@@ -214,12 +214,15 @@ class BookWishlistToggleTestCase(TestCase):
         )
         self.publisher = Publisher.objects.create(name="Test Publisher")
         self.author = Author.objects.create(name="Test Author")
-        self.book = Book.objects.create(
+        publication = BookPublication.objects.create(
             title="Wishlist Book",
-            owner=self.user,
             publisher=self.publisher,
         )
-        self.book.authors.add(self.author)
+        publication.authors.add(self.author)
+        self.book = BookCopy.objects.create(
+            publication=publication,
+            owner=self.user,
+        )
         self.client.force_authenticate(user=self.user)
 
     def test_remove_from_wishlist_success(self):

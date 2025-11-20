@@ -143,11 +143,12 @@ class BookSerializer(serializers.ModelSerializer):
     """
 
     owner = serializers.ReadOnlyField(source="owner.username")
-    title = serializers.CharField(source="title", read_only=True)
+    title = serializers.CharField(read_only=True)
     authors = serializers.SerializerMethodField()
     authors_display = serializers.SerializerMethodField()
-    publisher = serializers.SerializerMethodField()
     publisher_name = serializers.SerializerMethodField()
+    author = serializers.CharField(source="author_names", read_only=True)
+    coverUrl = serializers.SerializerMethodField(read_only=True)
     publication_date = serializers.DateField(
         source="publication.publication_date", read_only=True
     )
@@ -170,11 +171,13 @@ class BookSerializer(serializers.ModelSerializer):
             "title",
             "authors",
             "authors_display",
+            "author",
             "publisher_name",
             "publication_date",
             "isbn",
             "description",
             "cover_image",
+            "coverUrl",
             "is_for_barter",
             "owner_notes",
             "trade_status",
@@ -187,11 +190,13 @@ class BookSerializer(serializers.ModelSerializer):
             "title",
             "authors",
             "authors_display",
+            "author",
             "publisher_name",
             "publication_date",
             "isbn",
             "description",
             "cover_image",
+            "coverUrl",
             "trade_status",
         ]
         extra_kwargs = {"publication": {"write_only": True}}
@@ -202,12 +207,9 @@ class BookSerializer(serializers.ModelSerializer):
     def get_authors_display(self, obj):
         return self.get_authors(obj)
 
-    def get_publisher(self, obj):
+    def get_publisher_name(self, obj):
         publisher = obj.publication.publisher
         return publisher.name if publisher else None
-
-    def get_publisher_name(self, obj):
-        return self.get_publisher(obj)
 
     def get_cover_image(self, obj):
         if not obj.cover_image:
@@ -215,6 +217,9 @@ class BookSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         url = obj.cover_image.url
         return request.build_absolute_uri(url) if request else url
+
+    def get_coverUrl(self, obj):
+        return self.get_cover_image(obj)
 
     def create(self, validated_data):
         publication = validated_data.pop("publication", None)

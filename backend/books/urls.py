@@ -15,6 +15,7 @@ from .views import (
     modify_collection_books,
     modify_reading_status,
     reading_status_view,
+    publication_recommendations,
     toggle_book_for_barter,
     toggle_wishlist,
     nearby_owners,
@@ -83,6 +84,11 @@ urlpatterns = [
 
     #Book search API
     path("books/search/", book_search, name="book-search"),
+    path(
+        "publications/recommendations/",
+        publication_recommendations,
+        name="publication-recommendations",
+    ),
 
     #User's book list.
     path("books/", book_list, name="books-list"),
