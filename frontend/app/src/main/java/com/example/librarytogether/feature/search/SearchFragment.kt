@@ -48,12 +48,13 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentSearchBinding.bind(view)
 
-        val pendingQuery = searchSharedViewModel.consumeQuery()
-
-        if (!pendingQuery.isNullOrBlank()) {
-            binding.etSearch.setText(pendingQuery)
-
-            searchViewModel.search(pendingQuery)
+        searchSharedViewModel.pendingQuery.observe(viewLifecycleOwner) { query ->
+            if (!query.isNullOrBlank()) {
+                binding.etSearch.setText(query)
+                binding.etSearch.setSelection(query.length)
+                searchViewModel.search(query)
+                searchSharedViewModel.clearQuery()
+            }
         }
 
         setupRecyclerView()

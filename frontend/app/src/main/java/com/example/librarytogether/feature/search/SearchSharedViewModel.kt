@@ -15,10 +15,8 @@ class SearchSharedViewModel @Inject constructor() : ViewModel() {
         _pendingQuery.value = query
     }
 
-    fun consumeQuery(): String? {
-        val q = _pendingQuery.value
+    fun clearQuery() {
         _pendingQuery.value = null
-        return q
     }
 }
 
