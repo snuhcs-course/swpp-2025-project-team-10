@@ -145,12 +145,20 @@ def create_barter_request(request):
         )
 
     # AI 추천을 사용하여 적합한 책들 선택
-    recommended_book_ids = AIRecommendationService.recommend_books_for_barter(
+    recommendations = AIRecommendationService.recommend_books_for_barter(
         requester=request.user,
         recipient=recipient,
         requested_book=requested_book,
         limit=3
     )
+    recommended_book_ids = [
+        rec["id"] if isinstance(rec, dict) else rec for rec in recommendations
+    ]
+    reason_lookup = {
+        rec["id"]: rec.get("reason")
+        for rec in recommendations
+        if isinstance(rec, dict) and rec.get("id")
+    }
     
     # 추천된 책 ID로 실제 BookCopy 객체 가져오기
     if recommended_book_ids:
@@ -182,7 +190,12 @@ def create_barter_request(request):
     messages = []
     for idx, book in enumerate(offered_books):
         template = message_templates[idx % len(message_templates)]
-        messages.append(template.format(book.title))
+        base_message = template.format(book.title)
+        reason = reason_lookup.get(str(book.id))
+        if reason:
+            messages.append(f"{base_message} 이유: {reason}")
+        else:
+            messages.append(base_message)
 
     requested_book.trade_status = "not_available"
     requested_book.save(update_fields=["trade_status"])
