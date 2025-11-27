@@ -15,6 +15,7 @@ class Notification(models.Model):
 
     NOTIFICATION_TYPE_CHOICES = [
         ("barter_request", "Barter Request"),
+        ("barter_request_sent", "Barter Request Sent"),
         ("barter_accepted", "Barter Accepted"),
         ("barter_rejected", "Barter Rejected"),
         ("barter_completed", "Barter Completed"),

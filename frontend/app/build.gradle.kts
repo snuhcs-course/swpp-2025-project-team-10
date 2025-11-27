@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.safeargs)
     alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.jacoco)
 }
 
 android {
@@ -36,7 +37,7 @@ android {
     buildTypes {
         debug {
             enableAndroidTestCoverage = true
-            isTestCoverageEnabled = true
+            enableUnitTestCoverage = true
         }
 
         release {
@@ -75,6 +76,7 @@ android {
 
 dependencies {
 
+    androidTestImplementation(libs.androidx.navigation.testing)
     implementation(libs.flowbinding.android)
     implementation(libs.androidx.hilt.navigation.fragment)
     testImplementation(libs.hamcrest)
@@ -127,4 +129,51 @@ dependencies {
     implementation("com.google.android.material:material:1.12.0")
 
     testImplementation("org.robolectric:robolectric:4.12.2")
+}
+
+// JaCoCo 설정
+tasks.register<JacocoReport>("jacocoTestReport") {
+    dependsOn("testDebugUnitTest")
+
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+
+    val fileFilter = listOf(
+        // Hilt & Dagger 관련 파일 제외 (중요)
+        "**/*_MembersInjector.class",
+        "**/Dagger*Component.class",
+        "**/Dagger*Component\$Builder.class",
+        "**/Dagger*Subcomponent*.class",
+        "**/*_Factory.*",
+        "**/*_HiltModules*",
+        "**/Hilt_*",
+        "**/*_Impl*",
+        "**/di/**"
+    )
+
+    val debugTree = fileTree(
+        mapOf(
+            "dir" to layout.buildDirectory.dir("tmp/kotlin-classes/debug").get().asFile,
+            "excludes" to fileFilter
+        )
+    )
+
+    val mainSrc = layout.projectDirectory.dir("src/main/java").asFile
+
+    sourceDirectories.setFrom(files(mainSrc))
+    classDirectories.setFrom(files(debugTree))
+
+    executionData.setFrom(
+        fileTree(
+            mapOf(
+                "dir" to layout.buildDirectory.get().asFile,
+                "includes" to listOf(
+                    "**/*.exec",
+                    "**/*.ec"
+                )
+            )
+        )
+    )
 }

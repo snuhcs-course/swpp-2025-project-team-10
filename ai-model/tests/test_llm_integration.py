@@ -143,6 +143,7 @@ class TestReasoningGenerator:
             "오리엔트 특급 살인 추천해! 미스터리 장르 좋아하시니까 딱일 것 같아. 반전도 엄청나고 추리 과정이 재밌거든.",  # Initial
             "그럼 용의자 X의 헌신은 어때? 히가시노 게이고 작품이라 백야행 좋아했으면 마음에 들 거야.",  # Refine 1
             "두 책 다 추천할게. 둘 다 반전이 좋고 몰입감이 엄청나거든.",  # Refine 2
+            '[{"book_id": "book_1", "title": "Murder on the Orient Express", "reason": "미스터리 취향에 잘 맞아요", "score": 0.9}]',  # Reasons JSON
             "최종적으로 오리엔트 특급 살인과 용의자 X의 헌신 추천할게. 미스터리 장르 선호도에 완벽하게 맞아.",  # Final
         ]
         mock_critic.chat.side_effect = [
@@ -164,6 +165,8 @@ class TestReasoningGenerator:
         # Check trajectory structure
         assert trajectory.user_id == "user_123"
         assert len(trajectory.recommended_books) == 2
+        assert trajectory.recommendations
+        assert all(rec.reason for rec in trajectory.recommendations)
         assert len(trajectory.conversation) >= 3
         assert trajectory.final_recommendation is not None
         assert isinstance(trajectory.final_recommendation, str)
@@ -333,6 +336,7 @@ class TestConversationFormatter:
         assert formatted.user_id == "user_123"
         assert len(formatted.messages) == 2
         assert formatted.confidence_score == 0.85
+        assert formatted.recommendations
 
         # Check message structure
         assert formatted.messages[0].speaker_role == "recommender"
@@ -367,3 +371,4 @@ class TestConversationFormatter:
         assert "messages" in android_format
         assert "confidenceLevel" in android_format
         assert android_format["confidenceLevel"] == "HIGH"
+        assert android_format["recommendations"]

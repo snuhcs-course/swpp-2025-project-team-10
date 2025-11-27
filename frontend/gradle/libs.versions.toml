@@ -35,6 +35,7 @@ hiltNavigationFragment = "1.2.0"
 flowbinding = "1.2.0"
 
 [libraries]
+androidx-navigation-testing = { group = "androidx.navigation", name = "navigation-testing", version.ref = "navigation" }
 flowbinding-android = { group = "io.github.reactivecircus.flowbinding", name = "flowbinding-android", version.ref = "flowbinding" }
 androidx-hilt-navigation-fragment = { group = "androidx.hilt", name = "hilt-navigation-fragment", version.ref = "hiltNavigationFragment" }
 hamcrest = { group = "org.hamcrest", name = "hamcrest", version.ref = "hamcrest" } # <-- 이 라인 추가
@@ -83,4 +84,5 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 hilt = {id = "com.google.dagger.hilt.android", version.ref = "hilt"}
 safeargs = {id = "androidx.navigation.safeargs.kotlin", version.ref = "navigation"}
+jacoco = {id = "jacoco"}
 

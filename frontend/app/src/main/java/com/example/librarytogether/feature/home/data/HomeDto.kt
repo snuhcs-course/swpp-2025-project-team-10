@@ -35,6 +35,7 @@ data class Post(
     val isLiked: Boolean = false,
     val bookId: String, // 교환 대상 책 uuid
     val bookAvailableForBarter: Boolean,
+    val posterLocation: String? = null,
     // 지역
 )
 

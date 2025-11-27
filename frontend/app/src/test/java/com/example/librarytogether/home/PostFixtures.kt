@@ -1,27 +1,26 @@
-package com.example.librarytogether.home
+package com.example.librarytogether.feature.home
 
 import com.example.librarytogether.feature.home.data.Post
 
 object PostFixtures {
     fun post(
-        id: Int,
-        title: String = "T$id",
-        author: String = "A$id",
-        poster: String = "U$id",
-        liked: Boolean = false,
+        id: Int = 1,
         likeCount: Int = 0,
-        createdAt: String? = "2025-10-%02dT00:00:00Z".format(30 - id) // id가 작을수록 최신이 되게 예시
-    ) = Post(
+        liked: Boolean = false,
+        createdAt: String? = null
+    ): Post = Post(
         id = id,
-        posterId = 0,
-        bookTitle = title,
-        authorName = author,
-        posterName = poster,
-        posterProfile = "",
-        content = "C$id",
+        posterId = 100 + id,
+        bookTitle = "Book$id",
+        authorName = "Author$id",
+        posterName = "User$id",
+        posterProfile = "profile$id.png",
+        content = "Content$id",
+        imageUrls = emptyList(),
         likeCount = likeCount,
         createdAt = createdAt,
         isLiked = liked,
-        userBookId = 1
+        bookId = "book-$id",
+        bookAvailableForBarter = true
     )
 }

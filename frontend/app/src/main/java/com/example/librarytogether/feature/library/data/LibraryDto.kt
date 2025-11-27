@@ -33,6 +33,7 @@ data class Review(
     val likeCount: Int = 0,
     val createdAt: String? = null,
     val isLiked: Boolean = false,
+    val bookId: String? = null,
 )
 
 data class PostReview(
@@ -42,12 +43,13 @@ data class PostReview(
     val publisher: String?,
     val isbn: String?,
     val imageUrls: List<String> = emptyList(),
+    val bookId: String? = null,
 )
 
 data class Book(
     val id: String,
     val title: String,
-    val authors: String?,
+    val authors: List<String>?,
     val cover_image: String?,
     val publisher: String?,
     val isbn: String?
@@ -78,9 +80,9 @@ data class UserPreferences(
     val tradeLocation2: String?,
     val tradeSpot1: String?,
     val tradeSpot2: String?,
-    val favBooks: List<String>,  
+    val favBooks: List<String>,
     val favBookNotes: List<String>,
-    val favAuthors: List<String>,  
+    val favAuthors: List<String>,
     val favAuthorNotes: List<String>,
     val readingHabit: String?,
 )

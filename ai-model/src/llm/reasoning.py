@@ -1,14 +1,36 @@
 """Reasoning trajectory generation using two-LLM conversation."""
 
+import json
 import logging
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Any, Iterable
 
 from data.entities import Item, UserProfile
 from llm.client import ConversationTurn, LLMClient
 from llm.config import LLMConfig
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class BookRecommendation:
+    """Lightweight view of a recommended book with a reason."""
+
+    book_id: str
+    title: str
+    reason: str
+    score: float | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "id": self.book_id,
+            "title": self.title,
+            "reason": self.reason,
+            "score": self.score,
+            "metadata": self.metadata,
+        }
 
 
 @dataclass
@@ -21,16 +43,27 @@ class ReasoningTrajectory:
     """
 
     user_id: str
-    recommended_books: list[str]  # Book titles
-    conversation: list[ConversationTurn]
-    final_recommendation: str
-    confidence_score: float
+    recommended_books: list[str] = field(default_factory=list)  # Book titles
+    conversation: list[ConversationTurn] = field(default_factory=list)
+    final_recommendation: str = ""
+    confidence_score: float = 0.0
+    recommendations: list[BookRecommendation] = field(default_factory=list)
+
+    def __post_init__(self) -> None:
+        if not self.recommended_books and self.recommendations:
+            self.recommended_books = [rec.title for rec in self.recommendations]
+        if not self.recommendations and self.recommended_books:
+            self.recommendations = [
+                BookRecommendation(book_id=title, title=title, reason="")
+                for title in self.recommended_books
+            ]
 
     def to_dict(self) -> dict:
         """Convert to dictionary for JSON serialization."""
         return {
             "user_id": self.user_id,
             "recommended_books": self.recommended_books,
+            "recommendations": [rec.to_dict() for rec in self.recommendations],
             "conversation": [
                 {
                     "speaker": turn.speaker,
@@ -89,12 +122,14 @@ class ReasoningGenerator:
         )
 
         self.max_turns = int(os.getenv("REASONING_MAX_TURNS", "5"))
+        self.recommendation_count = int(os.getenv("RECOMMENDATION_COUNT", "3"))
 
     def generate_book_recommendation_reasoning(
         self,
         user_profile: UserProfile,
         candidate_books: list[Item],
         user_reading_history: list[str] | None = None,
+        max_recommendations: int | None = None,
     ) -> ReasoningTrajectory:
         """
         Generate reasoning trajectory for book recommendations.
@@ -103,10 +138,13 @@ class ReasoningGenerator:
             user_profile: User's profile with preferences
             candidate_books: List of candidate books to recommend
             user_reading_history: Optional reading history
+            max_recommendations: Optional override for how many books to return
 
         Returns:
             ReasoningTrajectory with conversation and final recommendation
         """
+        limit = max_recommendations or self.recommendation_count
+
         # Prepare context for LLMs
         context = self._prepare_context(
             user_profile, candidate_books, user_reading_history
@@ -168,15 +206,22 @@ class ReasoningGenerator:
                     )
                 )
 
+        recommendations = self._generate_recommendations_with_reasons(
+            user_profile, candidate_books, context, limit
+        )
+
         # Generate final recommendation
-        final_rec = self._generate_final_recommendation(context, conversation)
+        final_rec = self._generate_final_recommendation(
+            context, conversation, recommendations
+        )
 
         # Calculate confidence score
-        confidence = self._calculate_confidence(conversation)
+        confidence = self._calculate_confidence(conversation, recommendations)
 
         return ReasoningTrajectory(
             user_id=user_profile.user_id,
-            recommended_books=[book.title for book in candidate_books],
+            recommended_books=[rec.title for rec in recommendations],
+            recommendations=recommendations,
             conversation=conversation,
             final_recommendation=final_rec,
             confidence_score=confidence,
@@ -215,6 +260,200 @@ Reading History:
 Candidate Books:
 {books_str}
 """
+
+    def _generate_recommendations_with_reasons(
+        self,
+        user_profile: UserProfile,
+        candidate_books: list[Item],
+        context: str,
+        limit: int,
+    ) -> list[BookRecommendation]:
+        """Return top-N recommendations with reasons."""
+        if not candidate_books:
+            return []
+
+        target_books = list(candidate_books[:limit])
+        book_lines = "\n".join(
+            self._book_metadata_summary(book) for book in target_books
+        )
+        prefs = user_profile.preferences or {}
+        pref_desc = ", ".join(
+            f"{key}={', '.join(vals)}" for key, vals in prefs.items()
+        )
+
+        prompt = f"""사용자 정보와 후보 도서를 보고 교환/추천용 리스트를 만들어.
+최대 {limit}권까지 추천하고, 각 책마다 한두 문장으로 '왜 이 책이 맞는지'를 설명해.
+JSON 배열로만 답해. 형식:
+[
+  {{"book_id": "id", "title": "제목", "reason": "짧은 한국어 설명", "score": 0.0}}
+]
+score는 0~1 사이 적합도 추정값이야.
+
+사용자 취향: {pref_desc or '제공된 취향 없음'}
+대화 요약 컨텍스트:
+{context}
+
+후보 도서:
+{book_lines}
+"""
+        try:
+            response = self.recommender_client.chat(
+                self.recommender_prompt, prompt, temperature=0.4
+            )
+            parsed = self._parse_recommendation_response(
+                response, target_books, limit
+            )
+            if parsed:
+                return parsed
+            logger.info("LLM returned no parsable recommendations, using fallback.")
+        except Exception as exc:  # pragma: no cover - defensive
+            logger.warning("Failed to generate reasons with LLM: %s", exc)
+
+        return self._fallback_recommendations(user_profile, target_books)
+
+    def _parse_recommendation_response(
+        self, raw: str, candidates: Iterable[Item], limit: int
+    ) -> list[BookRecommendation]:
+        """Parse LLM JSON output into BookRecommendation objects."""
+        try:
+            start = raw.find("[")
+            end = raw.rfind("]") + 1
+            payload = raw[start:end] if start != -1 and end != 0 else raw
+            data = json.loads(payload)
+        except Exception:
+            logger.debug("Could not parse recommendation JSON payload: %s", raw)
+            return []
+
+        by_id = {book.item_id: book for book in candidates}
+        by_title = {book.title: book for book in candidates}
+        recommendations: list[BookRecommendation] = []
+
+        for entry in data:
+            book_id = (
+                str(entry.get("book_id"))
+                if entry.get("book_id") is not None
+                else str(entry.get("id"))
+            )
+            title = entry.get("title") or book_id
+            book = by_id.get(book_id) or by_title.get(title)
+
+            if book:
+                book_id = book.item_id
+                title = book.title
+
+            raw_score = entry.get("score")
+            score = None
+            if raw_score is not None:
+                try:
+                    score = float(raw_score)
+                except (TypeError, ValueError):
+                    score = None
+
+            reason = entry.get("reason") or "사용자 취향과 잘 맞는 책이에요."
+            metadata = book.metadata if book else {}
+
+            recommendations.append(
+                BookRecommendation(
+                    book_id=book_id,
+                    title=title,
+                    reason=reason,
+                    score=score,
+                    metadata=metadata,
+                )
+            )
+            if len(recommendations) >= limit:
+                break
+
+        return recommendations
+
+    def _fallback_recommendations(
+        self, user_profile: UserProfile, candidates: Iterable[Item]
+    ) -> list[BookRecommendation]:
+        """Deterministic fallback when the LLM cannot return JSON."""
+        recommendations: list[BookRecommendation] = []
+        pref = user_profile.preferences or {}
+
+        def _match(values: Iterable[str] | None, preferred: Iterable[str] | None):
+            if not values or not preferred:
+                return set()
+            return {v for v in values if v in preferred}
+
+        for book in candidates:
+            if book.metadata.get("genres"):
+                genres = book.metadata.get("genres", [])
+            elif book.facets.get("genre"):
+                genres = [book.facets["genre"]]
+            else:
+                genres = []
+
+            if book.metadata.get("moods"):
+                moods = book.metadata.get("moods", [])
+            elif book.facets.get("mood"):
+                moods = [book.facets["mood"]]
+            else:
+                moods = []
+
+            authors = (
+                [book.metadata.get("author")]
+                if book.metadata.get("author")
+                else []
+            )
+
+            reasons = []
+            matched_genres = _match(genres, pref.get("genres"))
+            if matched_genres:
+                reasons.append(f"{', '.join(matched_genres)} 장르를 좋아해서 잘 맞아")
+
+            matched_moods = _match(moods, pref.get("moods"))
+            if matched_moods:
+                reasons.append(f"{', '.join(matched_moods)} 무드를 찾고 있어서 추천해")
+
+            matched_authors = _match(authors, pref.get("authors"))
+            if matched_authors:
+                reasons.append(f"{', '.join(matched_authors)} 작가를 선호해서 어울려")
+
+            if not reasons:
+                reasons.append("내용과 분위기가 취향과 가까워 보여")
+
+            recommendations.append(
+                BookRecommendation(
+                    book_id=book.item_id,
+                    title=book.title,
+                    reason="; ".join(reasons),
+                    score=book.valuation,
+                    metadata=book.metadata,
+                )
+            )
+        return recommendations
+
+    @staticmethod
+    def _book_metadata_summary(book: Item) -> str:
+        """Compact metadata string for prompts."""
+        if book.metadata.get("genres"):
+            genres = book.metadata["genres"]
+        elif book.facets.get("genre"):
+            genres = [book.facets["genre"]]
+        else:
+            genres = []
+
+        if book.metadata.get("moods"):
+            moods = book.metadata["moods"]
+        elif book.facets.get("mood"):
+            moods = [book.facets["mood"]]
+        else:
+            moods = []
+        author = book.metadata.get("author", "Unknown")
+        score_hint = (
+            float(book.valuation)
+            if isinstance(book.valuation, (int, float))
+            else 0.5
+        )
+        return (
+            f"- id={book.item_id}, title={book.title}, author={author}, "
+            f"genres={', '.join([g for g in genres if g])}, "
+            f"moods={', '.join([m for m in moods if m])}, "
+            f"score_hint={score_hint:.2f}"
+        )
 
     def _recommender_initial_proposal(self, context: str) -> str:
         """Recommender's initial proposal (DM-style to critic)."""
@@ -322,7 +561,10 @@ Candidate Books:
         )
 
     def _generate_final_recommendation(
-        self, context: str, conversation: list[ConversationTurn]
+        self,
+        context: str,
+        conversation: list[ConversationTurn],
+        recommendations: Iterable[BookRecommendation],
     ) -> str:
         """Generate final recommendation summary (DM-style)."""
         conv_summary = "\n".join(
@@ -330,23 +572,34 @@ Candidate Books:
             for turn in conversation
         )
 
+        rec_lines = "\n".join(
+            f"- {rec.title}: {rec.reason}" for rec in recommendations
+        )
+
         prompt = f"""BookBot과 CriticBot의 대화:
 {conv_summary}
 
 이 대화를 바탕으로 최종 추천을 요약하세요.
+추천 후보와 이유:
+{rec_lines or '추천 후보 없음'}
+
 어떤 책을 왜 추천하는지 간단히 설명하세요.
-2-3문장으로 작성하세요."""
+2-3문장으로 작성하세요. 여러 권을 bullet로 제시해도 됩니다."""
 
         return self.recommender_client.chat(
             self.recommender_prompt, prompt, temperature=0.6
         )
 
     def _calculate_confidence(
-        self, conversation: list[ConversationTurn]
+        self,
+        conversation: list[ConversationTurn],
+        recommendations: Iterable[BookRecommendation] | None = None,
     ) -> float:
         """Calculate confidence score based on conversation."""
         # Simple heuristic: more turns = more refinement = higher confidence
         # In production, this could analyze sentiment or agreement
         base_confidence = 0.6
         turn_bonus = min(len(conversation) * 0.1, 0.3)
-        return min(base_confidence + turn_bonus, 0.95)
+        rec_count = len(list(recommendations or []))
+        rec_bonus = min(rec_count * 0.05, 0.15)
+        return min(base_confidence + turn_bonus + rec_bonus, 0.95)

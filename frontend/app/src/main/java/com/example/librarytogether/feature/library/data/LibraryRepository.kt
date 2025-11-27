@@ -2,8 +2,9 @@ package com.example.librarytogether.feature.library.data
 
 import android.util.Log
 import javax.inject.Inject
+import javax.inject.Singleton
 
-//@Singleton
+@Singleton
 open class LibraryRepository @Inject constructor(
     private val libraryApi: LibraryApi
 ) {
@@ -22,7 +23,7 @@ open class LibraryRepository @Inject constructor(
         }
     }
 
-    suspend fun addReview(review: PostReview) {
+    open suspend fun addReview(review: PostReview) {
         try {
             libraryApi.addReview(review)
         } catch (e: Exception) {
@@ -101,7 +102,7 @@ open class LibraryRepository @Inject constructor(
         }
     }
 
-    suspend fun updateMyProfile(profile: UserProfile): UserProfile? {
+    open suspend fun updateMyProfile(profile: UserProfile): UserProfile? {
         return try {
             val response = libraryApi.updateMyProfile(profile)
             if (response.isSuccessful) {
@@ -116,7 +117,7 @@ open class LibraryRepository @Inject constructor(
         }
     }
 
-    suspend fun getMyWishlist(): List<Book>? {
+    open suspend fun getMyWishlist(): List<Book>? {
         return try {
             val response = libraryApi.getMyWishlist()
             if (response.isSuccessful) {
@@ -134,7 +135,7 @@ open class LibraryRepository @Inject constructor(
     open suspend fun addToWishlist(book: Book): Boolean {
         val postBook : PostBook = PostBook(
             title = book.title,
-            authors = book.authors ?: "",
+            authors = book.authors?.joinToString(", ") ?: "",
             publisher = book.publisher,
             isbn = book.isbn,
             is_for_barter = false,

@@ -169,7 +169,7 @@
                 android:id="@+id/btnBookReview"
                 style="@style/Btn.Tonal.TextIcon"
                 android:layout_width="wrap_content"
-                android:text="@string/review"
+                android:text="@string/comment"
                 app:icon="@drawable/comment_icon"/>
 
             <Space

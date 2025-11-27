@@ -31,7 +31,7 @@ class SearchResultAdapter(
 
         fun bind(item: SearchItem) {
             binding.tvTitle.text = item.title
-            binding.tvAuthor.text = item.authors[0].toString()
+            binding.tvAuthor.text = item.author
             Glide.with(binding.imgCover).load(item.cover_image).into(binding.imgCover)
 
             binding.root.setOnClickListener { onClick(item) }

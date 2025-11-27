@@ -14,7 +14,7 @@ class SearchRepository @Inject constructor(
             if (res.isSuccessful) {
                 res.body() ?: emptyList()
             } else {
-                throw IllegalStateException("Failed to search: ${res.code()}")
+                emptyList()
             }
         } catch (e: Exception) {
             Log.e("SearchRepository", "Error searching", e)

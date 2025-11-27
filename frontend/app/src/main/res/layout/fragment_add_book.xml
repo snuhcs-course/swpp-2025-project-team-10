@@ -13,16 +13,15 @@
         android:layout_height="wrap_content"
         android:background="?attr/colorSurface">
 
-        <com.google.android.material.search.SearchBar
-            android:id="@+id/search_bar"
-            style="@style/Widget.Material3.SearchBar"
-            app:shapeAppearanceOverlay="@style/Shape.Round12"
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbarAddBook"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="16dp"
-            android:layout_marginVertical="8dp"
-            android:hint="Search books"/>
-
+            android:layout_height="?attr/actionBarSize"
+            android:theme="@style/ThemeOverlay.MaterialComponents.ActionBar"
+            app:navigationIcon="@drawable/arrow_back_icon"
+            app:title="@string/add_book_title"
+            app:menu="@menu/menu_search_book"
+            tools:title="내 책장에 책 추가" />
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.core.widget.NestedScrollView
@@ -149,8 +148,7 @@
         android:id="@+id/searchView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:hint="Search books"
-        app:layout_anchor="@id/search_bar">
+        android:hint="@string/search_books">
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvSearchResults"
@@ -162,4 +160,5 @@
             tools:listitem="@layout/item_book_row" />
 
     </com.google.android.material.search.SearchView>
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

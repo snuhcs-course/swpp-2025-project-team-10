@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+
+    <!-- Shape.Round12와 같은 12dp 라운드 -->
+    <corners android:radius="12dp" />
+
+    <!-- 기존 bg_gray 색상 사용 -->
+    <solid android:color="@color/bg_gray" />
+</shape>

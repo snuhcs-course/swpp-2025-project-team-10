@@ -69,9 +69,6 @@
         android:name="com.example.librarytogether.feature.library.AddBookFragment"
         android:label="AddBookFragment"
         tools:layout="@layout/fragment_add_book">
-        <argument
-            android:name="mode"
-            app:argType="com.example.librarytogether.feature.library.AddBookMode" />
     </fragment>
 
     <fragment

@@ -7,8 +7,6 @@ A book bartering social network mobile application built for the SNU Software Pr
 ![Kotlin](https://img.shields.io/badge/kotlin-2.0-orange)
 ![Django](https://img.shields.io/badge/django-5.2.7-green)
 
-[▶️ Watch Demo (iter1_demo.mov)](./sources/iter1_demo.mov)
-
 ## 📖 About
 
 **서로서로도서관 (Library Together)** is a social networking platform that enables users to:
@@ -248,11 +246,17 @@ coverage html  # Generate HTML report in htmlcov/
 # Navigate to frontend directory
 cd frontend
 
-# Run unit tests
-./gradlew test
-
 # Run instrumented tests (requires emulator or device)
-./gradlew connectedAndroidTest
+./gradlew clean connectedDebugAndroidTest
+
+# Run unit tests
+./gradlew testDebugUnitTest       
+
+# Jacoco Report (Generate HTML report)
+./gradlew jacocoTestReport
+
+# HTML report path:
+# frontend/app/build/reports/jacoco/jacocoTestReport/html/index.html
 ```
 
 ## 🎯 API Endpoints

@@ -9,6 +9,7 @@ import android.widget.Toast
 import com.google.android.material.search.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -18,6 +19,15 @@ import com.example.librarytogether.feature.library.data.Book
 import com.example.librarytogether.feature.library.data.PostBook
 import com.example.librarytogether.util.loadCover
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import reactivecircus.flowbinding.android.widget.textChanges
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlin.io.path.Path
 
 @AndroidEntryPoint
 class AddBookFragment : Fragment(R.layout.fragment_add_book) {
@@ -26,8 +36,6 @@ class AddBookFragment : Fragment(R.layout.fragment_add_book) {
     private val binding get() = _binding!!
 
     private val viewModel: LibraryViewModel by activityViewModels()
-
-    private val args by navArgs<AddBookFragmentArgs>()
 
     private val searchAdapter by lazy {
         SearchBookAdapter(::onBookSearchResultClicked) // 클릭 시 onBookSearchResultClicked 함수 호출
@@ -45,26 +53,14 @@ class AddBookFragment : Fragment(R.layout.fragment_add_book) {
     }
 
     private fun setupUiByMode() = with(binding) {
-        when (args.mode) {
-            AddBookMode.BOOKSHELF -> {
-                btnSaveBook.text = "내 책장에 저장"
-                switchBarterAvailable.visibility = View.VISIBLE
-                switchBarterAvailable.isEnabled = true
-            }
-            AddBookMode.WISHLIST -> {
-                btnSaveBook.text = "위시리스트에 추가"
-                switchBarterAvailable.isChecked = false
-                switchBarterAvailable.visibility = View.GONE
-            }
-        }
+        btnSaveBook.text = "내 책장에 저장"
+        switchBarterAvailable.visibility = View.VISIBLE
+        switchBarterAvailable.isEnabled = true
     }
 
     private fun setupClickListeners() {
         binding.btnSaveBook.setOnClickListener {
-            when (args.mode) {
-                AddBookMode.BOOKSHELF -> saveToBookshelf()
-                AddBookMode.WISHLIST -> addToWishlist()
-            }
+                saveToBookshelf()
         }
 
         binding.fabEditCover.setOnClickListener {
@@ -95,57 +91,60 @@ class AddBookFragment : Fragment(R.layout.fragment_add_book) {
         viewModel.addNewBook(postBook)
     }
 
-    private fun addToWishlist() {
-        val title = binding.etTitle.text.toString()
-        val authors = binding.etAuthor.text.toString()
-        val publisher = binding.etPublisher.text.toString()
-        val isbn = binding.etIsbn.text.toString()
-
-        if (title.isBlank() || authors.isBlank()) {
-            Toast.makeText(requireContext(), "책 제목과 저자는 필수입니다.", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        val postBook = Book(
-            id = "",
-            title = title,
-            authors = authors,
-            publisher = publisher.takeIf { it.isNotBlank() },
-            isbn = isbn.takeIf { it.isNotBlank() },
-            cover_image = ""
-        )
-
-        viewModel.addToWishlist(postBook)
-
-        findNavController().previousBackStackEntry
-            ?.savedStateHandle
-            ?.set("switch_tab", "PROFILE")
-
-        findNavController().popBackStack()
-    }
-
     private fun setupSearchHandler() {
-        binding.searchView.setupWithSearchBar(binding.searchBar)
+        binding.toolbarAddBook.setNavigationOnClickListener {
+            findNavController().popBackStack()
+        }
+        binding.toolbarAddBook.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.action_search -> {
+                    binding.searchView.show()
+                    true
+                }
+                else -> false
+            }
+        }
 
         binding.rvSearchResults.adapter = searchAdapter
         binding.rvSearchResults.layoutManager = LinearLayoutManager(requireContext())
 
 
-        binding.searchView
-            .getEditText()
-            .setOnEditorActionListener { v, actionId, event ->
-                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                    val query = binding.searchView.text.toString()
-                    if (!query.isNullOrBlank()) {
-                        viewModel.searchBook(query)
-                        hideKeyboard()
-                    }
-                    return@setOnEditorActionListener true
+        val edit = binding.searchView.editText
+
+        edit.setOnEditorActionListener { v, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                val query = v.text.toString().trim()
+                if (query.isNotEmpty()) {
+                    viewModel.searchBook(query)
                 }
-                return@setOnEditorActionListener false
+                true
+            } else {
+                false
             }
+        }
+
+        // 2) textChanges + debounce 로 실시간 검색
+        viewLifecycleOwner.lifecycleScope.launch {
+            edit.textChanges()
+                .debounce(300)
+                .map { it.toString().trim() }
+                .distinctUntilChanged()
+                .onEach { query ->
+                    val isEmpty = query.isEmpty()
+
+                    if (isEmpty) {
+                        viewModel.clearSearch()
+                    }
+                }
+                .filter { it.isNotEmpty() }
+                .collectLatest { query ->
+                    viewModel.searchBook(query)
+                }
+        }
+
         binding.searchView.addTransitionListener { _, _, newState ->
-            if (newState == SearchView.TransitionState.HIDDEN || newState == SearchView.TransitionState.HIDING) {
+            if (newState == SearchView.TransitionState.HIDDEN) {
+                edit.text = null
                 viewModel.clearSearch()
             }
         }
@@ -153,7 +152,7 @@ class AddBookFragment : Fragment(R.layout.fragment_add_book) {
 
     private fun onBookSearchResultClicked(book: Book) {
         binding.etTitle.setText(book.title)
-        binding.etAuthor.setText(book.authors)
+        binding.etAuthor.setText(book.authors?.joinToString(", ") ?: "")
         binding.etPublisher.setText(book.publisher)
         binding.etIsbn.setText(book.isbn)
         binding.imgCover.loadCover(book.cover_image)
@@ -170,13 +169,7 @@ class AddBookFragment : Fragment(R.layout.fragment_add_book) {
         }
         viewModel.searchResults.observe(viewLifecycleOwner) { results ->
             searchAdapter.submitList(results)
-            binding.rvSearchResults.visibility = if (results.isNotEmpty()) View.VISIBLE else View.GONE
         }
-    }
-
-    private fun hideKeyboard() {
-        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(binding.searchView.windowToken, 0)
     }
 
     override fun onDestroyView() {

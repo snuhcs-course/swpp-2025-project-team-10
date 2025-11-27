@@ -25,7 +25,7 @@ class SearchBookAdapter(
 
         fun bind(book: Book) {
             binding.tvTitle.text = book.title
-            binding.tvAuthor.text = book.authors
+            binding.tvAuthor.text = book.authors?.joinToString(", ") ?: ""
             binding.imgCover.loadCover(book.cover_image)
             binding.btnAction.visibility = View.GONE
         }
