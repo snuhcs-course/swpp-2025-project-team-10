@@ -2,6 +2,7 @@
 AI recommendation services for barter matching and book exploration.
 """
 import sys
+import os
 import logging
 from pathlib import Path
 from typing import List, Dict, Any
@@ -9,11 +10,14 @@ from typing import List, Dict, Any
 from django.conf import settings
 from books.models import BookCopy, BookWishlist
 from accounts.models import UserTaste
+import requests
 
 # Add AI model path to Python path
 AI_MODEL_PATH = Path(settings.BASE_DIR).parent / "ai-model" / "src"
 if str(AI_MODEL_PATH) not in sys.path:
     sys.path.insert(0, str(AI_MODEL_PATH))
+
+AI_MODEL_BASE_URL = getattr(settings, "AI_MODEL_BASE_URL", os.getenv("AI_MODEL_BASE_URL"))
 
 logger = logging.getLogger(__name__)
 
@@ -172,14 +176,25 @@ class AIRecommendationService:
         }
     
     @staticmethod
-    def recommend_books_for_barter(requester, recipient, requested_book, limit: int = 3) -> List[str]:
+    def recommend_books_for_barter(requester, recipient, requested_book, limit: int = 3) -> List[Dict[str, Any]]:
         """
         AI를 사용하여 교환에 적합한 책들을 추천.
-        실제 모델 호출 예시 포함.
+        가능한 경우 GPU 서버의 AI API를 호출하고, 실패 시 로컬 파이프라인이나 랜덤 선택으로 대체한다.
         """
         context_data = AIRecommendationService.get_barter_context_data(
             requester, recipient, requested_book
         )
+        # 1) 원격 GPU 서버의 FastAPI 호출 (multi-book + 이유 포함)
+        if AI_MODEL_BASE_URL:
+            try:
+                remote = AIRecommendationService._call_remote_barter_recommendations(
+                    context_data, limit
+                )
+                if remote:
+                    return remote
+            except Exception as e:
+                logger.exception("Remote AI barter recommendation failed: %s", e)
+
         # 실제 AI 모델 호출 예시
         try:
             from pipeline.recommender import BarterRecommender
@@ -228,7 +243,13 @@ class AIRecommendationService:
             )
             recommender = BarterRecommender()
             recommendations = recommender.recommend(context, limit=limit)
-            return [rec.candidate.item_id for rec in recommendations]
+            return [
+                {
+                    "id": rec.candidate.item_id,
+                    "reason": getattr(rec.negotiation, "rationale", None),
+                }
+                for rec in recommendations
+            ]
         except Exception as e:
             # Log the exception for visibility and debugging
             logger.exception("AI barter recommendation failed: %s", e)
@@ -238,7 +259,67 @@ class AIRecommendationService:
                 is_for_barter=True,
                 trade_status="available"
             ).order_by('?')[:limit]
-            return [str(book.id) for book in available_books]
+            return [
+                {"id": str(book.id), "reason": None} for book in available_books
+            ]
+
+    @staticmethod
+    def _call_remote_barter_recommendations(context_data: Dict[str, Any], limit: int) -> List[Dict[str, Any]]:
+        """Call the GPU-hosted FastAPI to get book ids + reasons."""
+        url = f"{AI_MODEL_BASE_URL.rstrip('/')}/api/recommendations/books"
+        taste = context_data["recipient"].get("taste", {})
+
+        user_payload = {
+            "id": context_data["recipient"]["id"],
+            "name": context_data["recipient"]["username"],
+            "preferred_genres": taste.get("favorite_genres", []),
+            "preferred_moods": taste.get("preferred_moods", []),
+            "reading_purposes": taste.get("reading_purposes", []),
+            "favorite_authors": taste.get("favorite_authors", []),
+            "favorite_books": taste.get("favorite_books", []),
+        }
+
+        condition_score_map = {
+            "new": 0.95,
+            "like_new": 0.9,
+            "good": 0.8,
+            "fair": 0.6,
+            "poor": 0.4,
+        }
+        candidate_books = []
+        for book in context_data["requester"]["available_books"]:
+            condition = (book.get("condition") or "").lower()
+            candidate_books.append(
+                {
+                    "id": str(book.get("id")),
+                    "title": book.get("title"),
+                    "authors": book.get("authors", []),
+                    "genres": book.get("genres", []),
+                    "moods": [],
+                    "popularity": 0.5,
+                    "condition_score": condition_score_map.get(condition, 0.7),
+                    "metadata": {"description": book.get("description")},
+                }
+            )
+
+        payload = {
+            "user": user_payload,
+            "candidate_books": candidate_books,
+            "reading_history": context_data["recipient"].get(
+                "owned_book_titles", []
+            ),
+            "max_results": limit,
+        }
+        response = requests.post(url, json=payload, timeout=8)
+        response.raise_for_status()
+        data = response.json()
+        recommendations = []
+        for rec in data.get("recommendations", [])[:limit]:
+            if rec.get("id"):
+                recommendations.append(
+                    {"id": str(rec.get("id")), "reason": rec.get("reason")}
+                )
+        return recommendations
     
     @staticmethod
     def recommend_books_for_exploration(user, limit: int = 10) -> List[Dict[str, Any]]:
