@@ -41,7 +41,8 @@ User = get_user_model()
 def _build_book_card(book: BookCopy, request) -> dict:
     """Return a lightweight payload for library/wishlist endpoints."""
     cover_url = None
-    if book.cover_image:
+    cover_image = getattr(book, "cover_image", None)
+    if cover_image and hasattr(cover_image, "url"):
         cover_url = (
             request.build_absolute_uri(book.cover_image.url)
             if request
@@ -53,7 +54,6 @@ def _build_book_card(book: BookCopy, request) -> dict:
         "author": book.author_names,
         "coverUrl": cover_url,
     }
-
 
 class UserReviewListCreateView(generics.ListCreateAPIView):
     """
@@ -318,10 +318,21 @@ def user_wishlist_list(request):
 
     wishlist_items = (
         BookWishlist.objects.filter(user=request.user)
-        .select_related("book__publication")
-        .prefetch_related("book__publication__authors")
+        .select_related(
+            "user",
+            "book",
+            "book__publication",
+            "book__publication__publisher",
+        )
+        .prefetch_related(
+            "book__publication__authors",
+            "book__publication__translators",
+            "book__publication__genres",
+        )
     )
-    books = [item.book for item in wishlist_items]
+
+    books = [item.book for item in wishlist_items]  # list of BookCopy objects
+
     return Response(
         [_build_book_card(book, request) for book in books],
         status=status.HTTP_200_OK,
@@ -342,8 +353,18 @@ def user_wishlist_by_id(request, user_id: int):
 
     wishlist_items = (
         BookWishlist.objects.filter(user=target_user)
-        .select_related("book__publication")
-        .prefetch_related("book__publication__authors")
+        .select_related(
+            "user",
+            "book",
+            "book__publication",
+            "book__publication__publisher",
+        )
+        .prefetch_related(
+            "book__publication__authors",
+            "book__publication__translators",
+            "book__publication__genres",
+        )
+
     )
     books = [item.book for item in wishlist_items]
     return Response(
@@ -383,16 +404,79 @@ def toggle_wishlist(request, book_id):
     POST adds (idempotent), DELETE removes.
     """
 
+    # book = get_object_or_404(
+    #     BookCopy.objects.select_related("owner", "publication"), pk=book_id
+    # )
+
+    # if request.method == "POST":
+    #     wishlist_item, created = BookWishlist.objects.get_or_create(
+    #         user=request.user,
+    #         book=book,
+    #     )
+    #     if created and book.owner_id and book.owner_id != request.user.id:
+    #         Notification.objects.create(
+    #             recipient=book.owner,
+    #             sender=request.user,
+    #             notification_type="book_wishlisted",
+    #             title=f"{request.user.username} wishlisted your book",
+    #             message=f"{request.user.username} added '{book.title}' to their wishlist.",
+    #             content_object=book,
+    #         )
+    #     return Response({"wishlisted": True}, status=status.HTTP_200_OK)
+
+    # deleted_count, _ = BookWishlist.objects.filter(
+    #     user=request.user, book=book
+    # ).delete()
+    # if deleted_count > 0:
+    #     data = {
+    #         "wishlisted": False,
+    #         "removed": True,
+    #         "message": "Removed from wishlist",
+    #     }
+    # else:
+    #     data = {
+    #         "wishlisted": False,
+    #         "removed": False,
+    #         "message": "Not in wishlist",
+    #     }
+    # return Response(data, status=status.HTTP_200_OK)
+
+    """
+    Wishlist toggle endpoint.
+
+    POST  → Add book to wishlist (idempotent)
+    DELETE → Remove book from wishlist
+
+    Responses:
+        201 Created / 200 OK on POST
+        204 No Content on DELETE when removed
+        404 if book not found
+        400 for invalid actions (e.g., wishlisting own book)
+    """
+
+    # Fetch book or return 404
     book = get_object_or_404(
         BookCopy.objects.select_related("owner", "publication"), pk=book_id
     )
 
+    # ❗ Block users from wishlisting their own book
+    if book.owner_id == request.user.id:
+        return Response(
+            {"error": "You cannot wishlist your own book."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    # --------------------------------------------------
+    # POST — Add to wishlist (idempotent)
+    # --------------------------------------------------
     if request.method == "POST":
         wishlist_item, created = BookWishlist.objects.get_or_create(
             user=request.user,
             book=book,
         )
-        if created and book.owner_id and book.owner_id != request.user.id:
+
+        # Only send notification on FIRST wishlist action
+        if created and book.owner_id:
             Notification.objects.create(
                 recipient=book.owner,
                 sender=request.user,
@@ -401,24 +485,31 @@ def toggle_wishlist(request, book_id):
                 message=f"{request.user.username} added '{book.title}' to their wishlist.",
                 content_object=book,
             )
-        return Response({"wishlisted": True}, status=status.HTTP_200_OK)
 
+        return Response(
+            {"wishlisted": True, "created": created},
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+        )
+
+    # --------------------------------------------------
+    # DELETE — Remove from wishlist
+    # --------------------------------------------------
     deleted_count, _ = BookWishlist.objects.filter(
         user=request.user, book=book
     ).delete()
+
     if deleted_count > 0:
-        data = {
-            "wishlisted": False,
-            "removed": True,
-            "message": "Removed from wishlist",
-        }
-    else:
-        data = {
-            "wishlisted": False,
-            "removed": False,
-            "message": "Not in wishlist",
-        }
-    return Response(data, status=status.HTTP_200_OK)
+        return Response(
+            {"wishlisted": False, "removed": True},
+            status=status.HTTP_200_OK,
+        )
+
+    # Item was not in wishlist
+    return Response(
+        {"wishlisted": False, "removed": False, "message": "Not in wishlist"},
+        status=status.HTTP_200_OK,
+    )
+
 
 
 @api_view(["PATCH"])
