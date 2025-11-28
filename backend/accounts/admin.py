@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
-from .models import Follow, User, UserPreferences
+from .models import Follow, User, UserPreferences, UserTaste
 
 
 @admin.register(User)
@@ -123,3 +123,15 @@ class UserPreferencesAdmin(admin.ModelAdmin):
             {"fields": ("max_barter_distance", "preferred_meeting_locations")},
         ),
     )
+
+
+@admin.register(UserTaste)
+class UserTasteAdmin(admin.ModelAdmin):
+    """
+    Admin configuration for User Taste.
+    """
+
+    list_display = ("user", "current_step", "trade_place_name", "trade_address")
+    search_fields = ("user__username", "trade_place_name", "trade_address")
+    list_filter = ("current_step",)
+    readonly_fields = ("user",)

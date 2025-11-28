@@ -6,6 +6,6 @@ import retrofit2.http.POST
 
 interface OnboardingApi {
 
-    @POST("onboarding/submit/")
+    @POST("auth/onboarding/submit/")
     suspend fun submit(@Body body: OnboardingSubmitRequest): Response<Unit>
 }
