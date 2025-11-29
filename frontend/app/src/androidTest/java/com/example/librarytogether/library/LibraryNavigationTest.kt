@@ -57,10 +57,10 @@ class LibraryNavigationTest {
         )
     )
     private val mockBooks = listOf(
-        Book(id = "book-1", title = "my book", authors = "author", cover_image = null, publisher = null, isbn = null)
+        Book(id = "book-1", title = "my book", authors = listOf("author"), cover_image = null, publisher = null, isbn = null)
     )
     private val mockWishlist = listOf(
-        Book(id = "wish-1", title = "wish book", authors = "author", cover_image = null, publisher = null, isbn = null)
+        Book(id = "wish-1", title = "wish book", authors = listOf("author"), cover_image = null, publisher = null, isbn = null)
     )
     private val mockProfile = UserProfile(
         username = "Me", bio = "Bio", profileUrl = null,
@@ -127,7 +127,6 @@ class LibraryNavigationTest {
 
         verify(navController).navigate(
             LibraryFragmentDirections.actionLibraryFragmentToAddBookFragment(
-                mode = AddBookMode.BOOKSHELF
             )
         )
     }

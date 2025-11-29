@@ -142,7 +142,7 @@
     <string name="more_options">더보기</string>
 
     <!-- 책 추가-->
-    <string name="add_book_title">내 서재에 책 추가</string>
+    <string name="add_book_title">내 책장에 책 추가</string>
     <string name="save">저장</string>
     <string name="book_title_hint">책 제목</string>
     <string name="book_author_hint">저자</string>

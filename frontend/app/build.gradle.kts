@@ -131,7 +131,6 @@ dependencies {
     testImplementation("org.robolectric:robolectric:4.12.2")
 }
 
-// JaCoCo 설정
 tasks.register<JacocoReport>("jacocoTestReport") {
     dependsOn("testDebugUnitTest")
 
@@ -150,7 +149,11 @@ tasks.register<JacocoReport>("jacocoTestReport") {
         "**/*_HiltModules*",
         "**/Hilt_*",
         "**/*_Impl*",
-        "**/di/**"
+        "**/di/**",
+        // DataBinding/ViewBinding 제외
+        "**/databinding/*",
+        "**/android/databinding/*",
+        "**/*Binding.class"
     )
 
     val debugTree = fileTree(

@@ -88,6 +88,7 @@ class HomeViewModel @Inject constructor(
                 )
                 _barterSuccess.value = ok
             } catch (e: Exception) {
+                _barterSuccess.value = false
                 _barterError.value = e.message ?: "네트워크 오류가 발생했습니다."
             } finally {
                 _barterLoading.value = false

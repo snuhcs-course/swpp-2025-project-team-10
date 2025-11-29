@@ -20,7 +20,7 @@ object LibraryFixtures {
     fun book(id: Int) = Book(
         id = id.toString(),
         title = "B$id",
-        authors = "Auth$id",
+        authors = listOf("Auth$id"),
         cover_image = null,
         publisher = "Pub$id",
         isbn = "ISBN$id"
@@ -38,8 +38,8 @@ object LibraryFixtures {
     fun userPrefs() = UserPreferences(
         tradeLocation1 = "L1", tradeLocation2 = "L2",
         tradeSpot1 = "S1", tradeSpot2 = "S2",
-        favBooks = "FB", favBookNotes = "FBN",
-        favAuthors = "FA", favAuthorNotes = "FAN",
+        favBooks = listOf("FB"), favBookNotes = listOf("FBN"),
+        favAuthors = listOf("FA"), favAuthorNotes = listOf("FAN"),
         readingHabit = "Night"
     )
 

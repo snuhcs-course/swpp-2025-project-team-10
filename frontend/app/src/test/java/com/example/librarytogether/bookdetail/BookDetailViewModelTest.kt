@@ -42,9 +42,9 @@ class BookDetailViewModelTest {
     private fun createBookDetail() = BookDetail(
         id = "target-id",
         title = "Title",
-        authors = "Author",
+        authors = listOf("Author"),
         publisher = null,
-        isbn_13 = null,
+        isbn = null,
         description = "Desc",
         cover_image = null,
         is_for_barter = false,

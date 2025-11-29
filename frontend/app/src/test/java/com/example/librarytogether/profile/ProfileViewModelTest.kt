@@ -55,9 +55,9 @@ class ProfileViewModelTest {
     fun loadUserProfile_success_loads_all_data() = runTest {
         val userId = 1
         val profile = createProfile(userId)
-        val books = listOf(Book(id = "b1", title = "T", authors = "A", cover_image = null, publisher = null, isbn = null))
+        val books = listOf(Book(id = "b1", title = "T", authors = listOf("A"), cover_image = null, publisher = null, isbn = null))
         val reviews = listOf(Review(1, "B", "A", "U", "", "C"))
-        val wishlist = listOf(Book(id = "w1", title = "W", authors = "A", cover_image = null, publisher = null, isbn = null))
+        val wishlist = listOf(Book(id = "w1", title = "W", authors = listOf("A"), cover_image = null, publisher = null, isbn = null))
 
         whenever(repo.getUserProfile(userId)).thenReturn(profile)
         whenever(repo.getUserBooks(userId)).thenReturn(books)
@@ -154,7 +154,7 @@ class ProfileViewModelTest {
         vm.loadUserProfile(1)
         advanceUntilIdle()
 
-        val newBooks = listOf(Book(id="b2", title="T", authors="A", cover_image = null, publisher = null, isbn = null))
+        val newBooks = listOf(Book(id="b2", title="T", authors=listOf("A"), cover_image = null, publisher = null, isbn = null))
         whenever(repo.getUserBooks(1)).thenReturn(newBooks)
 
         vm.refreshBooks()
@@ -223,7 +223,7 @@ class ProfileViewModelTest {
         vm.loadUserProfile(1)
         advanceUntilIdle()
 
-        val newWishlist = listOf(Book(id="w2", title="Wish", authors="A", cover_image = null, publisher = null, isbn = null))
+        val newWishlist = listOf(Book(id="w2", title="Wish", authors=listOf("A"), cover_image = null, publisher = null, isbn = null))
         whenever(repo.getUserWishlist(1)).thenReturn(newWishlist)
 
         vm.refreshWishlist()

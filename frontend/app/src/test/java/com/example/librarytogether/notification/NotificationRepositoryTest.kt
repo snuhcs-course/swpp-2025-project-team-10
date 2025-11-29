@@ -1,6 +1,7 @@
 package com.example.librarytogether.feature.notification
 
 import android.util.Log
+import com.example.librarytogether.feature.barterapproval.data.BarterApprovalApi
 import com.example.librarytogether.feature.notification.data.NotificationApi
 import com.example.librarytogether.feature.notification.data.NotificationDto
 import com.example.librarytogether.feature.notification.data.NotificationRepository
@@ -27,15 +28,17 @@ import retrofit2.Response
 @OptIn(ExperimentalCoroutinesApi::class)
 class NotificationRepositoryTest {
 
-    private lateinit var api: NotificationApi
+    private lateinit var notificationApi: NotificationApi
+    private lateinit var barterApprovalApi: BarterApprovalApi
     private lateinit var repo: NotificationRepository
     private lateinit var mockedLog: MockedStatic<Log>
 
     @Before
     fun setUp() {
-        api = mock()
+        notificationApi = mock()
+        barterApprovalApi = mock()
         mockedLog = mockStatic(Log::class.java)
-        repo = NotificationRepository(api)
+        repo = NotificationRepository(notificationApi, barterApprovalApi)
     }
 
     @After
@@ -59,7 +62,7 @@ class NotificationRepositoryTest {
     @Test
     fun fetchNotifications_success_returns_list() = runTest {
         val list = listOf(createNotification("1"), createNotification("2"))
-        whenever(api.getNotifications()).thenReturn(Response.success(list))
+        whenever(notificationApi.getNotifications()).thenReturn(Response.success(list))
 
         val result = repo.fetchNotifications()
 
@@ -70,7 +73,7 @@ class NotificationRepositoryTest {
     @Test
     fun fetchNotifications_success_null_body_returns_empty() = runTest {
         val response: Response<List<NotificationDto>> = Response.success(null)
-        whenever(api.getNotifications()).thenReturn(response)
+        whenever(notificationApi.getNotifications()).thenReturn(response)
 
         val result = repo.fetchNotifications()
 
@@ -79,7 +82,7 @@ class NotificationRepositoryTest {
 
     @Test
     fun fetchNotifications_failure_returns_empty() = runTest {
-        whenever(api.getNotifications()).thenReturn(Response.error(500, "".toResponseBody(null)))
+        whenever(notificationApi.getNotifications()).thenReturn(Response.error(500, "".toResponseBody(null)))
 
         val result = repo.fetchNotifications()
 
@@ -88,7 +91,7 @@ class NotificationRepositoryTest {
 
     @Test
     fun fetchNotifications_exception_returns_empty_and_logs() = runTest {
-        whenever(api.getNotifications()).thenThrow(RuntimeException("Net Error"))
+        whenever(notificationApi.getNotifications()).thenThrow(RuntimeException("Net Error"))
 
         val result = repo.fetchNotifications()
 
@@ -100,7 +103,7 @@ class NotificationRepositoryTest {
 
     @Test
     fun markAsRead_success_returns_true() = runTest {
-        whenever(api.markAsRead("1")).thenReturn(Response.success(Unit))
+        whenever(notificationApi.markAsRead("1")).thenReturn(Response.success(Unit))
 
         val result = repo.markAsRead("1")
 
@@ -109,7 +112,7 @@ class NotificationRepositoryTest {
 
     @Test
     fun markAsRead_failure_returns_false() = runTest {
-        whenever(api.markAsRead("1")).thenReturn(Response.error(400, "".toResponseBody(null)))
+        whenever(notificationApi.markAsRead("1")).thenReturn(Response.error(400, "".toResponseBody(null)))
 
         val result = repo.markAsRead("1")
 
@@ -118,7 +121,7 @@ class NotificationRepositoryTest {
 
     @Test
     fun markAsRead_exception_returns_false_and_logs() = runTest {
-        whenever(api.markAsRead("1")).thenThrow(RuntimeException("Error"))
+        whenever(notificationApi.markAsRead("1")).thenThrow(RuntimeException("Error"))
 
         val result = repo.markAsRead("1")
 

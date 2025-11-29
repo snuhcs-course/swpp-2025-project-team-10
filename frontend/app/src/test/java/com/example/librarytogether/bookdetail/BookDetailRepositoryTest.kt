@@ -44,9 +44,9 @@ class BookDetailRepositoryTest {
     private fun createBookDetail(id: String = "book-1") = BookDetail(
         id = id,
         title = "Kotlin In Action",
-        authors = "JetBrains",
+        authors = listOf("JetBrains"),
         publisher = "Manning",
-        isbn_13 = "978-1234567890",
+        isbn = "978-1234567890",
         description = "Great book",
         cover_image = "http://example.com/cover.jpg",
         is_for_barter = true,
