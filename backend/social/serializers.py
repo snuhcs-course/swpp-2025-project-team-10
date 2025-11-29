@@ -149,20 +149,14 @@ class PostSerializer(serializers.ModelSerializer):
         if not obj.related_book:
             return False
         book = obj.related_book
-        if hasattr(book, "is_available_for_barter"):
-            try:
-                return bool(book.is_available_for_barter)
-            except Exception:
-                # Defensive: fall back to field checks if property raises
-                pass
-
+        
         is_for_barter = bool(getattr(book, "is_for_barter", False))
         trade_status = getattr(book, "trade_status", None)
-        return (
-            is_for_barter
-            if trade_status is None
-            else is_for_barter and trade_status == "available"
-        )
+        
+        # True if is_for_barter is True and status is either "available" or "traded"
+        if trade_status is None:
+            return is_for_barter
+        return is_for_barter and trade_status in ["available", "traded"]
 
 
 class FeedResponseSerializer(serializers.Serializer):

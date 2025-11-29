@@ -104,6 +104,8 @@ def example_book_recommendation():
     )
 
     print(f"\nRecommended Books: {trajectory.recommended_books}")
+    for rec in trajectory.recommendations:
+        print(f" - {rec.title}: {rec.reason} (score={rec.score})")
     print(f"Confidence Score: {trajectory.confidence_score:.2f}")
 
     print("\n" + "=" * 60)

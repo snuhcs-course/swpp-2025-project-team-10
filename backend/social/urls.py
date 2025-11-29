@@ -14,5 +14,10 @@ urlpatterns = [
         name="comment-post",
     ),
     path("posts/<int:post_id>/barter/", views.barter_post, name="barter-post"),
+    path(
+        "posts/<int:post_id>/wishlist/",
+        views.wishlist_post,
+        name="wishlist-post",
+    ),
     path("posts/create/", views.create_post, name="create-post"),
 ]

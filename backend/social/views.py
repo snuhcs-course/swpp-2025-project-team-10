@@ -218,3 +218,63 @@ def barter_post(request, post_id):
     return Response(
         {"barter": serializer.data}, status=status.HTTP_201_CREATED
     )
+
+
+@api_view(["POST", "DELETE"])
+@permission_classes([IsAuthenticated])
+def wishlist_post(request, post_id):
+    """
+    Add or remove a book from user's wishlist via post.
+    POST adds (idempotent), DELETE removes.
+    """
+    from books.models import BookWishlist
+
+    try:
+        post = Post.objects.select_related(
+            "author", "related_book", "related_book__publication"
+        ).get(pk=post_id)
+    except Post.DoesNotExist:
+        return Response(
+            {"error": "Post not found"}, status=status.HTTP_404_NOT_FOUND
+        )
+
+    if not post.related_book:
+        return Response(
+            {"error": "This post has no related book to wishlist"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    book = post.related_book
+
+    if request.method == "POST":
+        wishlist_item, created = BookWishlist.objects.get_or_create(
+            user=request.user,
+            book=book,
+        )
+        if created and book.owner_id and book.owner_id != request.user.id:
+            Notification.objects.create(
+                recipient=book.owner,
+                sender=request.user,
+                notification_type="book_wishlisted",
+                title=f"{request.user.username} wishlisted your book",
+                message=f"{request.user.username} added '{book.title}' to their wishlist.",
+                content_object=book,
+            )
+        return Response({"wishlisted": True}, status=status.HTTP_200_OK)
+
+    deleted_count, _ = BookWishlist.objects.filter(
+        user=request.user, book=book
+    ).delete()
+    if deleted_count > 0:
+        data = {
+            "wishlisted": False,
+            "removed": True,
+            "message": "Removed from wishlist",
+        }
+    else:
+        data = {
+            "wishlisted": False,
+            "removed": False,
+            "message": "Not in wishlist",
+        }
+    return Response(data, status=status.HTTP_200_OK)
