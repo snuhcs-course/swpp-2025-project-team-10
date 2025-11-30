@@ -46,7 +46,7 @@
     </style>
     <!-- 툴바 제목 텍스트 전용 -->
     <style name="TextAppearance.Library.ToolbarTitle" parent="TextAppearance.MaterialComponents.Headline6">
-        <item name="android:textSize">18sp</item>
+        <item name="android:textSize">@dimen/text_title</item>
         <item name="android:textStyle">normal</item>
     </style>
 

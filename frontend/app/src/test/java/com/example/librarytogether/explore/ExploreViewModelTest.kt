@@ -38,7 +38,7 @@ class ExploreViewModelTest {
     }
 
     private fun createBook(id: String = "1") = Book(
-        id = id, title = "T", authors = listOf("A"), cover_image = null, publisher = null, isbn = null
+        id = id, title = "T", authors = listOf("A"), cover_image = null, publisher = null, isbn = null, publicationId = null
     )
 
     @Test

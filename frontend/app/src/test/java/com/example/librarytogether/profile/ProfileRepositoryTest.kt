@@ -90,7 +90,7 @@ class ProfileRepositoryTest {
 
     @Test
     fun getUserBooks_success_returns_list() = runTest {
-        val books = listOf(Book(id = "1", title = "T", authors = listOf("A"), cover_image = null, publisher = null, isbn = null))
+        val books = listOf(Book(id = "1", title = "T", authors = listOf("A"), cover_image = null, publisher = null, isbn = null, publicationId = null))
         whenever(api.getUserBooks(1)).thenReturn(Response.success(books))
 
         val result = repo.getUserBooks(1)
@@ -131,7 +131,7 @@ class ProfileRepositoryTest {
 
     @Test
     fun getUserWishlist_success_returns_list() = runTest {
-        val books = listOf(Book(id = "1", title = "T", authors = listOf("A"), cover_image = null, publisher = null, isbn = null))
+        val books = listOf(Book(id = "1", title = "T", authors = listOf("A"), cover_image = null, publisher = null, isbn = null, publicationId = null))
         whenever(api.getUserWishlist(1)).thenReturn(Response.success(books))
 
         val result = repo.getUserWishlist(1)

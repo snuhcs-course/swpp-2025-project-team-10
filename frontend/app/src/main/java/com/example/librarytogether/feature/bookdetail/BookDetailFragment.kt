@@ -57,6 +57,7 @@ class BookDetailFragment : Fragment(R.layout.fragment_book_detail) {
     private fun setupClicks() {
         binding.btnPrimary.setOnClickListener {
             val state = viewModel.state.value as? UiState.Data ?: return@setOnClickListener
+            val book = state.book
             when (source) {
                 EntrySource.BARTERAPPROVAL -> {
                     viewModel.acceptSelectedBook()
@@ -68,6 +69,10 @@ class BookDetailFragment : Fragment(R.layout.fragment_book_detail) {
                 EntrySource.MYBOOKSHELF -> {
                 }
                 else -> {
+                    homeViewModel.requestBarter(
+                        ownerId = book.ownerId,
+                        bookId = bookId
+                    )
                 }
             }
         }
@@ -136,6 +141,7 @@ class BookDetailFragment : Fragment(R.layout.fragment_book_detail) {
             EntrySource.MYBOOKSHELF -> {
                 binding.btnPrimary.isEnabled = false
                 binding.btnPrimary.text = getString(R.string.unavailable_for_barter)
+                setBtnBg(R.color.grey)
             }
             else -> {
                 binding.btnPrimary.isEnabled = b.is_for_barter

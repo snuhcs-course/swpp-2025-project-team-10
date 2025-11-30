@@ -11,7 +11,7 @@ object LibraryFixtures {
         isLiked = liked
     )
 
-    fun book(id: String) = Book(id = id, title = "B$id", authors = listOf("Auth$id"), publisher = "Pub$id", isbn = "isbn$id" , cover_image = null)
+    fun book(id: String) = Book(id = id, title = "B$id", authors = listOf("Auth$id"), publisher = "Pub$id", isbn = "isbn$id" , cover_image = null, publicationId = null)
 
     fun userPrefs() = UserPreferences(
         tradeLocation1 = "L1", tradeLocation2 = "L2",

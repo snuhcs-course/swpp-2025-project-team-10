@@ -202,7 +202,7 @@ class LibraryViewModelTest {
     @Test
     fun addNewBook_success_navigates() = runTest {
         setupDefaultMocks()
-        val postBook = PostBook("T", "A", null, null, true)
+        val postBook = PostBook("p","T", "A", null, null, true)
         whenever(repo.addBook(postBook)).thenReturn(true)
 
         val vm = createVM()
@@ -220,7 +220,7 @@ class LibraryViewModelTest {
     @Test
     fun addNewBook_failure_setsError() = runTest {
         setupDefaultMocks()
-        val postBook = PostBook("T", "A", null, null, true)
+        val postBook = PostBook("p","T", "A", null, null, true)
         whenever(repo.addBook(postBook)).thenReturn(false)
 
         val vm = createVM()
@@ -235,7 +235,7 @@ class LibraryViewModelTest {
     @Test
     fun addNewBook_exception_setsError() = runTest {
         setupDefaultMocks()
-        val postBook = PostBook("T", "A", null, null, true)
+        val postBook = PostBook("p","T", "A", null, null, true)
         whenever(repo.addBook(postBook)).thenThrow(RuntimeException("Api Error"))
 
         val vm = createVM()

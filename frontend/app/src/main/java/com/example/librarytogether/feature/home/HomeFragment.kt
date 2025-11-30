@@ -82,17 +82,21 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }
     }
 
+    internal fun handleSortMenuClick(itemId: Int) {
+        when (itemId) {
+            R.id.sort_latest -> homeviewModel.applySort(SortType.LATEST)
+            R.id.sort_popular -> homeviewModel.applySort(SortType.POPULAR)
+            R.id.sort_region -> homeviewModel.applySort(SortType.NEARBY)
+        }
+        shouldScrollToTopAfterSort = true
+    }
+
     private fun setupSortButton() {
         binding.ivSort.setOnClickListener { anchorView ->
             val popup = PopupMenu(requireContext(), anchorView)
             popup.menuInflater.inflate(R.menu.menu_feed_sort, popup.menu)
             popup.setOnMenuItemClickListener { item ->
-                when (item.itemId) {
-                    R.id.sort_latest -> homeviewModel.applySort(SortType.LATEST)
-                    R.id.sort_popular -> homeviewModel.applySort(SortType.POPULAR)
-                    R.id.sort_region -> homeviewModel.applySort(SortType.NEARBY)
-                }
-                shouldScrollToTopAfterSort = true
+                handleSortMenuClick(item.itemId)
                 true
             }
             popup.show()
@@ -206,7 +210,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         searchSharedViewModel.setQuery(query)
 
         val bottomNav = requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
-        bottomNav.selectedItemId = R.id.nav_search
+        bottomNav?.selectedItemId = R.id.nav_search
     }
 
     private fun searchAuthor(post: Post) {
@@ -214,7 +218,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         searchSharedViewModel.setQuery(query)
 
         val bottomNav = requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
-        bottomNav.selectedItemId = R.id.nav_search
+        bottomNav?.selectedItemId = R.id.nav_search
     }
 
     private fun expandContent(post: Post) {

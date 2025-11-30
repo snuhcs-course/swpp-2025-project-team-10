@@ -101,7 +101,7 @@ class LibraryFragmentTest {
         onView(withText(R.string.profile)).perform(click())
 
         onView(withId(R.id.tvName)).check(matches(withText("TestUser")))
-        onView(withId(R.id.tvBio)).check(matches(withText("Hello World")))
+        onView(withId(R.id.tvBio)).check(matches(withText("Night")))
 
 //        onView(withId(R.id.chipGroupLocations))
 //            .check(matches(hasDescendant(withText("Seoul Gangnam"))))
@@ -115,13 +115,20 @@ class LibraryFragmentTest {
             .check(matches(withContentDescription(R.string.fab_add_review)))
 
         onView(withText(R.string.shelf)).perform(click())
+
+        onView(withId(R.id.tvBookEmpty)).check(matches(isDisplayed()))
+
         onView(withId(R.id.fabAdd))
             .check(matches(withContentDescription(R.string.fab_add_book)))
 
         onView(withText(R.string.profile)).perform(click())
+
+        onView(withId(R.id.profileContainer)).check(matches(isDisplayed()))
+
         onView(withId(R.id.fabAdd))
             .check(matches(withContentDescription(R.string.fab_edit_profile)))
     }
+
 
     @Test
     fun clickEditProfile_togglesUiVisibility() {

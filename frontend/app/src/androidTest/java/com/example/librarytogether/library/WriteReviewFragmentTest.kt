@@ -88,4 +88,20 @@ class WriteReviewFragmentTest {
         // 성공 시 뒤로 가기
         verify(navController).popBackStack()
     }
+
+    @Test
+    fun submit_withTitleOnly_doesNotNavigate() {
+        launchWriteReviewFragment()
+
+        onView(withId(R.id.etBookTitle))
+            .perform(replaceText("제목만 있는 리뷰"), closeSoftKeyboard())
+        onView(withId(R.id.etBody))
+            .perform(replaceText(""), closeSoftKeyboard())
+
+        onView(withId(R.id.btnSubmit))
+            .perform(click())
+
+        verify(navController, never()).popBackStack()
+    }
+
 }

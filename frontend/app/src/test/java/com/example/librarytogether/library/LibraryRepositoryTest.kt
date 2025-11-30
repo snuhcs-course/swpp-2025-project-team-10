@@ -151,7 +151,7 @@ class LibraryRepositoryTest {
 
     @Test
     fun addBook_success_returns_true() = runTest {
-        val book = PostBook("T", "A", null, null, false)
+        val book = PostBook("p","T", "A", null, null, false)
         // API 정의에 따라 Response<Unit> 혹은 Response<Book> 등 적절히 조정 필요
         whenever(libraryApi.addBook(book)).thenReturn(Response.success(Unit))
 
@@ -162,7 +162,7 @@ class LibraryRepositoryTest {
 
     @Test
     fun addBook_failure_returns_false() = runTest {
-        val book = PostBook("T", "A", null, null, false)
+        val book = PostBook("p","T", "A", null, null, false)
         whenever(libraryApi.addBook(book)).thenReturn(errorResponse())
 
         val result = repository.addBook(book)
@@ -173,7 +173,7 @@ class LibraryRepositoryTest {
 
     @Test
     fun addBook_exception_returns_false() = runTest {
-        val book = PostBook("T", "A", null, null, false)
+        val book = PostBook("p","T", "A", null, null, false)
         whenever(libraryApi.addBook(book)).thenThrow(RuntimeException("Error"))
 
         val result = repository.addBook(book)

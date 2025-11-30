@@ -180,6 +180,7 @@ class DiffTest {
         coverImage: String? = null,
         publisher: String? = null,
         isbn: String? = null,
+        publicationId: String? = null,
     ): Book = Book(
         id = id,
         title = title,
@@ -187,6 +188,7 @@ class DiffTest {
         cover_image = coverImage,
         publisher = publisher,
         isbn = isbn,
+        publicationId = publicationId
     )
 
     @Test

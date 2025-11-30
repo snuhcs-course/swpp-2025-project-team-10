@@ -23,7 +23,8 @@ object LibraryFixtures {
         authors = listOf("Auth$id"),
         cover_image = null,
         publisher = "Pub$id",
-        isbn = "ISBN$id"
+        isbn = "ISBN$id",
+        publicationId = null
     )
 
     fun postBook() = PostBook(
@@ -33,6 +34,7 @@ object LibraryFixtures {
         publisher = "Pub",
         isbn = "ISBN",
         is_for_barter = false,
+        publication = "1234",
     )
 
     fun userPrefs() = UserPreferences(

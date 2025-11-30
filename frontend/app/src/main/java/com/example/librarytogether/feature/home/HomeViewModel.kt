@@ -59,6 +59,8 @@ class HomeViewModel @Inject constructor(
     fun applySort(type: SortType) {
         currentSort = type
 
+        val allPosts: List<Post> = originalPosts.orEmpty()
+
         val baseList = when (type) {
             SortType.NEARBY -> {
                 val region = userRegion
@@ -66,9 +68,9 @@ class HomeViewModel @Inject constructor(
                     ?.takeIf { it.length >= 2 }
                     ?.take(2)
                 if (region.isNullOrBlank()) {
-                    originalPosts
+                    allPosts
                 } else {
-                    originalPosts.filter { post ->
+                    allPosts.filter { post ->
                         val posterRegion = post.posterLocation
                             ?.trim()
                             ?.takeIf { it.length >= 2 }
@@ -78,17 +80,17 @@ class HomeViewModel @Inject constructor(
                     }
                 }
             }
-            else -> originalPosts
+            else -> allPosts
         }
         val sorted = when (type) {
-            SortType.LATEST -> originalPosts.sortedByDescending { it.createdAt }
-            SortType.POPULAR -> originalPosts.sortedByDescending { it.likeCount }
+            SortType.LATEST -> allPosts.sortedByDescending { it.createdAt }
+            SortType.POPULAR -> allPosts.sortedByDescending { it.likeCount }
             SortType.NEARBY -> baseList.sortedByDescending { it.createdAt }
         }
         if (type == SortType.NEARBY && sorted.isEmpty() && originalPosts.isNotEmpty()) {
             _error.value = "현재 지역 근처에는 게시글이 없습니다."
 
-            _posts.value = originalPosts.sortedByDescending { it.createdAt }.toList()
+            _posts.value = allPosts.sortedByDescending { it.createdAt }.toList()
             currentSort = SortType.LATEST
         } else {
             _posts.value = sorted.toList()
@@ -109,7 +111,8 @@ class HomeViewModel @Inject constructor(
 
     private fun applyLocalUpdate(updated: Post) {
         originalPosts = originalPosts.map { if (it.id == updated.id) updated else it }
-        _posts.value = _posts.value?.map { if (it.id == updated.id) updated else it }
+        val current = _posts.value.orEmpty()
+        _posts.value = current.map { if (it.id == updated.id) updated else it }
     }
 
     fun requestBarter(ownerId: Int, bookId: String) {
