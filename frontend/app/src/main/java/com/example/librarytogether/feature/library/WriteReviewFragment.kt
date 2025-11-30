@@ -85,22 +85,7 @@ class WriteReviewFragment : Fragment(R.layout.fragment_write_review) {
         }
 
         bookSearchAdapter = SearchBookAdapter { book ->
-            selectedBookId = book.id
-
-            if (etBookTitle.text.isNullOrBlank()) {
-                etBookTitle.setText(book.title)
-            }
-            if (etAuthor.text.isNullOrBlank()) {
-                etAuthor.setText(book.authors?.joinToString(", ") ?: "")
-            }
-            if (etPublisher.text.isNullOrBlank()) {
-                etPublisher.setText(book.publisher ?: "")
-            }
-            if (etIsbn.text.isNullOrBlank()) {
-                etIsbn.setText(book.isbn ?: "")
-            }
-
-            searchView.hide()
+            onBookSearchResultClicked(book)
         }
 
         rvBookSearchResults.apply {
@@ -222,7 +207,6 @@ class WriteReviewFragment : Fragment(R.layout.fragment_write_review) {
         findNavController().popBackStack()
     }
 
-
     private fun validate(title: String, body: String): Boolean {
         if (title.isBlank()) {
             return false
@@ -238,6 +222,24 @@ class WriteReviewFragment : Fragment(R.layout.fragment_write_review) {
         binding.rvPhotos.isVisible = hasItems
     }
 
+    private fun onBookSearchResultClicked(book: Book) = with(binding) {
+        selectedBookId = book.id
+
+        if (etBookTitle.text.isNullOrBlank()) {
+            etBookTitle.setText(book.title)
+        }
+        if (etAuthor.text.isNullOrBlank()) {
+            etAuthor.setText(book.authors?.joinToString(", ") ?: "")
+        }
+        if (etPublisher.text.isNullOrBlank()) {
+            etPublisher.setText(book.publisher ?: "")
+        }
+        if (etIsbn.text.isNullOrBlank()) {
+            etIsbn.setText(book.isbn ?: "")
+        }
+
+        searchView.hide()
+    }
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

@@ -7,7 +7,7 @@ plugins {
     alias(libs.plugins.safeargs)
     alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.hilt)
-    alias(libs.plugins.jacoco)
+    alias(libs.plugins.kover)
 }
 
 android {
@@ -37,7 +37,7 @@ android {
     buildTypes {
         debug {
             enableAndroidTestCoverage = true
-            enableUnitTestCoverage = true
+            enableUnitTestCoverage = false
         }
 
         release {
@@ -61,6 +61,7 @@ android {
     }
     testOptions {
         unitTests.isReturnDefaultValues = true
+        unitTests.isIncludeAndroidResources = true
     }
     packaging {
         resources {
@@ -76,6 +77,12 @@ android {
 
 dependencies {
 
+    testImplementation(libs.androidx.espresso.core)
+    testImplementation(libs.androidx.espresso.contrib)
+    testImplementation(libs.androidx.fragment.testing)
+    testImplementation(libs.hilt.android.testing)
+    kaptTest(libs.hilt.android.compiler)
+    debugImplementation("com.google.dagger:hilt-android-testing:2.51.1")
     androidTestImplementation(libs.androidx.navigation.testing)
     implementation(libs.flowbinding.android)
     implementation(libs.androidx.hilt.navigation.fragment)
@@ -131,52 +138,59 @@ dependencies {
     testImplementation("org.robolectric:robolectric:4.12.2")
 }
 
-tasks.register<JacocoReport>("jacocoTestReport") {
-    dependsOn("testDebugUnitTest")
-
+kover {
     reports {
-        xml.required.set(true)
-        html.required.set(true)
+        // 'debug' 빌드 변형에 대한 리포트 설정
+        variant("debug") {
+            filters {
+                excludes {
+                    // 1. 안드로이드 시스템 관련 제외
+                    classes(
+                        "*.BuildConfig",
+                        "*.R",
+                        "*.R$*",
+                        "*.Manifest",
+                        "*.Manifest$*",
+                        "android.*",
+                        "androidx.*"
+                    )
+
+                    // 2. Hilt & Dagger 생성 파일 제외
+                    // Kover는 와일드카드(*)를 사용하여 클래스 이름을 매칭합니다.
+                    classes(
+                        "*_MembersInjector",
+                        "dagger.*",
+                        "*_Factory",
+                        "*_HiltModules*",
+                        "hilt_aggregated_deps.*",
+                        "*_Impl*", // Room이나 Retrofit 구현체 등
+                        "*.di.*"   // di 패키지 내부
+                    )
+
+                    // 3. DataBinding/ViewBinding
+                    classes(
+                        "*databinding.*",
+                        "*Binding"
+                    )
+
+                    // 4. 어노테이션 기반 제외 (유용함)
+                    annotatedBy(
+                        "dagger.internal.DaggerGenerated",
+                        "javax.annotation.processing.Generated"
+                    )
+                }
+            }
+
+            // HTML 리포트 설정
+            html {
+                // 리포트가 생성될 경로 (기본값: build/reports/kover/html/debug)
+                onCheck = true // ./gradlew check 실행 시 리포트 생성 여부
+            }
+
+            // XML 리포트 설정 (CI/CD 연동 시 필요)
+            xml {
+                onCheck = true
+            }
+        }
     }
-
-    val fileFilter = listOf(
-        // Hilt & Dagger 관련 파일 제외 (중요)
-        "**/*_MembersInjector.class",
-        "**/Dagger*Component.class",
-        "**/Dagger*Component\$Builder.class",
-        "**/Dagger*Subcomponent*.class",
-        "**/*_Factory.*",
-        "**/*_HiltModules*",
-        "**/Hilt_*",
-        "**/*_Impl*",
-        "**/di/**",
-        // DataBinding/ViewBinding 제외
-        "**/databinding/*",
-        "**/android/databinding/*",
-        "**/*Binding.class"
-    )
-
-    val debugTree = fileTree(
-        mapOf(
-            "dir" to layout.buildDirectory.dir("tmp/kotlin-classes/debug").get().asFile,
-            "excludes" to fileFilter
-        )
-    )
-
-    val mainSrc = layout.projectDirectory.dir("src/main/java").asFile
-
-    sourceDirectories.setFrom(files(mainSrc))
-    classDirectories.setFrom(files(debugTree))
-
-    executionData.setFrom(
-        fileTree(
-            mapOf(
-                "dir" to layout.buildDirectory.get().asFile,
-                "includes" to listOf(
-                    "**/*.exec",
-                    "**/*.ec"
-                )
-            )
-        )
-    )
 }

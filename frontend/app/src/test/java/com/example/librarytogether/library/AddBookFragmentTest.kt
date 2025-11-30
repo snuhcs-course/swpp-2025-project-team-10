@@ -1,35 +1,34 @@
 package com.example.librarytogether.library
 
-
+import android.os.Looper
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
-import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.matcher.ViewMatchers.*
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.runner.AndroidJUnit4
 import com.example.librarytogether.R
 import com.example.librarytogether.feature.library.AddBookFragment
-import com.example.librarytogether.feature.library.SearchBookAdapter
 import com.example.librarytogether.feature.library.data.Book
 import com.example.librarytogether.feature.library.data.LibraryRepository
 import com.example.librarytogether.testing.launchFragmentInHiltContainer
 import dagger.hilt.android.testing.BindValue
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
-import org.hamcrest.MatcherAssert.assertThat
+import dagger.hilt.android.testing.HiltTestApplication
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
+import org.robolectric.Shadows
+import org.robolectric.annotation.Config
 
 @HiltAndroidTest
+@Config(application = HiltTestApplication::class, sdk = [33])
 @RunWith(AndroidJUnit4::class)
 class AddBookFragmentTest {
 
@@ -71,12 +70,15 @@ class AddBookFragmentTest {
     @Test
     fun clickSearchResult_fillsFields_andHidesSearchView() {
         launchAddBookFragment {
+            // Private Method 호출을 위한 Reflection
             val method = AddBookFragment::class.java
                 .getDeclaredMethod("onBookSearchResultClicked", Book::class.java)
             method.isAccessible = true
             method.invoke(this, mockBooks)
         }
 
+        // Reflection을 통한 데이터 변경 후 UI 반영 대기
+        Shadows.shadowOf(Looper.getMainLooper()).idle()
 
         onView(withId(R.id.etTitle))
             .check(matches(withText("테스트 도서 제목")))
@@ -98,9 +100,12 @@ class AddBookFragmentTest {
         onView(withId(R.id.btnSaveBook))
             .perform(click())
 
+        // Toast 메시지 등의 비동기 UI 동작 대기
+        Shadows.shadowOf(Looper.getMainLooper()).idle()
+
         verify(navController, never()).popBackStack()
 
-         onView(withText("먼저 검색 결과에서 책을 선택해 주세요."))
-             .check(matches(isDisplayed()))
+        onView(withText("먼저 검색 결과에서 책을 선택해 주세요."))
+            .check(matches(isDisplayed()))
     }
 }

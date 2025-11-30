@@ -50,7 +50,8 @@ class BookDetailRepositoryTest {
         description = "Great book",
         cover_image = "http://example.com/cover.jpg",
         is_for_barter = true,
-        owner = "User1"
+        owner = "User1",
+        ownerId = 1
     )
 
     @Test

@@ -73,6 +73,10 @@ class BookDetailFragment : Fragment(R.layout.fragment_book_detail) {
                         ownerId = book.ownerId,
                         bookId = bookId
                     )
+                    findNavController().popBackStack(
+                        R.id.nav_notification,
+                        false
+                    )
                 }
             }
         }

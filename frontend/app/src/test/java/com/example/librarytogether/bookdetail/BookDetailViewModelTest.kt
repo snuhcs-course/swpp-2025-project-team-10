@@ -54,7 +54,8 @@ class BookDetailViewModelTest {
         description = "Desc",
         cover_image = null,
         is_for_barter = false,
-        owner = "Owner"
+        owner = "Owner",
+        ownerId = 1
     )
 
     @Test
