@@ -61,6 +61,9 @@
     <string name="feed_content">책을 읽은 후 느낀점</string>
     <string name="feed_time">1시간 전</string>
     <string name="like_count_short">%1$d</string>
+    <string name="like_with_count">좋아요 %1$s</string>
+    <string name="comment_with_count">댓글 %1$s</string>
+
 
     <!-- a11y descriptions -->
     <string name="desc_profile_image">작성자 프로필 이미지</string>
@@ -199,7 +202,7 @@
     <string name="label_publisher">출판사</string>
     <string name="label_isbn">ISBN</string>
     <string name="owned_by">소유자: %1$s</string>
-    <string name="unavailable_for_trade">교환 불가</string>
+    <string name="unavailable_for_barter">교환 불가</string>
     <string name="action_barter_approve">교환 승인</string>
 
     <!--explore-->

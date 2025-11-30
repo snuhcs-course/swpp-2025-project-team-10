@@ -52,10 +52,12 @@ data class Book(
     val authors: List<String>?,
     val cover_image: String?,
     val publisher: String?,
-    val isbn: String?
+    val isbn: String?,
+    val publicationId: String?
 )
 
 data class PostBook(
+    val publication: String,
     val title: String,
     val authors: String,
     val publisher: String?,

@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -73,7 +74,7 @@ class LibraryFragment : Fragment() {
                     val dir = BookDetailFragmentDirections
                         .actionGlobalBookDetail(
                             bookId = book.id,
-                            source = EntrySource.BOOKSHELF
+                            source = EntrySource.MYBOOKSHELF
                         )
                     findNavController().navigate(dir)
                 }
@@ -125,7 +126,7 @@ class LibraryFragment : Fragment() {
         if (currentTab == Tab.PROFILE) {
             rvWishlist.visibility = if (!isWishlistEmpty) View.VISIBLE else View.GONE
             tvWishlistEmpty.visibility = if (isWishlistEmpty)  View.VISIBLE else View.GONE
-            btnAddWishlist.visibility = if (isEditingProfile)  View.VISIBLE else View.GONE
+            btnAddWishlist.visibility = View.GONE
             tvGenreNone.visibility = if (!isEditingProfile && isGenreEmpty) View.VISIBLE else View.GONE
         } else {
             rvWishlist.visibility = View.GONE
@@ -155,22 +156,27 @@ class LibraryFragment : Fragment() {
             val bioPlaceholder = getString(R.string.profile_bio_empty)
 
             binding.tvName.text = profile.username
-            binding.tvBio.text = profile.bio.takeIf { !it.isNullOrEmpty() } ?: bioPlaceholder
+            binding.tvBio.text = profile.preferences.readingHabit.takeIf { !it.isNullOrEmpty() } ?: bioPlaceholder
             binding.ivProfileImage.loadAvatar(profile.profileUrl)
             binding.tvReviewCount.text = profile.reviewCount.toString()
             binding.tvFollowerCount.text = profile.followerCount.toString()
             binding.tvFollowingCount.text = profile.followingCount.toString()
 
             binding.tvTradeLocation1.text = profile.preferences.tradeLocation1
-            binding.tvTradeLocation2.text = profile.preferences.tradeLocation2
+            binding.tvTradeLocation2.visibility = View.GONE
             binding.tvTradeSpot1.text = profile.preferences.tradeSpot1
-            binding.tvTradeSpot2.text = profile.preferences.tradeSpot2
-            binding.tvFavBook.text = profile.preferences.favBooks?.firstOrNull().orEmpty()
-            binding.tvFavBookNote.text = profile.preferences.favBookNotes?.firstOrNull().orEmpty()
-            binding.tvFavAuthor.text = profile.preferences.favAuthors?.firstOrNull().orEmpty()
-            binding.tvFavAuthorNote.text = profile.preferences.favAuthorNotes?.firstOrNull().orEmpty()
             binding.tvReadingHabit.text = profile.preferences.readingHabit
             isGenreEmpty = profile.favoriteGenres.isEmpty()
+
+            val favBook      = profile.preferences.favBooks?.firstOrNull()
+            val favBookNote  = profile.preferences.favBookNotes?.firstOrNull()
+            val favAuthor    = profile.preferences.favAuthors?.firstOrNull()
+            val favAuthorNote= profile.preferences.favAuthorNotes?.firstOrNull()
+
+            binding.tvFavBook.setTextOrGone(favBook)
+            binding.tvFavBookNote.setTextOrGone(favBookNote)
+            binding.tvFavAuthor.setTextOrGone(favAuthor)
+            binding.tvFavAuthorNote.setTextOrGone(favAuthorNote)
 
             renderSelectedGenresFromViewModel(profile.favoriteGenres)
             syncEditChipsFromViewModel(profile.favoriteGenres)
@@ -282,7 +288,6 @@ class LibraryFragment : Fragment() {
                             tradeLocation1 = location1,
                             tradeLocation2 = location2,
                             tradeSpot1 = binding.editTradeSpot1.text.toString(),
-                            tradeSpot2 = binding.editTradeSpot2.text.toString(),
                             favBooks = prependAndShift(
                                 newValue = binding.editFavBook.text.toString(),
                                 oldList = currentProfile.preferences.favBooks
@@ -332,8 +337,8 @@ class LibraryFragment : Fragment() {
 
         setGroupVisible(
             edit = edit,
-            viewViews = listOf(tvTradeLocation1, tvTradeLocation2, tvTradeSpot1, tvTradeSpot2),
-            editViews = listOf(locationEditorRow, menuTradeCity, menuTradeDistrict, chipGroupLocations, btnAddLocation, editTradeSpot1, editTradeSpot2)
+            viewViews = listOf(tvTradeLocation1, tvTradeLocation2, tvTradeSpot1),
+            editViews = listOf(locationEditorRow, menuTradeCity, menuTradeDistrict, chipGroupLocations, btnAddLocation, editTradeSpot1)
         )
 
         groupSelectedGenres.visibility = if (edit) View.GONE else View.VISIBLE
@@ -367,7 +372,6 @@ class LibraryFragment : Fragment() {
             tvGenreNone.visibility = if (profile.favoriteGenres.isEmpty()) View.VISIBLE else View.GONE
             syncChipsFromProfile(profile)
             editTradeSpot1.setText(profile.preferences.tradeSpot1)
-            editTradeSpot2.setText(profile.preferences.tradeSpot2)
             editFavBook.setText(profile.preferences.favBooks?.firstOrNull().orEmpty())
             editFavBookNote.setText(profile.preferences.favBookNotes?.firstOrNull().orEmpty())
             editFavAuthor.setText(profile.preferences.favAuthors?.firstOrNull().orEmpty())
@@ -525,8 +529,8 @@ class LibraryFragment : Fragment() {
         val city = autoCompleteLocation1.text?.toString()?.trim().orEmpty()
         val district = autoCompleteLocation2.text?.toString()?.trim().orEmpty()
 
-        if (selectedLocations.size >= 2) {
-            Toast.makeText(requireContext(), "최대 2곳까지 추가할 수 있어요.", Toast.LENGTH_SHORT).show()
+        if (selectedLocations.size >= 1) {
+            Toast.makeText(requireContext(), "선택한 지역을 취소하고 추가해주세요.", Toast.LENGTH_SHORT).show()
             return@with
         }
 
@@ -555,11 +559,21 @@ class LibraryFragment : Fragment() {
     ): List<String>? {
         val trimmed = newValue.trim()
         if (trimmed.isEmpty())
-            return oldList
+            return emptyList()
 
         val result = mutableListOf<String>()
         result.add(trimmed)
         result.addAll(oldList ?: emptyList())
         return result.take(maxSize)
+    }
+
+    private fun TextView.setTextOrGone(value: String?) {
+        if (value.isNullOrBlank()) {
+            visibility = View.GONE
+            text = ""
+        } else {
+            visibility = View.VISIBLE
+            text = value
+        }
     }
 }

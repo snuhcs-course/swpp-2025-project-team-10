@@ -10,13 +10,15 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-enum class SortType { LATEST, POPULAR }
+enum class SortType { LATEST, POPULAR, NEARBY }
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val repository: HomeRepository
 ) : ViewModel() {
     private var originalPosts: List<Post> = emptyList()
+    private var currentSort: SortType = SortType.LATEST
+    private var userRegion: String? = null
     private val _posts = MutableLiveData<List<Post>>(emptyList())
     val posts: LiveData<List<Post>> = _posts
 
@@ -45,7 +47,7 @@ class HomeViewModel @Inject constructor(
             try {
                 val feedPosts = repository.getFeed()
                 originalPosts = feedPosts
-                applySort(SortType.LATEST)
+                applySort(currentSort)
             } catch (e: Exception) {
                 _error.value = "네트워크 오류가 발생했습니다."
             } finally {
@@ -55,11 +57,42 @@ class HomeViewModel @Inject constructor(
     }
 
     fun applySort(type: SortType) {
+        currentSort = type
+
+        val baseList = when (type) {
+            SortType.NEARBY -> {
+                val region = userRegion
+                    ?.trim()
+                    ?.takeIf { it.length >= 2 }
+                    ?.take(2)
+                if (region.isNullOrBlank()) {
+                    originalPosts
+                } else {
+                    originalPosts.filter { post ->
+                        val posterRegion = post.posterLocation
+                            ?.trim()
+                            ?.takeIf { it.length >= 2 }
+                            ?.take(2)
+
+                        posterRegion == region
+                    }
+                }
+            }
+            else -> originalPosts
+        }
         val sorted = when (type) {
             SortType.LATEST -> originalPosts.sortedByDescending { it.createdAt }
             SortType.POPULAR -> originalPosts.sortedByDescending { it.likeCount }
+            SortType.NEARBY -> baseList.sortedByDescending { it.createdAt }
         }
-        _posts.value = sorted.toList()
+        if (type == SortType.NEARBY && sorted.isEmpty() && originalPosts.isNotEmpty()) {
+            _error.value = "현재 지역 근처에는 게시글이 없습니다."
+
+            _posts.value = originalPosts.sortedByDescending { it.createdAt }.toList()
+            currentSort = SortType.LATEST
+        } else {
+            _posts.value = sorted.toList()
+        }
     }
 
     fun toggleLike(post: Post) {
@@ -94,6 +127,15 @@ class HomeViewModel @Inject constructor(
                 _barterLoading.value = false
             }
         }
+    }
+
+    fun setUserLocation(location: String?) {
+        userRegion = location
+            ?.trim()
+            ?.takeIf { it.length >= 2 }
+            ?.take(2)
+
+        applySort(currentSort)
     }
 
     fun clearBarterResult() {

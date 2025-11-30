@@ -41,11 +41,6 @@ interface LibraryApi {
     @GET("library/wishlist/")
     suspend fun getMyWishlist(): Response<List<Book>>
 
-    //legacy
-    @POST("library/wishlist/")
-    suspend fun addToWishlist(@Body body: WishlistRequest): Response<Unit>
-
-
     @POST("library/books/{bookId}/wishlist/")
     suspend fun addToWishlistById(@Path("bookId") bookId: String): Response<Unit>
 

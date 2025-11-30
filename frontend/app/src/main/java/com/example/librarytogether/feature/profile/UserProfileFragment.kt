@@ -2,6 +2,7 @@ package com.example.librarytogether.feature.profile
 
 import android.os.Bundle
 import android.view.View
+import android.widget.TextView
 import android.widget.Toast
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
@@ -9,6 +10,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.observe
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.librarytogether.R
 import com.example.librarytogether.databinding.FragmentUserProfileBinding
 import com.example.librarytogether.feature.bookdetail.BookDetailFragmentDirections
@@ -82,6 +84,9 @@ class UserProfileFragment : Fragment(R.layout.fragment_user_profile) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentUserProfileBinding.bind(view)
+        binding.toolbar.setNavigationOnClickListener {
+            findNavController().navigateUp()
+        }
 
         viewModel.loadUserProfile(args.userId)
 
@@ -89,6 +94,8 @@ class UserProfileFragment : Fragment(R.layout.fragment_user_profile) {
         setupClickListeners()
         setupTabs()
         observeViewModel()
+
+        render()
     }
 
     private fun setupClickListeners() {
@@ -116,7 +123,11 @@ class UserProfileFragment : Fragment(R.layout.fragment_user_profile) {
     private fun setupRecyclerViews() {
         binding.rvReviews.adapter = reviewAdapter
         binding.rvBooks.adapter = booksAdapter
-        binding.rvWishlist.adapter = wishlistAdapter
+        binding.rvWishlist.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = wishlistAdapter
+            setHasFixedSize(true)
+        }
     }
 
     private fun render() = with(binding) {
@@ -144,11 +155,19 @@ class UserProfileFragment : Fragment(R.layout.fragment_user_profile) {
             if (profile == null) return@observe
 
             binding.tvName.text = profile.username
-            binding.tvBio.text = profile.bio?.ifEmpty { "소개가 없습니다." }
+            binding.tvBio.text = profile.preferences.readingHabit?.ifEmpty { "소개가 없습니다." }
             binding.ivProfileImage.loadAvatar(profile.profileUrl)
             binding.tvReviewCount.text = profile.reviewCount.toString()
             binding.tvFollowerCount.text = profile.followerCount.toString()
             binding.tvFollowingCount.text = profile.followingCount.toString()
+
+            binding.tvTradeLocation1.text = profile.preferences.tradeLocation1
+            binding.tvTradeSpot1.text = profile.preferences.tradeSpot1
+            binding.tvFavBook.setTextOrGone(profile.preferences.favBooks?.firstOrNull())
+            binding.tvFavBookNote.setTextOrGone(profile.preferences.favBookNotes?.firstOrNull())
+            binding.tvFavAuthor.setTextOrGone(profile.preferences.favAuthors?.firstOrNull())
+            binding.tvFavAuthorNote.setTextOrGone(profile.preferences.favAuthorNotes?.firstOrNull())
+            binding.tvReadingHabit.text = profile.preferences.readingHabit
 
             binding.btnFollow.text = if (profile.isFollowing) {
                 getString(R.string.unfollow)
@@ -160,19 +179,19 @@ class UserProfileFragment : Fragment(R.layout.fragment_user_profile) {
         viewModel.reviews.observe(viewLifecycleOwner) { reviews ->
             reviewAdapter.submitList(reviews)
             isReviewEmpty = reviews.isEmpty()
-            if (currentTab == Tab.REVIEWS) render()
+            render()
         }
 
         viewModel.books.observe(viewLifecycleOwner) { books ->
             booksAdapter.submitList(books)
             isBookEmpty = books.isEmpty()
-            if (currentTab == Tab.BOOKS) render()
+            render()
         }
 
         viewModel.wishlist.observe(viewLifecycleOwner) { wishlist ->
             wishlistAdapter.submitList(wishlist)
             isWishlistEmpty = wishlist.isEmpty()
-            if (currentTab == Tab.PROFILE) render()
+            render()
         }
 
         viewModel.loading.observe(viewLifecycleOwner) { isLoading ->
@@ -183,6 +202,15 @@ class UserProfileFragment : Fragment(R.layout.fragment_user_profile) {
             error?.let {
                 Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
             }
+        }
+    }
+
+    private fun TextView.setTextOrGone(value: String?) {
+        if (value.isNullOrBlank()) {
+            visibility = View.GONE
+        } else {
+            visibility = View.VISIBLE
+            text = value
         }
     }
 

@@ -176,6 +176,27 @@ class FeedAdapter(
                 btnLike.setIconResource(R.drawable.like_icon)
             }
 
+            val likeText = if (post.likeCount > 0) {
+                itemView.context.getString(
+                    R.string.like_with_count,
+                    formatCount(post.likeCount)
+                )
+            } else {
+                itemView.context.getString(R.string.like)
+            }
+            btnLike.text = likeText
+
+            val commentText = if (post.commentCount > 0) {
+                itemView.context.getString(
+                    R.string.comment_with_count,
+                    formatCount(post.commentCount)
+                )
+            } else {
+                itemView.context.getString(R.string.comment)
+            }
+            btnBookReview.text = commentText
+
+
             val barterAvailable = post.bookAvailableForBarter
 
             btnExchange.isEnabled = barterAvailable
@@ -205,6 +226,22 @@ class FeedAdapter(
     override fun onViewRecycled(holder: PostVH) {
         holder.cleanup()
         super.onViewRecycled(holder)
+    }
+}
+
+private fun formatCount(count: Int): String {
+    return when {
+        count >= 1_000_000 -> {
+            val value = count / 1_000_000.0
+            val formatted = String.format("%.1f", value)
+            (if (formatted.endsWith(".0")) formatted.dropLast(2) else formatted) + "M"
+        }
+        count >= 1_000 -> {
+            val value = count / 1_000.0
+            val formatted = String.format("%.1f", value)
+            (if (formatted.endsWith(".0")) formatted.dropLast(2) else formatted) + "K"
+        }
+        else -> count.toString()
     }
 }
 

@@ -132,27 +132,6 @@ open class LibraryRepository @Inject constructor(
         }
     }
 
-    open suspend fun addToWishlist(book: Book): Boolean {
-        val postBook : PostBook = PostBook(
-            title = book.title,
-            authors = book.authors?.joinToString(", ") ?: "",
-            publisher = book.publisher,
-            isbn = book.isbn,
-            is_for_barter = false,
-            cover_image = book.cover_image
-        )
-        return try {
-            val res = libraryApi.addToWishlist(WishlistRequest(postBook))
-            if (!res.isSuccessful) {
-                Log.e("LibraryRepository", "addToWishlist failed: ${res.code()}")
-            }
-            res.isSuccessful
-        } catch (e: Exception) {
-            Log.e("LibraryRepository", "Error addToWishlist", e)
-            false
-        }
-    }
-
     open suspend fun addToWishlistById(bookId: String): Boolean {
         return try {
             val res = libraryApi.addToWishlistById(bookId)

@@ -71,11 +71,11 @@ class ReviewAdapter(
                     val review = current ?: return@setOnClickListener // 'current' 사용
                     if (p != RecyclerView.NO_POSITION) action(review)
                 }
+                btnExchange.visibility = View.GONE
+                btnAdd.visibility = View.GONE
 
                 btnLike.safeClick(clicks.onClickLike)
                 btnBookReview.safeClick(clicks.onClickReview)
-                btnExchange.safeClick(clicks.onClickExchange)
-                btnAdd.safeClick(clicks.onClickMore) // btnAdd는 UI상 '더보기'가 아닐 수 있으나, FeedAdapter 구조를 따름
                 btnMore.safeClick(clicks.onClickMore)
                 ivProfileImage.safeClick(clicks.onClickProfile)
                 tvPoster.safeClick(clicks.onClickUserName)

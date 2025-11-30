@@ -49,7 +49,6 @@ class NotificationViewModel @Inject constructor(
         viewModelScope.launch {
             val ok = repo.cancelBarter(requestId)
             if (ok) {
-                _items.value = _items.value?.filterNot { it.id == item.id }
                 _snackbarMessage.value = "교환 요청을 취소했어요."
             } else {
                 _snackbarMessage.value = "교환 요청을 취소하지 못했어요. 잠시 후 다시 시도해 주세요."

@@ -245,28 +245,6 @@ class LibraryRepositoryTest {
         assertThat(result, nullValue())
     }
 
-    // --- addToWishlist 테스트 ---
-
-    @Test
-    fun addToWishlist_success_returns_true() = runTest {
-        val book = LibraryFixtures.book(1)
-        whenever(libraryApi.addToWishlist(any())).thenReturn(Response.success(Unit))
-
-        val result = repository.addToWishlist(book)
-
-        assertThat(result, equalTo(true))
-    }
-
-    @Test
-    fun addToWishlist_failure_returns_false() = runTest {
-        val book = LibraryFixtures.book(1)
-        whenever(libraryApi.addToWishlist(any())).thenReturn(errorResponse())
-
-        val result = repository.addToWishlist(book)
-
-        assertThat(result, equalTo(false))
-    }
-
     // --- addToWishlistById 테스트 ---
 
     @Test

@@ -37,7 +37,7 @@ class BookDetailViewModelTest {
         savedStateHandle = SavedStateHandle(mapOf("bookId" to "target-id"))
     }
 
-    private fun createViewModel() = BookDetailViewModel(repo, savedStateHandle)
+    private fun createViewModel() = BookDetailViewModel(repo,, savedStateHandle)
 
     private fun createBookDetail() = BookDetail(
         id = "target-id",

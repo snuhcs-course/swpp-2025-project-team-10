@@ -182,6 +182,10 @@ class BookSerializer(serializers.ModelSerializer):
         write_only=True,
         required=False,
     )
+    publicationId = serializers.UUIDField(
+        source="publication.id",
+        read_only=True,
+    )
 
     class Meta:
         model = BookCopy
@@ -201,7 +205,10 @@ class BookSerializer(serializers.ModelSerializer):
             "owner_notes",
             "trade_status",
             "owner",
+            #post
             "publication",
+            #get
+            "publicationId",
         ]
         read_only_fields = [
             "id",
@@ -217,6 +224,7 @@ class BookSerializer(serializers.ModelSerializer):
             "cover_image",
             "coverUrl",
             "trade_status",
+            "publicationId",
         ]
         extra_kwargs = {"publication": {"write_only": True}}
 

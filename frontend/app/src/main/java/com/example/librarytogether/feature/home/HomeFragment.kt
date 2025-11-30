@@ -72,6 +72,10 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     }
 
     private fun setupRecyclerView() {
+        binding.swipeRefresh.setOnRefreshListener {
+            homeviewModel.loadFeed()
+        }
+
         binding.rvFeed.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = feedAdapter
@@ -86,6 +90,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 when (item.itemId) {
                     R.id.sort_latest -> homeviewModel.applySort(SortType.LATEST)
                     R.id.sort_popular -> homeviewModel.applySort(SortType.POPULAR)
+                    R.id.sort_region -> homeviewModel.applySort(SortType.NEARBY)
                 }
                 shouldScrollToTopAfterSort = true
                 true
@@ -106,12 +111,13 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
         homeviewModel.error.observe(viewLifecycleOwner) { error ->
             error?.let {
-                Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+                Snackbar.make(binding.root, it, Snackbar.LENGTH_SHORT).show()
                 homeviewModel.onErrorShown()
             }
         }
         homeviewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-            //binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+            binding.swipeRefresh.isRefreshing = isLoading
+            shouldScrollToTopAfterSort = true
         }
 
         homeviewModel.barterLoading.observe(viewLifecycleOwner) { loading ->
@@ -128,6 +134,11 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 Snackbar.make(requireView(), msg, Snackbar.LENGTH_SHORT).show()
                 homeviewModel.clearBarterResult()
             }
+        }
+
+        libraryViewModel.userProfile.observe(viewLifecycleOwner) { profile ->
+            profile ?: return@observe
+            homeviewModel.setUserLocation(profile.preferences.tradeLocation1)
         }
 
         libraryViewModel.error.observe(viewLifecycleOwner) { msg ->
