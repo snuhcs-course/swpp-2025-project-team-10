@@ -67,18 +67,12 @@ class UserTasteView(APIView):
         except UserTaste.DoesNotExist:
             # Create new taste profile if it doesn't exist
             taste = UserTaste.objects.create(user=request.user)
-            serializer = UserTasteSerializer(taste)
-
-        is_complete = taste.favorite_genres and taste.favorite_authors and taste.favorite_books
-
-        return Response(
-            {
+            return Response({
                 "ok": True,
-                "taste": serializer.data,
-                "step": taste.current_step,
-                "is_complete": is_complete,
-            }
-        )
+                "taste": UserTasteSerializer(taste).data,
+                "step": 1,
+                "is_complete": False,
+            })
     def post(self, request):
         """Handle each step of the taste categorization process."""
         try:
@@ -92,11 +86,18 @@ class UserTasteView(APIView):
         )
         if serializer.is_valid():
             # Update the taste profile
-            taste = serializer.save()
+            serializer.save()
+            taste.refresh_from_db() # Ensure we have the latest data
 
             # Mark categorization as complete if all fields are populated
-            if taste.favorite_genres and taste.favorite_authors and taste.favorite_books:
-                if not request.user.has_initial_taste:
+            is_complete = (
+                taste.favorite_genres
+                and taste.favorite_authors
+                and taste.favorite_books
+            )
+
+            if is_complete:
+                if not request.user.has_initial_taste: # Avoid redundant saves
                     request.user.has_initial_taste = True
                     request.user.save(update_fields=["has_initial_taste"])
 
@@ -105,7 +106,7 @@ class UserTasteView(APIView):
                     "ok": True,
                     "taste": UserTasteSerializer(taste).data,
                     "step": taste.current_step,
-                    "is_complete": request.user.has_initial_taste,
+                    "is_complete": is_complete,
                 }
             )
 
@@ -808,9 +809,9 @@ class UserProfileMeView(APIView):
                 "tradeLocation2": trade_location2,
                 "tradeSpot1": trade_spot1,
                 "tradeSpot2": trade_spot2,
-                "favBooks": favorite_books or [],
+                "favBooks": favorite_books,
                 "favBookNotes": fav_book_notes or [],
-                "favAuthors": favorite_authors or [],
+                "favAuthors": favorite_authors,
                 "favAuthorNotes": fav_author_notes or [],
                 "readingHabit": reading_habit,
                 "favoriteGenres": favorite_genres,
