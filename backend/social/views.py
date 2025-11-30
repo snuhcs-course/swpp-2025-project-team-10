@@ -10,6 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from social.models import Comment, Post, PostLike
 from social.serializers import PostCreateSerializer, PostSerializer
+from django.shortcuts import get_object_or_404
 
 
 @api_view(["GET"])
@@ -49,6 +50,53 @@ def create_post(request):
             {"post": serializer.data}, status=status.HTTP_201_CREATED
         )
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(["PUT", "PATCH"])
+@permission_classes([IsAuthenticated])
+def edit_post(request, post_id):
+    """
+    Edit a post by ID. Only the owner can edit.
+
+    PUT / PATCH /posts/<pk>/edit/
+    """
+    post = get_object_or_404(Post, id=post_id)
+
+    # Ensure only the owner can edit
+    if post.owner != request.user:
+        return Response(
+            {"detail": "You do not have permission to edit this post."},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    serializer = PostCreateSerializer(
+        post, data=request.data, partial=True, context={"request": request}
+    )
+    if serializer.is_valid():
+        serializer.save()
+        return Response({"post": serializer.data}, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
+def delete_post(request, post_id):
+    """
+    Delete a post by ID. Only the owner can delete.
+
+    DELETE /posts/<pk>/delete/
+    """
+    post = get_object_or_404(Post, id=post_id)
+
+    # Ensure only the owner can delete
+    if post.owner != request.user:
+        return Response(
+            {"detail": "You do not have permission to delete this post."},
+            status=status.HTTP_403_FORBIDDEN
+        )
+
+    post.delete()
+    return Response({"detail": "Post deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+
 
 
 @api_view(["POST"])
@@ -128,6 +176,74 @@ def comment_post(request, post_id):
     serializer = PostSerializer(post, context={"request": request})
     return Response({"post": serializer.data}, status=status.HTTP_201_CREATED)
 
+@api_view(["DELETE"])
+@permission_classes([IsAuthenticated])
+def comment_delete(request, comment_id):
+    """
+    Delete a comment from a post. Only the comment author or post author can delete.
+    """
+
+    comment_id = request.data.get("comment_id")
+
+    if not comment_id:
+        return Response(
+            {"error": "comment_id is required"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    try:
+        #Ensure comment belongs to the specified post.
+        comment = Comment.objects.select_related("post").get(pk=comment_id)
+    except Comment.DoesNotExist:
+        return Response(
+            {"error": "Comment not found"}, status=status.HTTP_404_NOT_FOUND
+        )
+
+    if (comment.author_id != request.user.id and comment.post.author_id != request.user.id):
+        return Response(
+            {"error": "You do not have permission to delete this comment."},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
+    post = comment.post
+    comment.delete()
+
+    serializer = PostSerializer(post, context={"request": request})
+    return Response({"post": serializer.data}, status=status.HTTP_200_OK)
+
+@api_view(["PUT", "PATCH"])
+@permission_classes([IsAuthenticated])
+def comment_edit(request, comment_id):
+    """
+    Edit a comment on a post. Only the comment author can edit.
+    """
+
+    content = request.data.get("content", "").strip()
+    if not content:
+        return Response(
+            {"error": "Content is required"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    try:
+        comment = Comment.objects.select_related("post").get(pk=comment_id)
+    except Comment.DoesNotExist:
+        return Response(
+            {"error": "Comment not found"}, status=status.HTTP_404_NOT_FOUND
+        )
+
+    if comment.author_id != request.user.id:
+        return Response(
+            {"error": "You do not have permission to edit this comment."},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
+    comment.content = content
+    comment.save(update_fields=["content", "updated_at"])
+
+    post = comment.post
+    serializer = PostSerializer(post, context={"request": request})
+    return Response({"post": serializer.data}, status=status.HTTP_200_OK)
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])

@@ -400,48 +400,6 @@ def user_reviews_by_id(request, user_id: int):
 @permission_classes([permissions.IsAuthenticated])
 def toggle_wishlist(request, book_id):
     """
-    Add or remove a book from user's wishlist.
-    POST adds (idempotent), DELETE removes.
-    """
-
-    # book = get_object_or_404(
-    #     BookCopy.objects.select_related("owner", "publication"), pk=book_id
-    # )
-
-    # if request.method == "POST":
-    #     wishlist_item, created = BookWishlist.objects.get_or_create(
-    #         user=request.user,
-    #         book=book,
-    #     )
-    #     if created and book.owner_id and book.owner_id != request.user.id:
-    #         Notification.objects.create(
-    #             recipient=book.owner,
-    #             sender=request.user,
-    #             notification_type="book_wishlisted",
-    #             title=f"{request.user.username} wishlisted your book",
-    #             message=f"{request.user.username} added '{book.title}' to their wishlist.",
-    #             content_object=book,
-    #         )
-    #     return Response({"wishlisted": True}, status=status.HTTP_200_OK)
-
-    # deleted_count, _ = BookWishlist.objects.filter(
-    #     user=request.user, book=book
-    # ).delete()
-    # if deleted_count > 0:
-    #     data = {
-    #         "wishlisted": False,
-    #         "removed": True,
-    #         "message": "Removed from wishlist",
-    #     }
-    # else:
-    #     data = {
-    #         "wishlisted": False,
-    #         "removed": False,
-    #         "message": "Not in wishlist",
-    #     }
-    # return Response(data, status=status.HTTP_200_OK)
-
-    """
     Wishlist toggle endpoint.
 
     POST  → Add book to wishlist (idempotent)

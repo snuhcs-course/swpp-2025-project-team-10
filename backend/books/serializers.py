@@ -12,6 +12,8 @@ from .models import (
     BookPublication,
     BookReview,
     ReadingStatus,
+    Author,
+    Publisher,
 )
 
 User = get_user_model()
@@ -164,6 +166,13 @@ class BookSerializer(serializers.ModelSerializer):
         required=False,
     )
 
+    book_isbn_10 = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    book_isbn_13 = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    book_publisher = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    book_published_date = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    book_description = serializers.CharField(write_only=True, required=False, allow_blank=True)
+
+
     class Meta:
         model = BookCopy
         fields = [
@@ -183,6 +192,17 @@ class BookSerializer(serializers.ModelSerializer):
             "trade_status",
             "owner",
             "publication",
+            #When a user adds a book that does not exist in BookPublication,
+            #these fields are used to create a new BookPublication.
+            "book_title",
+            "book_authors",
+            "book_isbn_10",
+            "book_isbn_13",
+            "book_publisher",
+            "book_published_date",
+            "book_description",
+
+
         ]
         read_only_fields = [
             "id",
@@ -222,11 +242,63 @@ class BookSerializer(serializers.ModelSerializer):
         return self.get_cover_image(obj)
 
     def create(self, validated_data):
+        # Check if publication is provided directly
         publication = validated_data.pop("publication", None)
+
+        # Extract fields for creating new publication
+        book_title = validated_data.pop("book_title", None)
+        book_authors = validated_data.pop("book_authors", [])
+        book_isbn_10 = validated_data.pop("book_isbn_10", "").strip()
+        book_isbn_13 = validated_data.pop("book_isbn_13", "").strip()
+        book_publisher = validated_data.pop("book_publisher", "").strip()
+        book_published_date = validated_data.pop("book_published_date", "").strip()
+        book_description = validated_data.pop("book_description", "").strip()
+
+        # If no publication provided, try to find or create one
         if publication is None:
-            raise serializers.ValidationError(
-                {"publication": "This field is required."}
-            )
+            if not book_title:
+                raise serializers.ValidationError({"book_title": "Either 'publication' or 'book_title' must be provided"})
+            
+            # Try to find existing BookPublication by ISBN
+            if book_isbn_13:
+                publication = BookPublication.objects.filter(isbn_13=book_isbn_13).first()
+            
+            if not publication and book_isbn_10:
+                publication = BookPublication.objects.filter(isbn_10=book_isbn_10).first()
+
+            # If not found by ISBN, try by title (case-insensitive)
+            if not publication:
+                publication = BookPublication.objects.filter(
+                    title__iexact=book_title
+                ).first()
+
+            # If still not found, create new BookPublication
+            if not publication:
+                # Handle publisher
+                publisher_obj = None
+                if book_publisher:
+                    publisher_obj, _ = Publisher.objects.get_or_create(
+                        name=book_publisher
+                    )
+
+                # Create publication
+                publication = BookPublication.objects.create(
+                    title=book_title,
+                    isbn_10=book_isbn_10 or None,
+                    isbn_13=book_isbn_13 or None,
+                    publisher=publisher_obj,
+                    publication_date=book_published_date or None,
+                    description=book_description,
+                )
+
+                # Create and link authors
+                if book_authors:
+                    for author_name in book_authors:
+                        author, _ = Author.objects.get_or_create(
+                            name=author_name.strip()
+                        )
+                        publication.authors.add(author)
+
         return BookCopy.objects.create(
             publication=publication,
             **validated_data,

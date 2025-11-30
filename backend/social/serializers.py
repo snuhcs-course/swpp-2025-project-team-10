@@ -30,6 +30,9 @@ class PostSerializer(serializers.ModelSerializer):
     content = serializers.CharField(read_only=True)
     imageUrls = serializers.SerializerMethodField()
 
+    bookTitle = serializers.CharField(source="book_title", read_only=True)
+    authorName = serializers.CharField(source="author_name", read_only=True)
+
     # New: bookId for direct bartering
     bookId = serializers.SerializerMethodField()
 
@@ -47,6 +50,8 @@ class PostSerializer(serializers.ModelSerializer):
     bookAvailableForBarter = serializers.SerializerMethodField()
 
     createdAt = serializers.DateTimeField(source="created_at", read_only=True)
+
+    comments = serializers.SerializerMethodField()
 
     class Meta:
         model = Post
@@ -67,6 +72,9 @@ class PostSerializer(serializers.ModelSerializer):
             "isBookmarked",
             "bookAvailableForBarter",
             "createdAt",
+            "comments",
+            "bookTitle",
+            "authorName",
         ]
         read_only_fields = [
             "id",
@@ -81,6 +89,9 @@ class PostSerializer(serializers.ModelSerializer):
             "bookAvailableForBarter",
             "createdAt",
             "bookId",
+            "comments",
+            "bookTitle",
+            "authorName",
         ]
 
     def get_bookId(self, obj):
@@ -100,24 +111,29 @@ class PostSerializer(serializers.ModelSerializer):
             return obj.author.profile_picture.url
         return None
 
-    def get_bookTitle(self, obj):
-        """Get book title from related_book if exists."""
-        if obj.related_book:
-            return obj.related_book.title
-        return ""
+    # def get_bookTitle(self, obj):
+    #     """Get book title from related_book if exists."""
+    #     if obj.related_book:
+    #         return obj.related_book.title
+    #     return ""
 
-    def get_authorName(self, obj):
-        """Get book author name from related_book if exists."""
-        if obj.related_book:
-            # Get the first author's name
-            authors = obj.related_book.authors.all()
-            if authors.exists():
-                return authors.first().name
-        return ""
+    # def get_authorName(self, obj):
+    #     """Get book author name from related_book if exists."""
+    #     if obj.related_book:
+    #         # Get the first author's name
+    #         authors = obj.related_book.authors.all()
+    #         if authors.exists():
+    #             return authors.first().name
+    #     return ""
 
     def get_imageUrls(self, obj):
         """Get image URLs for the post."""
         image_urls = []
+
+        #Check for book cover image first
+        if obj.book_cover_image:
+            image_urls.append(obj.book_cover_image)
+
         if obj.image:
             request = self.context.get("request")
             if request:
@@ -163,7 +179,45 @@ class PostSerializer(serializers.ModelSerializer):
             if trade_status is None
             else is_for_barter and trade_status == "available"
         )
+    
+    def get_comments(self, obj):
+        """Get all comments related to the post."""
+        comments = obj.comments.all().order_by('-created_at')
+        from social.serializers import CommentSerializer  # Avoid circular import
+        return CommentSerializer(comments, many=True, context=self.context).data
 
+
+class CommentSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Comment model.
+    """
+
+    id = serializers.UUIDField(read_only=True)
+    authorName = serializers.CharField(source="author.username", read_only=True)
+    authorProfile = serializers.SerializerMethodField()
+
+    content = serializers.CharField()
+    createdAt = serializers.DateTimeField(source="created_at", read_only=True)
+    updatedAt = serializers.DateTimeField(source="updated_at", read_only=True)
+
+
+    class Meta:
+        model = Post  # Assuming Comment model is similar to Post for this example
+        fields = [
+            "id",
+            "authorName",
+            "authorProfile",
+            "content",
+            "createdAt",
+            "updatedAt",
+        ]
+        read_only_fields = [
+            "id",
+            "authorName",
+            "authorProfile",
+            "createdAt",
+            "updatedAt",
+        ]
 
 class FeedResponseSerializer(serializers.Serializer):
     """
