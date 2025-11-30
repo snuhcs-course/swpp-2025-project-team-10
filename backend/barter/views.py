@@ -352,7 +352,7 @@ def accept_book_for_counter_propose(request, request_id, book_id):
             sender=request.user,
             notification_type="barter_accepted",
             title="Barter accepted",
-            message=f"{original_recipient.username} accepted your barter proposal.",
+            message=f"{original_recipient.username} accepted your barter proposal. Contact them at {original_recipient.email}",
             content_object=barter_request,
         )
 
@@ -361,7 +361,7 @@ def accept_book_for_counter_propose(request, request_id, book_id):
             sender=original_requester,
             notification_type="barter_completed",
             title="Barter completed",
-            message=f"Barter with {original_requester.username} completed.",
+            message=f"Barter with {original_requester.username} completed. Contact them at {original_requester.email}",
             content_object=barter_request,
         )
 

@@ -25,6 +25,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     # Frontend expects these exact field names
     id = serializers.IntegerField(read_only=True)
+    bookId = serializers.SerializerMethodField()
     bookTitle = serializers.CharField(source="book_title", read_only=True)
     authorName = serializers.CharField(source="author_name", read_only=True)
     userName = serializers.CharField(
@@ -44,6 +45,7 @@ class ReviewSerializer(serializers.ModelSerializer):
         model = BookReview
         fields = [
             "id",
+            "bookId",
             "bookTitle",
             "authorName",
             "userId",
@@ -55,6 +57,12 @@ class ReviewSerializer(serializers.ModelSerializer):
             "createdAt",
             "isLiked",
         ]
+
+    def get_bookId(self, obj):
+        """Get book ID if review is linked to a book."""
+        if obj.book:
+            return str(obj.book.id)
+        return None
 
     def get_userProfile(self, obj):
         """Get user profile picture URL."""
@@ -99,6 +107,7 @@ class CreateReviewSerializer(serializers.Serializer):
     Matches frontend POST request format.
     """
 
+    bookId = serializers.UUIDField(required=False, allow_null=True)
     bookTitle = serializers.CharField(max_length=200)
     authorName = serializers.CharField(max_length=200, allow_blank=True)
     content = serializers.CharField()
@@ -109,9 +118,19 @@ class CreateReviewSerializer(serializers.Serializer):
     def create(self, validated_data):
         """Create a new BookReview instance."""
         user = self.context["request"].user
+        book_id = validated_data.get("bookId")
+        
+        # Try to find the book if bookId is provided
+        book = None
+        if book_id:
+            try:
+                book = BookCopy.objects.get(pk=book_id)
+            except BookCopy.DoesNotExist:
+                pass
 
         review = BookReview.objects.create(
             reviewer=user,
+            book=book,
             book_title=validated_data["bookTitle"],
             author_name=validated_data.get("authorName", ""),
             content=validated_data["content"],
