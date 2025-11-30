@@ -517,21 +517,17 @@ class UserBarterInfoSerializer(serializers.ModelSerializer):
 
 
 class UserTasteSerializer(serializers.ModelSerializer):
-    """
-    Serializer for user's book preferences and taste information.
-    """
 
-    # TextChoices가 아닌 실제 모델의 ID 리스트를 받도록 수정
     favorite_genres = serializers.ListField(
-        child=serializers.IntegerField(), required=False
+        child=serializers.CharField(), required=False
     )
     favorite_authors = serializers.ListField(
-        child=serializers.IntegerField(), required=False
+        child=serializers.CharField(), required=False
     )
     favorite_books = serializers.ListField(
-        child=serializers.UUIDField(), required=False
+        child=serializers.CharField(), required=False
     )
-    # Trade style fields (optional, can be set later from profile)
+
     trade_place_name = serializers.CharField(
         max_length=120, required=False, allow_blank=True
     )
@@ -550,18 +546,6 @@ class UserTasteSerializer(serializers.ModelSerializer):
             "current_step",
         )
         read_only_fields = ("current_step",)
-
-    def validate_favorite_genres(self, value):
-        # 실제 Genre 모델 ID가 존재하는지 검증 (선택 사항)
-        return value
-
-    def validate_favorite_authors(self, value):
-        # 실제 Author 모델 ID가 존재하는지 검증 (선택 사항)
-        return value
-
-    def validate_favorite_books(self, value):
-        # 실제 BookPublication 모델 ID(UUID)가 존재하는지 검증 (선택 사항)
-        return value
 
 
 class OnboardingSerializer(serializers.Serializer):

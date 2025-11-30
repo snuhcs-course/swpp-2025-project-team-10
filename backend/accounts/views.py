@@ -649,24 +649,13 @@ class UserProfileMeView(APIView):
         if trade_spot1 is not None:
             taste.trade_address = trade_spot1
         if favorite_genres is not None and isinstance(favorite_genres, list):
-            # Convert genre names to IDs
-            genre_ids = list(BookGenre.objects.filter(name__in=favorite_genres).values_list('id', flat=True))
-            taste.favorite_genres = genre_ids
-        if fav_books is not None:
-            if isinstance(fav_books, list):
-                # Convert book titles to UUIDs
-                book_ids = list(BookPublication.objects.filter(title__in=fav_books).values_list('id', flat=True))
-                taste.favorite_books = [str(bid) for bid in book_ids]
-            elif isinstance(fav_books, str):
-                taste.favorite_books = [fav_books] if fav_books else []
-        if fav_authors is not None:
-            if isinstance(fav_authors, list):
-                # Convert author names to IDs
-                author_ids = list(BookAuthor.objects.filter(name__in=fav_authors).values_list('id', flat=True))
-                taste.favorite_authors = author_ids
-            elif isinstance(fav_authors, str):
-                taste.favorite_authors = [fav_authors] if fav_authors else []
+            taste.favorite_genres = favorite_genres 
+        if fav_books is not None and isinstance(fav_books, list):
+            taste.favorite_books = fav_books  
+        if fav_authors is not None and isinstance(fav_authors, list):
+            taste.favorite_authors = fav_authors 
         taste.save()
+
 
         # Update UserPreferences fields (store additional fields here)
         update_fields = []
@@ -751,21 +740,18 @@ class UserProfileMeView(APIView):
         trade_spot1 = None
         try:
             taste = user.taste
-            genre_ids = taste.favorite_genres or []
-            book_ids = taste.favorite_books or []
-            author_ids = taste.favorite_authors or []
-
-            # ID 목록을 이름 목록으로 변환
-            favorite_genres = list(BookGenre.objects.filter(pk__in=genre_ids).values_list("name", flat=True))
-            favorite_books = list(BookPublication.objects.filter(pk__in=book_ids).values_list("title", flat=True))
-            favorite_authors = list(BookAuthor.objects.filter(pk__in=author_ids).values_list("name", flat=True))
-
+            favorite_genres = taste.favorite_genres or []
+            favorite_books = taste.favorite_books or []
+            favorite_authors = taste.favorite_authors or []
             trade_location1 = taste.trade_place_name or None
             trade_spot1 = taste.trade_address or None
         except UserTaste.DoesNotExist:
             favorite_genres = []
             favorite_books = []
             favorite_authors = []
+            trade_location1 = None
+            trade_spot1 = None
+
 
         # Additional preferences & metadata (only notes & meeting locations; favorites from taste)
         trade_location2 = None
