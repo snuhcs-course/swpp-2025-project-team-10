@@ -30,5 +30,9 @@
     <!-- Book -->
     <dimen name="book_thumb_w">60dp</dimen>
     <dimen name="book_thumb_h">84dp</dimen>
+
+    <!-- Onboarding survey grid -->
+    <dimen name="grid_spacing">10dp</dimen>
+
 </resources>
 

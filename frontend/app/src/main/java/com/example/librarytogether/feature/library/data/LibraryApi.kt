@@ -29,8 +29,8 @@ interface LibraryApi {
      * 'AddBookFragment'의 'searchBook'이 호출할 API
      * (ex: /books/search/?query=harrypoter)
      */
-    @GET("books/search/")
-    suspend fun searchBooks(@Query("query") query: String): Response<List<Book>>
+    @GET("library/books/search/")
+    suspend fun searchBooks(@Query("q") query: String): Response<List<Book>>
 
     @GET("accounts/profile/me/")
     suspend fun getMyProfile(): Response<UserProfile>

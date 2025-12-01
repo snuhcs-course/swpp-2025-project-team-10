@@ -121,7 +121,6 @@ class ProfileViewModel @Inject constructor(
                 } else {
                     repository.unfollow(it)
                 }
-                true
             } catch (_: Exception) {
                 false
             }
@@ -150,7 +149,7 @@ class ProfileViewModel @Inject constructor(
         }
     }
 
-    fun consumeError() { _error.value = null }
+//    fun consumeError() { _error.value = null }
 
     private inline fun withUserId(block: (Int) -> Unit) {
         val id = _userId.value

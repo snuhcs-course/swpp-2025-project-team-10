@@ -1,4 +1,4 @@
-package com.example.librarytogether.home
+package com.example.librarytogether.feature.home.data
 
 import com.example.librarytogether.feature.home.data.FeedResponse
 import com.example.librarytogether.feature.home.data.HomeApi
@@ -15,12 +15,12 @@ import org.hamcrest.Matchers.contains
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.any
-import org.mockito.kotlin.whenever
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import retrofit2.Response
 
-
 class HomeRepositoryTest {
+
     private lateinit var api: HomeApi
     private lateinit var repo: HomeRepository
 
@@ -30,26 +30,32 @@ class HomeRepositoryTest {
         repo = HomeRepository(api)
     }
 
+    // getFeed()
 
     @Test
     fun getFeed_returns_list_on_200() = runTest {
         val p1 = Post(
             id = 1,
+            posterId = 10,
             bookTitle = "B1",
             authorName = "A1",
             posterName = "U1",
             posterProfile = "",
             content = "C1",
-            userBookId = 11
+            // imageUrls, likeCount, createdAt, isLiked 는 default 사용
+            bookId = "11",
+            bookAvailableForBarter = true
         )
         val p2 = Post(
             id = 2,
+            posterId = 20,
             bookTitle = "B2",
             authorName = "A2",
             posterName = "U2",
             posterProfile = "",
             content = "C2",
-            userBookId = 22
+            bookId = "22",
+            bookAvailableForBarter = false
         )
         val body = FeedResponse(results = listOf(p1, p2))
         whenever(api.feed()).thenReturn(Response.success(body))
@@ -85,11 +91,13 @@ class HomeRepositoryTest {
         repo.getFeed() // expect throw
     }
 
+    // toggleLike()
+
     @Test
     fun toggleLike_returns_post_on_200() = runTest {
         val liked = Post(
             id = 7,
-            posterId = 0,
+            posterId = 77,
             bookTitle = "BX",
             authorName = "AX",
             posterName = "UX",
@@ -99,7 +107,8 @@ class HomeRepositoryTest {
             likeCount = 9,
             createdAt = "2025-10-10T00:00:00Z",
             isLiked = true,
-            userBookId = 77
+            bookId = "77-uuid",
+            bookAvailableForBarter = true
         )
         val body = LikeResponse(post = liked)
         whenever(api.togglePostLike(7)).thenReturn(Response.success(body))
@@ -110,6 +119,7 @@ class HomeRepositoryTest {
         assertThat(post.isLiked, equalTo(true))
         assertThat(post.likeCount, equalTo(9))
         assertThat(post.imageUrls, contains("u1", "u2"))
+        assertThat(post.bookId, equalTo("77-uuid"))
     }
 
     @Test(expected = IllegalStateException::class)
@@ -134,4 +144,40 @@ class HomeRepositoryTest {
         repo.toggleLike(99) // expect throw
     }
 
+    // createRequest()
+
+    @Test
+    fun createRequest_returns_true_on_success() = runTest {
+        whenever(api.createRequest(any())).thenReturn(Response.success(mock()))
+
+        val result = repo.createRequest(
+            recipientId = 10,
+            requestedBookId = "book-uuid-1"
+        )
+
+        assertThat(result, equalTo(true))
+    }
+
+    @Test
+    fun createRequest_returns_false_on_non_200() = runTest {
+        whenever(api.createRequest(any()))
+            .thenReturn(Response.error(400, "x".toResponseBody()))
+
+        val result = repo.createRequest(
+            recipientId = 10,
+            requestedBookId = "book-uuid-2"
+        )
+
+        assertThat(result, equalTo(false))
+    }
+
+    @Test(expected = RuntimeException::class)
+    fun createRequest_rethrows_on_exception() = runTest {
+        whenever(api.createRequest(any())).thenThrow(RuntimeException("boom"))
+
+        repo.createRequest(
+            recipientId = 10,
+            requestedBookId = "book-uuid-3"
+        )
+    }
 }

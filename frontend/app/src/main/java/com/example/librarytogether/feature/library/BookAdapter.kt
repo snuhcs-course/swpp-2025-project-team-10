@@ -80,9 +80,9 @@ class BookAdapter(
         fun bind(item: Book) {
             img.loadCover(item.cover_image)
             tvTitle.text  = item.title
-            tvAuthor.text = item.authors.orEmpty()
+            tvAuthor.text = item.authors?.joinToString(", ").orEmpty()
 
-            itemView.setOnClickListener { clicks.onSelect(item) }
+            itemView.setOnClickListener { clicks.onClickItem(item) }
             btnMore?.setOnClickListener { v -> clicks.onClickMore(item, v) }
         }
     }

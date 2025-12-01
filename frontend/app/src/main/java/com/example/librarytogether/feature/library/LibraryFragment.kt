@@ -22,8 +22,6 @@ import com.example.librarytogether.util.loadAvatar
 import com.google.android.material.tabs.TabLayout
 import dagger.hilt.android.AndroidEntryPoint
 
-enum class AddBookMode {BOOKSHELF, WISHLIST}
-
 @AndroidEntryPoint
 class LibraryFragment : Fragment() {
 
@@ -104,25 +102,15 @@ class LibraryFragment : Fragment() {
     }
 
     private fun setupClickListeners() {
-        binding.btnAddWishlist.setOnClickListener {
-            val action = LibraryFragmentDirections
-                .actionLibraryFragmentToAddBookFragment(mode = AddBookMode.WISHLIST)
-            findNavController().navigate(action)
-        }
-
-        binding.btnManageWishlist.setOnClickListener {
-            // TODO: Adapter에 관리 모드 전달
-        }
-
         binding.btnAddLocation.setOnClickListener { onClickAddLocation() }
     }
 
     private fun render() = with(binding) {
-        rvReviews.visibility       = if (currentTab == Tab.REVIEWS && !isReviewEmpty) View.VISIBLE else View.GONE
-        tvReviewEmpty.visibility   = if (currentTab == Tab.REVIEWS &&  isReviewEmpty) View.VISIBLE else View.GONE
+        rvReviews.visibility = if (currentTab == Tab.REVIEWS && !isReviewEmpty) View.VISIBLE else View.GONE
+        tvReviewEmpty.visibility = if (currentTab == Tab.REVIEWS &&  isReviewEmpty) View.VISIBLE else View.GONE
 
-        rvBooks.visibility         = if (currentTab == Tab.BOOKS   && !isBookEmpty)   View.VISIBLE else View.GONE
-        tvBookEmpty.visibility     = if (currentTab == Tab.BOOKS   &&  isBookEmpty)   View.VISIBLE else View.GONE
+        rvBooks.visibility = if (currentTab == Tab.BOOKS   && !isBookEmpty)   View.VISIBLE else View.GONE
+        tvBookEmpty.visibility = if (currentTab == Tab.BOOKS   &&  isBookEmpty)   View.VISIBLE else View.GONE
 
         profileContainer.visibility = if (currentTab == Tab.PROFILE) View.VISIBLE else View.GONE
 
@@ -177,10 +165,10 @@ class LibraryFragment : Fragment() {
             binding.tvTradeLocation2.text = profile.preferences.tradeLocation2
             binding.tvTradeSpot1.text = profile.preferences.tradeSpot1
             binding.tvTradeSpot2.text = profile.preferences.tradeSpot2
-            binding.tvFavBook.text = profile.preferences.favBooks
-            binding.tvFavBookNote.text = profile.preferences.favBookNotes
-            binding.tvFavAuthor.text = profile.preferences.favAuthors
-            binding.tvFavAuthorNote.text = profile.preferences.favAuthorNotes
+            binding.tvFavBook.text = profile.preferences.favBooks.firstOrNull().orEmpty()
+            binding.tvFavBookNote.text = profile.preferences.favBookNotes.firstOrNull().orEmpty()
+            binding.tvFavAuthor.text = profile.preferences.favAuthors.firstOrNull().orEmpty()
+            binding.tvFavAuthorNote.text = profile.preferences.favAuthorNotes.firstOrNull().orEmpty()
             binding.tvReadingHabit.text = profile.preferences.readingHabit
             isGenreEmpty = profile.favoriteGenres.isEmpty()
 
@@ -273,7 +261,7 @@ class LibraryFragment : Fragment() {
                 contentDescription = getString(R.string.fab_add_book)
                 setOnClickListener {
                     val action = LibraryFragmentDirections
-                        .actionLibraryFragmentToAddBookFragment(mode = AddBookMode.BOOKSHELF)
+                        .actionLibraryFragmentToAddBookFragment()
                     findNavController().navigate(action)
                 }
                 show()
@@ -295,11 +283,23 @@ class LibraryFragment : Fragment() {
                             tradeLocation2 = location2,
                             tradeSpot1 = binding.editTradeSpot1.text.toString(),
                             tradeSpot2 = binding.editTradeSpot2.text.toString(),
-                            favBooks = binding.editFavBook.text.toString(),
-                            favBookNotes = binding.editFavBookNote.text.toString(),
-                            favAuthors = binding.editFavAuthor.text.toString(),
-                            favAuthorNotes = binding.editFavAuthorNote.text.toString(),
-                            readingHabit = binding.editReadingHabit.text.toString()
+                            favBooks = prependAndShift(
+                                newValue = binding.editFavBook.text.toString(),
+                                oldList = currentProfile.preferences.favBooks
+                            ),
+                            favBookNotes = prependAndShift(
+                                newValue = binding.editFavBookNote.text.toString(),
+                                oldList = currentProfile.preferences.favBookNotes
+                            ),
+                            favAuthors = prependAndShift(
+                                newValue = binding.editFavAuthor.text.toString(),
+                                oldList = currentProfile.preferences.favAuthors
+                            ),
+                            favAuthorNotes = prependAndShift(
+                                newValue = binding.editFavAuthorNote.text.toString(),
+                                oldList = currentProfile.preferences.favAuthorNotes
+                            ),
+                            readingHabit = binding.editReadingHabit.text.toString(),
                         )
 
                         val newProfile = currentProfile.copy(
@@ -357,7 +357,6 @@ class LibraryFragment : Fragment() {
             editViews = listOf(editReadingHabit)
         )
 
-        btnManageWishlist.visibility = if (edit) View.VISIBLE else View.GONE
         btnAddWishlist.visibility = if (edit) View.VISIBLE else View.GONE
 
         // 2) 값 동기화
@@ -369,10 +368,10 @@ class LibraryFragment : Fragment() {
             syncChipsFromProfile(profile)
             editTradeSpot1.setText(profile.preferences.tradeSpot1)
             editTradeSpot2.setText(profile.preferences.tradeSpot2)
-            editFavBook.setText(profile.preferences.favBooks)
-            editFavBookNote.setText(profile.preferences.favBookNotes)
-            editFavAuthor.setText(profile.preferences.favAuthors)
-            editFavAuthorNote.setText(profile.preferences.favAuthorNotes)
+            editFavBook.setText(profile.preferences.favBooks.firstOrNull().orEmpty())
+            editFavBookNote.setText(profile.preferences.favBookNotes.firstOrNull().orEmpty())
+            editFavAuthor.setText(profile.preferences.favAuthors.firstOrNull().orEmpty())
+            editFavAuthorNote.setText(profile.preferences.favAuthorNotes.firstOrNull().orEmpty())
             editReadingHabit.setText(profile.preferences.readingHabit)
             syncEditChipsFromViewModel(profile.favoriteGenres)
 
@@ -547,5 +546,20 @@ class LibraryFragment : Fragment() {
 
         autoCompleteLocation1.setText("", false)
         autoCompleteLocation2.setText("", false)
+    }
+
+    private fun prependAndShift(
+        newValue: String,
+        oldList: List<String>,
+        maxSize: Int = 10
+    ): List<String> {
+        val trimmed = newValue.trim()
+        if (trimmed.isEmpty())
+            return oldList
+
+        val result = mutableListOf<String>()
+        result.add(trimmed)
+        result.addAll(oldList)
+        return result.take(maxSize)
     }
 }

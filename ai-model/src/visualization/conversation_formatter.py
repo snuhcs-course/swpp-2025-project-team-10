@@ -1,7 +1,7 @@
 """Format LLM conversations for frontend display."""
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any
 
@@ -33,6 +33,7 @@ class FormattedConversation:
     conversation_id: str
     user_id: str
     recommended_books: list[str]
+    recommendations: list[dict[str, Any]] = field(default_factory=list)
     messages: list[ConversationMessage]
     final_recommendation: str
     confidence_score: float
@@ -44,6 +45,7 @@ class FormattedConversation:
             "conversation_id": self.conversation_id,
             "user_id": self.user_id,
             "recommended_books": self.recommended_books,
+            "recommendations": self.recommendations,
             "messages": [
                 {
                     "id": msg.id,
@@ -123,10 +125,22 @@ class ConversationFormatter:
             "model_type": "llm_conversation",
         }
 
+        recommendation_payloads = [
+            {
+                "id": rec.book_id,
+                "title": rec.title,
+                "reason": rec.reason,
+                "score": rec.score,
+                "metadata": rec.metadata,
+            }
+            for rec in trajectory.recommendations
+        ]
+
         return FormattedConversation(
             conversation_id=conv_id,
             user_id=trajectory.user_id,
             recommended_books=trajectory.recommended_books,
+            recommendations=recommendation_payloads,
             messages=messages,
             final_recommendation=trajectory.final_recommendation,
             confidence_score=trajectory.confidence_score,
@@ -247,6 +261,7 @@ class ConversationFormatter:
             "conversationId": conversation.conversation_id,
             "userId": conversation.user_id,
             "recommendedBooks": conversation.recommended_books,
+            "recommendations": conversation.recommendations,
             "messages": [
                 {
                     "id": msg.id,

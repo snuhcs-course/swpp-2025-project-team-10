@@ -105,9 +105,9 @@ class BookDetailFragment : Fragment(R.layout.fragment_book_detail) {
 
         val book = state.book
         binding.tvTitle.text = book.title
-        binding.tvAuthor.text = book.authors
+        binding.tvAuthor.text = book.authors?.joinToString(", ") ?: ""
         binding.tvPublisher.text = book.publisher.orEmpty()
-        binding.tvIsbn.text = book.isbn_13.orEmpty()
+        binding.tvIsbn.text = book.isbn.orEmpty()
         binding.tvDescription.apply {
             isVisible = !book.description.isNullOrBlank()
             text = book.description ?: ""

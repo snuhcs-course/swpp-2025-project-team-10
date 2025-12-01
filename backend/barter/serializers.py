@@ -13,7 +13,7 @@ class BarterRequestSerializer(serializers.ModelSerializer):
     """
     Serializer for BarterRequest with requester/recipient info.
     New flow: requester proposes 3 books (offered_book_ids) for recipient's 1 book (requested_book).
-    Phone numbers are only exposed when status is 'completed'.
+    Emails are only exposed when status is 'completed'.
     """
 
     requester = UserBarterInfoSerializer(read_only=True)
@@ -28,9 +28,9 @@ class BarterRequestSerializer(serializers.ModelSerializer):
         help_text="List of 3 book IDs proposed by requester",
     )
 
-    # Phone numbers only visible when trade is completed
-    requester_phone = serializers.SerializerMethodField()
-    recipient_phone = serializers.SerializerMethodField()
+    # Emails only visible when trade is completed
+    requester_email = serializers.SerializerMethodField()
+    recipient_email = serializers.SerializerMethodField()
 
     class Meta:
         model = BarterRequest
@@ -48,8 +48,8 @@ class BarterRequestSerializer(serializers.ModelSerializer):
             "proposed_meeting_time",
             "response_message",
             "response_date",
-            "requester_phone",
-            "recipient_phone",
+            "requester_email",
+            "recipient_email",
             "created_at",
             "updated_at",
         ]
@@ -61,22 +61,22 @@ class BarterRequestSerializer(serializers.ModelSerializer):
             "offered_book_ids",
             "status",
             "response_date",
-            "requester_phone",
-            "recipient_phone",
+            "requester_email",
+            "recipient_email",
             "created_at",
             "updated_at",
         ]
 
-    def get_requester_phone(self, obj):
-        """Return requester's phone only if trade is completed."""
+    def get_requester_email(self, obj):
+        """Return requester's email only if trade is completed."""
         if obj.status == "completed":
-            return obj.requester.phone_number
+            return obj.requester.email
         return None
 
-    def get_recipient_phone(self, obj):
-        """Return recipient's phone only if trade is completed."""
+    def get_recipient_email(self, obj):
+        """Return recipient's email only if trade is completed."""
         if obj.status == "completed":
-            return obj.recipient.phone_number
+            return obj.recipient.email
         return None
 
 

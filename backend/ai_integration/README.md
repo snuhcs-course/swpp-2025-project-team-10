@@ -199,12 +199,16 @@ backend/
        profiles=profiles,
        requests=requests
    )
-   
+
    recommender = BarterRecommender()
    recommendations = recommender.recommend(context, limit=limit)
    
    return [rec.candidate.item_id for rec in recommendations]
    ```
+
+   또는 `.env`에 `AI_MODEL_BASE_URL`을 설정하면 GPU 서버의 FastAPI
+   (`POST /api/recommendations/books`)를 호출하여 책 ID와 추천 이유를 함께 받습니다.
+   네트워크 오류가 발생하면 자동으로 로컬 파이프라인/랜덤 선택으로 폴백합니다.
 
 3. **탐색 추천 통합**
    ```python

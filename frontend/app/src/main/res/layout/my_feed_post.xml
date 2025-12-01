@@ -161,7 +161,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="40dp"
                 android:backgroundTint="@android:color/transparent"
-                android:text="@string/review"
+                android:text="@string/comment"
                 android:textStyle="bold"
                 android:paddingHorizontal="0dp"
                 android:minWidth="0dp"
@@ -173,19 +173,19 @@
                 android:layout_width="18dp"
                 android:layout_height="wrap_content"/>
 
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnExchange"
-                style="@style/Widget.Material3.Button.TonalButton"
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:backgroundTint="@android:color/transparent"
-                android:text="@string/exchange"
-                android:textStyle="bold"
-                android:paddingHorizontal="0dp"
-                android:minWidth="0dp"
-                app:icon="@drawable/exchange_icon"
-                app:iconPadding="6dp"
-                app:iconGravity="textStart"/>
+<!--            <com.google.android.material.button.MaterialButton-->
+<!--                android:id="@+id/btnExchange"-->
+<!--                style="@style/Widget.Material3.Button.TonalButton"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="40dp"-->
+<!--                android:backgroundTint="@android:color/transparent"-->
+<!--                android:text="@string/exchange"-->
+<!--                android:textStyle="bold"-->
+<!--                android:paddingHorizontal="0dp"-->
+<!--                android:minWidth="0dp"-->
+<!--                app:icon="@drawable/exchange_icon"-->
+<!--                app:iconPadding="6dp"-->
+<!--                app:iconGravity="textStart"/>-->
         </LinearLayout>
 
         <TextView

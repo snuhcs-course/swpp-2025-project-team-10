@@ -6,11 +6,12 @@ import android.view.View
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.GridLayoutManager
 import com.example.librarytogether.R
 import com.example.librarytogether.databinding.FragmentOnboardingBinding
 import com.example.librarytogether.feature.main.MainActivity
+import com.example.librarytogether.util.GridSpacingItemDecoration
 import com.google.android.flexbox.FlexWrap
-import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -36,9 +37,18 @@ class OnboardingFragment : Fragment(R.layout.fragment_onboarding) {
         setupRecyclerView()
         observeViewModel()
 
+        // [다음] 버튼
         binding.btnNext.setOnClickListener {
             viewLifecycleOwner.lifecycleScope.launch {
                 val isFinished = viewModel.nextStep()
+                if (isFinished) navigateToMain()
+            }
+        }
+
+        // [건너뛰기] 버튼
+        binding.btnSkip.setOnClickListener {
+            viewLifecycleOwner.lifecycleScope.launch {
+                val isFinished = viewModel.skipStep()
                 if (isFinished) navigateToMain()
             }
         }
@@ -48,12 +58,17 @@ class OnboardingFragment : Fragment(R.layout.fragment_onboarding) {
 
     private fun setupRecyclerView() {
         binding.rvChips.apply {
-            layoutManager = FlexboxLayoutManager(requireContext()).apply {
-                flexWrap = FlexWrap.WRAP
-                justifyContent = JustifyContent.FLEX_START
-            }
+            layoutManager = GridLayoutManager(requireContext(), 3) // 3열
             adapter = chipAdapter
+
+            val spacingInPixels = resources.getDimensionPixelSize(R.dimen.grid_spacing)
+
+            addItemDecoration(GridSpacingItemDecoration(3, dpToPx(12), true))
         }
+    }
+
+    private fun dpToPx(dp: Int): Int {
+        return (dp * resources.displayMetrics.density).toInt()
     }
 
     private fun observeViewModel() {

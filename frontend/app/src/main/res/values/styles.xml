@@ -105,6 +105,24 @@
         <item name="android:layout_height">wrap_content</item>
     </style>
 
+    <style name="TextOnlyChip" parent="Widget.Material3.Chip.Assist">
+        <item name="chipBackgroundColor">@android:color/transparent</item>
+        <item name="rippleColor">@android:color/transparent</item>
+        <item name="chipStrokeWidth">0dp</item>
+        <item name="chipCornerRadius">0dp</item>
+        <item name="chipMinHeight">0dp</item>
+
+        <item name="chipStartPadding">0dp</item>
+        <item name="chipEndPadding">8dp</item>
+        <item name="chipIconVisible">false</item>
+        <item name="checkedIconVisible">false</item>
+        <item name="closeIconVisible">false</item>
+
+        <item name="android:textColor">?attr/colorOnSurface</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+
     <!-- 섹션 칩(‘필’ 배경으로 구획감) -->
     <style name="Pill">
         <item name="android:gravity">center</item>

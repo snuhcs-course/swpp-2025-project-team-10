@@ -87,7 +87,6 @@ class HomeViewModel @Inject constructor(
                     ownerId, requestedBookId = bookId
                 )
                 _barterSuccess.value = ok
-                if (!ok) _barterError.value = "교환 신청에 실패했습니다."
             } catch (e: Exception) {
                 _barterError.value = e.message ?: "네트워크 오류가 발생했습니다."
             } finally {
@@ -99,15 +98,6 @@ class HomeViewModel @Inject constructor(
     fun clearBarterResult() {
         _barterSuccess.value = null
         _barterError.value = null
-    }
-
-    fun onClickAdd(post: Post) {
-
-    }
-
-    fun addPost(post: Post) {
-        viewModelScope.launch {
-        }
     }
 
     fun onErrorShown() {

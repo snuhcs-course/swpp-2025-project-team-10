@@ -37,19 +37,24 @@ class NotificationFragment : Fragment(R.layout.fragment_notification) {
                 },
                 onClickAction = { item ->
                     vm.markAsRead(item)
-                    //if (item.deepLink == "BARTER") {
                     Log.d("NotificationFragment", "onClickAction called. item = $item")
-                    val requestId = item.related_object_id
-                    if (requestId.isNullOrEmpty()) {
-                        return@NotificationClicks
-                    }
 
-                    val action =
-                        NotificationFragmentDirections
-                            .actionNotificationToBarterApprovalFragment(
-                                requestId = requestId
-                            )
-                    findNavController().navigate(action)
+                    when (item.type){
+                        "barter_request" -> {
+                            val requestId = item.related_object_id
+                            if (!requestId.isNullOrEmpty()) {
+                                val action =
+                                    NotificationFragmentDirections
+                                        .actionNotificationToBarterApprovalFragment(requestId = requestId)
+                                findNavController().navigate(action)
+                            }
+                        }
+                        "barter_request_sent" -> {
+                            vm.cancelBarter(item)
+                        }
+                        else -> {
+                        }
+                    }
                 }
             )
         )
@@ -67,6 +72,15 @@ class NotificationFragment : Fragment(R.layout.fragment_notification) {
         vm.loading.observe(viewLifecycleOwner) {
             binding.progress.visibility = if (it) View.VISIBLE else View.GONE
             binding.swipeRefresh.isRefreshing = false
+        }
+
+        vm.snackbarMessage.observe(viewLifecycleOwner) { msg ->
+            if (!msg.isNullOrEmpty()) {
+                com.google.android.material.snackbar.Snackbar
+                    .make(binding.root, msg, com.google.android.material.snackbar.Snackbar.LENGTH_SHORT)
+                    .show()
+                vm.onSnackbarShown()
+            }
         }
 
         vm.load()

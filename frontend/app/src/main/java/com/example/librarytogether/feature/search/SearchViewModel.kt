@@ -28,9 +28,12 @@ class SearchViewModel @Inject constructor(
         viewModelScope.launch {
             _isLoading.value = true
             try {
-                _results.value = repository.search(query.trim())
+                val res = repository.search(query)
+                _results.value = res
+                _error.value = null
             } catch (e: Exception) {
-                //_error.value = "검색 중 오류가 발생했습니다."
+                _results.value = emptyList()
+                _error.value = "검색 중 오류가 발생했습니다. 다시 시도해주세요."
             } finally {
                 _isLoading.value = false
             }

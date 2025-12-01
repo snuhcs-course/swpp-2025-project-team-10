@@ -748,14 +748,14 @@
                             android:layout_weight="1"
                             android:text="@string/profile_wishlist"/>
 
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnManageWishlist"
-                            style="@style/Btn.Tonal.Text"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/wishlist_manage"
-                            android:visibility="gone"
-                            tools:visibility="visible"/>
+<!--                        <com.google.android.material.button.MaterialButton-->
+<!--                            android:id="@+id/btnManageWishlist"-->
+<!--                            style="@style/Btn.Tonal.Text"-->
+<!--                            android:layout_width="wrap_content"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:text="@string/wishlist_manage"-->
+<!--                            android:visibility="gone"-->
+<!--                            tools:visibility="visible"/>-->
                     </LinearLayout>
 
                     <!-- Divider -->
@@ -802,12 +802,12 @@
                         android:visibility="gone"
                         tools:visibility="visible">
 
-                        <com.google.android.material.button.MaterialButton
-                            style="@style/Btn.Tonal.Text"
-                            android:layout_height="wrap_content"
-                            android:layout_width="wrap_content"
-                            android:text="@string/wishlist_add"
-                            tools:visibility="visible"/>
+<!--                        <com.google.android.material.button.MaterialButton-->
+<!--                            style="@style/Btn.Tonal.Text"-->
+<!--                            android:layout_height="wrap_content"-->
+<!--                            android:layout_width="wrap_content"-->
+<!--                            android:text="@string/wishlist_add"-->
+<!--                            tools:visibility="visible"/>-->
                     </LinearLayout>
 
                 </LinearLayout>

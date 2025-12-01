@@ -31,6 +31,8 @@ class LibraryViewModel @Inject constructor(
     val searchResults: LiveData<List<Book>> = _searchResults
     private val _navigateToLibrary = MutableLiveData<Boolean>(false)
     val navigateToLibrary: LiveData<Boolean> = _navigateToLibrary
+    private val _snackbarMessage = MutableLiveData<String?>()
+    val snackbarMessage: LiveData<String?> = _snackbarMessage
 
     private val _error = MutableLiveData<String?>()
     val error: LiveData<String?> = _error
@@ -117,22 +119,35 @@ class LibraryViewModel @Inject constructor(
         }
     }
 
-    fun addToWishlist(book: Book) = viewModelScope.launch {
-        if (_myWishlist.value?.any { it.id == book.id } == true) {
-            _error.value = "이미 위시리스트에 있어요."
-            return@launch
+    fun addToWishList(bookId: String) = viewModelScope.launch {
+        val exists = _myWishlist.value?.any { it.id == bookId } == true
+
+        val ok = try {
+            if (exists) {
+                _snackbarMessage.value = "이미 위시리스트에 있어요."
+                false
+            } else {
+                repository.addToWishlistById(bookId)
+            }
+        } catch (e: Exception) {
+            _error.value = "위시리스트 변경에 실패했어요."
+            false
         }
 
-        val ok = repository.addToWishlist(book)
         if (ok) {
-             _myWishlist.value = repository.getMyWishlist().orEmpty()
-        } else {
-            _error.value = "위시리스트 추가에 실패했어요."
+            _myWishlist.value = repository.getMyWishlist().orEmpty()
+            _snackbarMessage.value = "위시 리스트에 추가했어요."
+        } else if (_error.value.isNullOrBlank()) {
+            _error.value = if (exists) null else "위시리스트에 추가하지 못했어요."
         }
     }
 
     fun onErrorShown() {
         _error.value = null
+    }
+
+    fun onSnackbarShown() {
+        _snackbarMessage.value = null
     }
 
     fun addNewReview(review: PostReview) {

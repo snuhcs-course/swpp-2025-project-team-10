@@ -49,7 +49,19 @@ class NotificationAdapter(
                 .load(R.drawable.sample_profile)
                 .into(imgProfile)
 
-            btnAction.text = "교환"
+            when (item.type) {
+                "barter_request" -> {
+                    btnAction.visibility = View.VISIBLE
+                    btnAction.text = "교환 보기"
+                }
+                "barter_request_sent" -> {
+                    btnAction.visibility = View.VISIBLE
+                    btnAction.text = "교환 취소"
+                }
+                else -> {
+                    btnAction.visibility = View.GONE
+                }
+            }
 
             itemView.setOnClickListener { clicks.onClickItem(item) }
             btnAction.setOnClickListener { clicks.onClickAction(item) }
