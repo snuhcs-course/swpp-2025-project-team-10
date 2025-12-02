@@ -13,30 +13,39 @@ class OnboardingRepository @Inject constructor(
     private val selectedGenres = mutableListOf<Int>()
 
     fun getBooks() = listOf(
-        LabelId(1, "해리포터"),
-        LabelId(2, "데미안"),
-        LabelId(3, "나미야 잡화점의 기적"),
-        LabelId(4, "달러구트 꿈 백화점"),
-        LabelId(5, "1984")
+        LabelId(1, "채식주의자"),
+        LabelId(2, "사피엔스"),
+        LabelId(3, "생각의 탄생"),
+        LabelId(4, "연금술사"),
+        LabelId(5, "백년의 고독"),
+        LabelId(6, "82년생 김지영"),
+        LabelId(7,"해리포터와 마법사의 돌" ),
+        LabelId(8,"살인자의 기억법" ),
+        LabelId(9, "미움받을 용기" )
     )
 
     fun getAuthors() = listOf(
-        LabelId(1, "J.K. 롤링"),
+        LabelId(1, "한강"),
         LabelId(2, "무라카미 하루키"),
-        LabelId(3, "조앤 조지"),
-        LabelId(4, "조지 오웰"),
-        LabelId(5, "히가시노 게이고")
+        LabelId(3, "김영하"),
+        LabelId(4, "유발 하라리"),
+        LabelId(5, "베르나르 베르베르"),
+        LabelId(6, "알랭 드 보통"),
+        LabelId(7, "움베르트 에코"),
+        LabelId(8,"세이노"),
+        LabelId(9, "운동주")
     )
 
     fun getGenres() = listOf(
         LabelId(1, "현대소설"),
         LabelId(2, "고전소설"),
-        LabelId(3, "에세이"),
-        LabelId(4, "시/희곡"),
+        LabelId(3, "시"),
+        LabelId(4, "자기계발"),
         LabelId(5, "과학·기술"),
         LabelId(6, "인문·사회"),
         LabelId(7, "역사·철학"),
-        LabelId(8, "예술·언어")
+        LabelId(8, "예술·언어"),
+        LabelId(9,"경제·경영")
     )
 
     fun saveSelection(step: Int, ids: List<Int>) {

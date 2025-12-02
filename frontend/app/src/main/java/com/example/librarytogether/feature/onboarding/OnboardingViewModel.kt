@@ -37,12 +37,7 @@ class OnboardingViewModel @Inject constructor(
         val newSet = if (isSelected) currentSet + id else currentSet - id
         _selected.value = newSet
     }
-    suspend fun skipStep(): Boolean {
-        val step = _currentStep.value ?: 0
-        repo.saveSelection(step, emptyList())
 
-        return proceedToNextOrFinish(step)
-    }
     suspend fun nextStep(): Boolean {
         val step = _currentStep.value ?: 0
         val selectedIds = _selected.value?.toList() ?: emptyList()
