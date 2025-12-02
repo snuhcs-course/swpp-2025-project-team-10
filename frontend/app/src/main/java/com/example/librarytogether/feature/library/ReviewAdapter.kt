@@ -75,6 +75,7 @@ class ReviewAdapter(
                 }
                 btnExchange.visibility = View.GONE
                 btnAdd.visibility = View.GONE
+                actionBar.visibility = View.GONE
 
                 btnLike.safeClick(clicks.onClickLike)
                 btnBookReview.safeClick(clicks.onClickReview)
