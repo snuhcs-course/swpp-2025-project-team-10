@@ -87,8 +87,8 @@ class HomeFragmentTest {
         onView(withId(R.id.rvFeed)).check(matches(isDisplayed()))
         onView(withText("테스트 책 제목")).check(matches(isDisplayed()))
         onView(withText("테스트 작가")).check(matches(isDisplayed()))
-        onView(withText("좋아요 5")).check(matches(isDisplayed())) // formatCount 로직 확인
-        onView(withText("댓글 2")).check(matches(isDisplayed()))   // formatCount 로직 확인
+        onView(withText("5 좋아요")).check(matches(isDisplayed()))
+        onView(withText("2 댓글")).check(matches(isDisplayed()))
     }
 
     @Test
@@ -203,42 +203,44 @@ class HomeFragmentTest {
             .check(matches(isDisplayed()))
     }
 
-//    @Test
-//    fun swipeRefresh_triggersLoadFeed() {
-//        // Given
-//        runBlocking {
-//            `when`(mockRepo.getFeed()).thenReturn(listOf(mockPosts))
-//        }
-//        launchHomeFragment()
-//
-//        Shadows.shadowOf(Looper.getMainLooper()).idle()
-//
-//        // When
-//        onView(withId(R.id.swipeRefresh)).perform(androidx.test.espresso.action.ViewActions.swipeDown())
-//
-//        Shadows.shadowOf(Looper.getMainLooper()).idle()
-//
-//        // Then
-//        runBlocking {
-//            verify(mockRepo, times(2)).getFeed()
-//        }
-//    }
+    @Test
+    fun swipeRefresh_triggersLoadFeed() {
+        // Given
+        runBlocking {
+            `when`(mockRepo.getFeed()).thenReturn(listOf(mockPosts))
+        }
+        launchHomeFragment()
 
-//    @Test
-//    fun loadFeed_error_showsSnackbar() {
-//        // Given
-//        runBlocking {
-//            `when`(mockRepo.getFeed()).thenThrow(RuntimeException("네트워크 오류"))
-//        }
-//
-//        // When
-//        launchHomeFragment()
-//
-//        Shadows.shadowOf(Looper.getMainLooper()).idle()
-//
-//        // Then
-//        onView(withText("네트워크 오류가 발생했습니다.")).check(matches(isDisplayed()))
-//    }
+        Shadows.shadowOf(Looper.getMainLooper()).idle()
+
+        // When
+        onView(withId(R.id.swipeRefresh))
+            .perform(androidx.test.espresso.action.ViewActions.swipeDown())
+
+        Shadows.shadowOf(Looper.getMainLooper()).idle()
+
+        // Then
+        runBlocking {
+            verify(mockRepo, times(2)).getFeed()
+        }
+    }
+
+    @Test
+    fun loadFeed_error_showsSnackbar() {
+        // Given
+        runBlocking {
+            `when`(mockRepo.getFeed()).thenThrow(RuntimeException("네트워크 오류"))
+        }
+
+        // When
+        launchHomeFragment()
+        Shadows.shadowOf(Looper.getMainLooper()).idle()
+
+        // Then:
+        onView(withText("네트워크 오류가 발생했습니다."))
+            .check(matches(withEffectiveVisibility(Visibility.VISIBLE)))
+    }
+
 
     @Test
     fun clickAddToWishlist_callsViewModel() {

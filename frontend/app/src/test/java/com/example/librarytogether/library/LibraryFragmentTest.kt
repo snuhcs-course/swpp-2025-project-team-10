@@ -12,9 +12,11 @@ import androidx.test.espresso.action.ViewActions.closeSoftKeyboard
 import androidx.test.espresso.action.ViewActions.replaceText
 import androidx.test.espresso.action.ViewActions.scrollTo
 import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.hasDescendant
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withContentDescription
+import androidx.test.espresso.matcher.ViewMatchers.withEffectiveVisibility
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.runner.AndroidJUnit4
@@ -120,23 +122,28 @@ class LibraryFragmentTest {
             .check(matches(withContentDescription(R.string.fab_edit_profile)))
     }
 
-//    @Test
-//    fun clickEditProfile_togglesUiVisibility() {
-//        launchLibraryFragment()
-//
-//        onView(withText(R.string.profile)).perform(click())
-//
-//        onView(withId(R.id.tvTradeSpot1)).check(matches(isDisplayed()))
-//        onView(withId(R.id.editTradeSpot1)).check(matches(not(isDisplayed())))
-//
-//        onView(withId(R.id.fabAdd)).perform(click())
-//
-//        onView(withId(R.id.tvTradeSpot1)).check(matches(not(isDisplayed())))
-//        onView(withId(R.id.editTradeSpot1)).check(matches(isDisplayed()))
-//
-//        onView(withId(R.id.fabAdd))
-//            .check(matches(withContentDescription(R.string.fab_save_profile)))
-//    }
+    @Test
+    fun clickEditProfile_togglesUiVisibility() {
+        launchLibraryFragment()
+
+        onView(withText(R.string.profile)).perform(click())
+
+        onView(withId(R.id.tvTradeSpot1))
+            .check(matches(withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE)))
+        onView(withId(R.id.editTradeSpot1))
+            .check(matches(withEffectiveVisibility(ViewMatchers.Visibility.GONE)))
+
+        onView(withId(R.id.fabAdd)).perform(click())
+
+        onView(withId(R.id.tvTradeSpot1))
+            .check(matches(withEffectiveVisibility(ViewMatchers.Visibility.GONE)))
+        onView(withId(R.id.editTradeSpot1))
+            .check(matches(withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE)))
+
+        onView(withId(R.id.fabAdd))
+            .check(matches(withContentDescription(R.string.fab_save_profile)))
+    }
+
 
     @Test
     fun addLocation_addsNewChip() {

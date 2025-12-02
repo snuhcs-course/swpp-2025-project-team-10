@@ -9,8 +9,10 @@ import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.scrollTo
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions
+import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.hasDescendant
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
+import androidx.test.espresso.matcher.ViewMatchers.withEffectiveVisibility
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.runner.AndroidJUnit4
@@ -169,19 +171,19 @@ class LibraryNavigationTest {
         )
     }
 
-//    @Test
-//    fun clickEditProfile_togglesEditMode() {
-//        launchLibraryFragment()
-//
-//        onView(withText(R.string.profile)).perform(click())
-//
-//        // 탭 전환 후 UI 갱신 대기
-//        Shadows.shadowOf(Looper.getMainLooper()).idle()
-//
-//        onView(withId(R.id.fabAdd)).perform(click())
-//
-//        onView(withId(R.id.editFavBook)).check(matches(isDisplayed()))
-//    }
+    @Test
+    fun clickEditProfile_togglesEditMode() {
+        launchLibraryFragment()
+
+        onView(withText(R.string.profile)).perform(click())
+
+        Shadows.shadowOf(Looper.getMainLooper()).idle()
+
+        onView(withId(R.id.fabAdd)).perform(click())
+
+        onView(withId(R.id.editFavBook))
+            .check(matches(withEffectiveVisibility(ViewMatchers.Visibility.VISIBLE)))
+    }
 
     private fun launchLibraryFragment() {
         launchFragmentInHiltContainer<LibraryFragment> {
