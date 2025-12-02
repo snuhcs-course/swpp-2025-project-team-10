@@ -1,0 +1,18 @@
+[run]
+source =
+    accounts
+    books
+    social
+    barter
+    notify
+    ai_integration
+    core
+omit =
+    */tests/*
+    */migrations/*
+    */__init__.py
+    manage.py
+    */ai-model/src/*
+
+[report]
+show_missing = True
