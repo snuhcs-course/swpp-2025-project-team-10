@@ -10,6 +10,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.librarytogether.R
 import com.example.librarytogether.databinding.FragmentNotificationBinding
+import com.example.librarytogether.feature.notification.data.NotificationDto
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -20,6 +21,10 @@ class NotificationFragment : Fragment(R.layout.fragment_notification) {
 
     private val vm: NotificationViewModel by viewModels()
     private lateinit var adapter: NotificationAdapter
+
+    private var allNotifications: List<NotificationDto> = emptyList()
+    private enum class FilterType { EXCHANGE, SOCIAL }
+    private var currentFilter: FilterType = FilterType.EXCHANGE
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -62,10 +67,18 @@ class NotificationFragment : Fragment(R.layout.fragment_notification) {
         binding.rvNotifications.layoutManager = LinearLayoutManager(requireContext())
         binding.rvNotifications.adapter = adapter
 
+        setupFilterChips()
+
         binding.swipeRefresh.setOnRefreshListener { vm.load() }
 
         vm.items.observe(viewLifecycleOwner) { list ->
-            adapter.submitList(list)
+            allNotifications = list
+            val closedIds = list
+                .filter { it.type == "barter_completed" || it.type == "barter_accepted" || it.type == "barter_rejected" }
+                .mapNotNull { it.related_object_id }
+                .toSet()
+            adapter.updateClosedBarterIds(closedIds)
+            applyFilter()
             binding.emptyView.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
         }
 
@@ -84,6 +97,37 @@ class NotificationFragment : Fragment(R.layout.fragment_notification) {
         }
 
         vm.load()
+    }
+
+
+    private fun setupFilterChips() {
+        binding.chipExchange.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                currentFilter = FilterType.EXCHANGE
+                applyFilter()
+            }
+        }
+        binding.chipSocial.setOnCheckedChangeListener { _, isChecked ->
+            if (isChecked) {
+                currentFilter = FilterType.SOCIAL
+                applyFilter()
+            }
+        }
+    }
+
+    private fun applyFilter() {
+        val filtered = when (currentFilter) {
+            FilterType.EXCHANGE -> {
+                allNotifications.filter { it.type.startsWith("barter_") }
+            }
+            FilterType.SOCIAL -> {
+                allNotifications.filter { !it.type.startsWith("barter_") }
+            }
+        }
+
+        adapter.submitList(filtered)
+        binding.emptyView.visibility =
+            if (filtered.isEmpty()) View.VISIBLE else View.GONE
     }
 
     override fun onDestroyView() {

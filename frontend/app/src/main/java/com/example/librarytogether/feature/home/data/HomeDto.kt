@@ -31,6 +31,7 @@ data class Post(
     val content: String,
     val imageUrls: List<String> = emptyList(),
     val likeCount: Int = 0,
+    val commentCount: Int = 0,
     val createdAt: String? = null,
     val isLiked: Boolean = false,
     val bookId: String, // 교환 대상 책 uuid

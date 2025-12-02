@@ -43,6 +43,9 @@ class WriteReviewFragment : Fragment(R.layout.fragment_write_review) {
     private var _binding: FragmentWriteReviewBinding? = null
     private val binding get() = _binding!!
 
+    private var isEditMode: Boolean = false
+    private var editingReviewId: Int? = null
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentWriteReviewBinding.bind(view)
@@ -53,6 +56,7 @@ class WriteReviewFragment : Fragment(R.layout.fragment_write_review) {
         setupSearch()
         setupListeners()
 
+        initFromArguments()
     }
 
     private fun setupToolbar() = with(binding) {
@@ -85,22 +89,7 @@ class WriteReviewFragment : Fragment(R.layout.fragment_write_review) {
         }
 
         bookSearchAdapter = SearchBookAdapter { book ->
-            selectedBookId = book.id
-
-            if (etBookTitle.text.isNullOrBlank()) {
-                etBookTitle.setText(book.title)
-            }
-            if (etAuthor.text.isNullOrBlank()) {
-                etAuthor.setText(book.authors?.joinToString(", ") ?: "")
-            }
-            if (etPublisher.text.isNullOrBlank()) {
-                etPublisher.setText(book.publisher ?: "")
-            }
-            if (etIsbn.text.isNullOrBlank()) {
-                etIsbn.setText(book.isbn ?: "")
-            }
-
-            searchView.hide()
+            onBookSearchResultClicked(book)
         }
 
         rvBookSearchResults.apply {
@@ -193,6 +182,25 @@ class WriteReviewFragment : Fragment(R.layout.fragment_write_review) {
         }
     }
 
+    private fun initFromArguments() = with(binding) {
+        val args = arguments ?: return@with
+
+        isEditMode = args.getBoolean("isEdit", false)
+        if (!isEditMode) return@with
+
+        editingReviewId = args.getInt("reviewId")
+        selectedBookId = args.getString("bookId")
+
+        etBookTitle.setText(args.getString("bookTitle").orEmpty())
+        etAuthor.setText(args.getString("authorName").orEmpty())
+        etBody.setText(args.getString("content").orEmpty())
+
+        val urls = args.getStringArrayList("imageUrls") ?: arrayListOf()
+        selectedUrls.clear()
+        selectedUrls.addAll(urls.map(Uri::parse))
+        photoAdapter.submitList(selectedUrls.toList())
+        togglePhotoViews()
+    }
 
     private fun submitReview() = with(binding) {
         val title = etBookTitle.text?.toString()?.trim().orEmpty()
@@ -213,7 +221,12 @@ class WriteReviewFragment : Fragment(R.layout.fragment_write_review) {
             bookId = selectedBookId
         )
 
-        parentViewModel.addNewReview(newReview)
+        if (isEditMode) {
+            val id = editingReviewId ?: return@with
+            parentViewModel.updateNewReview(id, newReview)
+        } else {
+            parentViewModel.addNewReview(newReview)
+        }
 
         findNavController().previousBackStackEntry
             ?.savedStateHandle
@@ -221,7 +234,6 @@ class WriteReviewFragment : Fragment(R.layout.fragment_write_review) {
 
         findNavController().popBackStack()
     }
-
 
     private fun validate(title: String, body: String): Boolean {
         if (title.isBlank()) {
@@ -238,6 +250,24 @@ class WriteReviewFragment : Fragment(R.layout.fragment_write_review) {
         binding.rvPhotos.isVisible = hasItems
     }
 
+    private fun onBookSearchResultClicked(book: Book) = with(binding) {
+        selectedBookId = book.id
+
+        if (etBookTitle.text.isNullOrBlank()) {
+            etBookTitle.setText(book.title)
+        }
+        if (etAuthor.text.isNullOrBlank()) {
+            etAuthor.setText(book.authors?.joinToString(", ") ?: "")
+        }
+        if (etPublisher.text.isNullOrBlank()) {
+            etPublisher.setText(book.publisher ?: "")
+        }
+        if (etIsbn.text.isNullOrBlank()) {
+            etIsbn.setText(book.isbn ?: "")
+        }
+
+        searchView.hide()
+    }
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

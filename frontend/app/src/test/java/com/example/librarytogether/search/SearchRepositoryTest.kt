@@ -46,16 +46,17 @@ class SearchRepositoryTest {
     private fun createSearchItem(
         id: String = "book-1",
         title: String = "Kotlin",
-        authors: List<Int> = listOf(101)
+        author: String = "A"
     ): SearchItem {
         return SearchItem(
             id = id,
             title = title,
-            authors = authors,
-            publisher = 1,
-            isbn13 = "978-1234567890",
+            author = author,
+            publisher_name = "Pub",
+            isbn = "978-1234567890",
             cover_image = null,
-            is_for_barter = true
+            is_for_barter = true,
+            description = "des"
         )
     }
 
@@ -81,17 +82,17 @@ class SearchRepositoryTest {
     }
 
     @Test
-    fun search_throws_IllegalStateException_on_non_200() = runTest {
+    fun search_returns_emptyList_on_non_200() = runTest {
+        // given
         val errorBody = "{}".toResponseBody("application/json".toMediaTypeOrNull())
-        whenever(api.search("x")).thenReturn(Response.error(500, errorBody))
+        whenever(api.search("x"))
+            .thenReturn(Response.error(500, errorBody))
 
-        assertThrows(IllegalStateException::class.java) {
-            kotlinx.coroutines.test.runTest {
-                repo.search("x")
-            }
-        }
+        val result = repo.search("x")
 
-        mockedLog.verify { Log.e(any(), any(), any()) }
+        assertThat(result, equalTo(emptyList<SearchItem>()))
+
+        mockedLog.verifyNoInteractions()
     }
 
     @Test

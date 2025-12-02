@@ -126,67 +126,67 @@
 
         </com.google.android.material.card.MaterialCardView>
 
-        <LinearLayout
-            android:id="@+id/actionBar"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            app:layout_constraintTop_toBottomOf="@id/tvContent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent">
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnLike"
-                style="@style/Widget.Material3.Button.TonalButton"
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:backgroundTint="@android:color/transparent"
-                android:text="@string/like"
-                android:textStyle="bold"
-                android:paddingHorizontal="0dp"
-                android:minWidth="0dp"
-                app:icon="@drawable/like_icon"
-                app:iconPadding="6dp"
-                app:iconGravity="textStart" />
-
-            <Space
-                android:layout_width="18dp"
-                android:layout_height="wrap_content"/>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btnBookReview"
-                style="@style/Widget.Material3.Button.TonalButton"
-                android:layout_width="wrap_content"
-                android:layout_height="40dp"
-                android:backgroundTint="@android:color/transparent"
-                android:text="@string/comment"
-                android:textStyle="bold"
-                android:paddingHorizontal="0dp"
-                android:minWidth="0dp"
-                app:icon="@drawable/comment_icon"
-                app:iconPadding="6dp"
-                app:iconGravity="textStart" />
-
-            <Space
-                android:layout_width="18dp"
-                android:layout_height="wrap_content"/>
+<!--        <LinearLayout-->
+<!--            android:id="@+id/actionBar"-->
+<!--            android:layout_width="0dp"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_marginTop="2dp"-->
+<!--            android:orientation="horizontal"-->
+<!--            android:gravity="center_vertical"-->
+<!--            app:layout_constraintTop_toBottomOf="@id/tvContent"-->
+<!--            app:layout_constraintStart_toStartOf="parent"-->
+<!--            app:layout_constraintEnd_toEndOf="parent">-->
 
 <!--            <com.google.android.material.button.MaterialButton-->
-<!--                android:id="@+id/btnExchange"-->
+<!--                android:id="@+id/btnLike"-->
 <!--                style="@style/Widget.Material3.Button.TonalButton"-->
 <!--                android:layout_width="wrap_content"-->
 <!--                android:layout_height="40dp"-->
 <!--                android:backgroundTint="@android:color/transparent"-->
-<!--                android:text="@string/exchange"-->
+<!--                android:text="@string/like"-->
 <!--                android:textStyle="bold"-->
 <!--                android:paddingHorizontal="0dp"-->
 <!--                android:minWidth="0dp"-->
-<!--                app:icon="@drawable/exchange_icon"-->
+<!--                app:icon="@drawable/like_icon"-->
 <!--                app:iconPadding="6dp"-->
-<!--                app:iconGravity="textStart"/>-->
-        </LinearLayout>
+<!--                app:iconGravity="textStart" />-->
+
+<!--            <Space-->
+<!--                android:layout_width="18dp"-->
+<!--                android:layout_height="wrap_content"/>-->
+
+<!--            <com.google.android.material.button.MaterialButton-->
+<!--                android:id="@+id/btnBookReview"-->
+<!--                style="@style/Widget.Material3.Button.TonalButton"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="40dp"-->
+<!--                android:backgroundTint="@android:color/transparent"-->
+<!--                android:text="@string/comment"-->
+<!--                android:textStyle="bold"-->
+<!--                android:paddingHorizontal="0dp"-->
+<!--                android:minWidth="0dp"-->
+<!--                app:icon="@drawable/comment_icon"-->
+<!--                app:iconPadding="6dp"-->
+<!--                app:iconGravity="textStart" />-->
+
+<!--            <Space-->
+<!--                android:layout_width="18dp"-->
+<!--                android:layout_height="wrap_content"/>-->
+
+<!--&lt;!&ndash;            <com.google.android.material.button.MaterialButton&ndash;&gt;-->
+<!--&lt;!&ndash;                android:id="@+id/btnExchange"&ndash;&gt;-->
+<!--&lt;!&ndash;                style="@style/Widget.Material3.Button.TonalButton"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:layout_width="wrap_content"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:layout_height="40dp"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:backgroundTint="@android:color/transparent"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:text="@string/exchange"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:textStyle="bold"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:paddingHorizontal="0dp"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:minWidth="0dp"&ndash;&gt;-->
+<!--&lt;!&ndash;                app:icon="@drawable/exchange_icon"&ndash;&gt;-->
+<!--&lt;!&ndash;                app:iconPadding="6dp"&ndash;&gt;-->
+<!--&lt;!&ndash;                app:iconGravity="textStart"/>&ndash;&gt;-->
+<!--        </LinearLayout>-->
 
         <TextView
             android:id="@+id/tvContent"
@@ -213,7 +213,7 @@
             android:textColor="@color/grey"
             android:ellipsize="end"
             app:layout_constraintHorizontal_bias="0"
-            app:layout_constraintTop_toBottomOf="@id/actionBar"
+            app:layout_constraintTop_toBottomOf="@id/tvContent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 

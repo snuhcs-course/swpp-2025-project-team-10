@@ -31,6 +31,22 @@ open class LibraryRepository @Inject constructor(
         }
     }
 
+    open suspend fun updateReview(reviewId: Int, review: PostReview) {
+        try {
+            libraryApi.updateReview(reviewId, review)
+        } catch (e: Exception) {
+            Log.e("LibraryRepository", "Error updating review", e)
+        }
+    }
+
+    open suspend fun deleteReview(reviewId: Int){
+        try {
+            libraryApi.deleteReview(reviewId)
+        } catch (e: Exception) {
+            Log.e("LibraryRepository", "Error deleting review", e)
+        }
+    }
+
     open suspend fun toggleLike(reviewId: Int): Review {
         return try {
             val response = libraryApi.toggleReviewLike(reviewId)
@@ -129,27 +145,6 @@ open class LibraryRepository @Inject constructor(
         } catch (e: Exception) {
             Log.e("LibraryRepository", "Error fetching my wishlist", e)
             emptyList()
-        }
-    }
-
-    open suspend fun addToWishlist(book: Book): Boolean {
-        val postBook : PostBook = PostBook(
-            title = book.title,
-            authors = book.authors?.joinToString(", ") ?: "",
-            publisher = book.publisher,
-            isbn = book.isbn,
-            is_for_barter = false,
-            cover_image = book.cover_image
-        )
-        return try {
-            val res = libraryApi.addToWishlist(WishlistRequest(postBook))
-            if (!res.isSuccessful) {
-                Log.e("LibraryRepository", "addToWishlist failed: ${res.code()}")
-            }
-            res.isSuccessful
-        } catch (e: Exception) {
-            Log.e("LibraryRepository", "Error addToWishlist", e)
-            false
         }
     }
 

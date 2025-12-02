@@ -12,6 +12,7 @@ import org.hamcrest.Matchers.empty
 import org.hamcrest.Matchers.equalTo
 import org.hamcrest.Matchers.hasSize
 import org.hamcrest.Matchers.contains
+import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.any
@@ -159,17 +160,21 @@ class HomeRepositoryTest {
     }
 
     @Test
-    fun createRequest_returns_false_on_non_200() = runTest {
+    fun createRequest_throws_on_non_200_with_default_message() = runTest {
         whenever(api.createRequest(any()))
             .thenReturn(Response.error(400, "x".toResponseBody()))
 
-        val result = repo.createRequest(
-            recipientId = 10,
-            requestedBookId = "book-uuid-2"
-        )
-
-        assertThat(result, equalTo(false))
+        try {
+            repo.createRequest(
+                recipientId = 10,
+                requestedBookId = "book-uuid-2"
+            )
+            fail("IllegalStateException 이 발생해야 합니다.")
+        } catch (e: IllegalStateException) {
+            assertThat(e.message, equalTo("교환 신청에 실패했어요."))
+        }
     }
+
 
     @Test(expected = RuntimeException::class)
     fun createRequest_rethrows_on_exception() = runTest {

@@ -157,6 +157,20 @@ class LibraryViewModel @Inject constructor(
         }
     }
 
+    fun updateNewReview(reviewId: Int, review: PostReview) {
+        viewModelScope.launch {
+            repository.updateReview(reviewId, review)
+            refreshMyReviews()
+        }
+    }
+
+    fun deleteNewReview(reviewId: Int) {
+        viewModelScope.launch {
+            repository.deleteReview(reviewId)
+            refreshMyReviews()
+        }
+    }
+
     fun addNewBook(book: PostBook) {
         viewModelScope.launch {
             try {
