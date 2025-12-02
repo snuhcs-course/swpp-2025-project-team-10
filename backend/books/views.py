@@ -122,6 +122,53 @@ class UserReviewListCreateView(generics.ListCreateAPIView):
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class UserReviewDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    API endpoint for retrieving, updating, and deleting a single review.
+    
+    PATCH /library/reviews/<id>/
+    DELETE /library/reviews/<id>/
+    """
+
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        """Only allow the user to access their own reviews."""
+        return BookReview.objects.filter(reviewer=self.request.user)
+
+    def get_serializer_class(self):
+        """Use the same serializer for create/update."""
+        if self.request.method in ("PATCH", "PUT"):
+            return CreateReviewSerializer
+        return ReviewSerializer
+
+    @extend_schema(
+        summary="Update Review",
+        description="Edit an existing book review",
+        request=CreateReviewSerializer,
+        responses={
+            200: OpenApiResponse(
+                description="Review updated successfully",
+                response=ReviewSerializer,
+            ),
+            400: OpenApiResponse(description="Invalid input"),
+            404: OpenApiResponse(description="Review not found"),
+        },
+    )
+    def patch(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    @extend_schema(
+        summary="Delete Review",
+        description="Delete the selected book review",
+        responses={
+            204: OpenApiResponse(description="Review deleted successfully"),
+            404: OpenApiResponse(description="Review not found"),
+        },
+    )
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
 
 class ReviewLikeView(APIView):
     """
