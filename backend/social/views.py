@@ -178,28 +178,19 @@ def comment_post(request, post_id):
 
 @api_view(["DELETE"])
 @permission_classes([IsAuthenticated])
-def comment_delete(request, comment_id):
+def comment_delete(request, post_id, comment_id):
     """
     Delete a comment from a post. Only the comment author or post author can delete.
     """
 
-    comment_id = request.data.get("comment_id")
-
-    if not comment_id:
-        return Response(
-            {"error": "comment_id is required"},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
-
     try:
-        #Ensure comment belongs to the specified post.
-        comment = Comment.objects.select_related("post").get(pk=comment_id)
+        comment = get_object_or_404(Comment, pk=comment_id, post_id=post_id)
     except Comment.DoesNotExist:
         return Response(
             {"error": "Comment not found"}, status=status.HTTP_404_NOT_FOUND
         )
 
-    if (comment.author_id != request.user.id and comment.post.author_id != request.user.id):
+    if comment.author_id != request.user.id and comment.post.author_id != request.user.id:
         return Response(
             {"error": "You do not have permission to delete this comment."},
             status=status.HTTP_403_FORBIDDEN,
@@ -213,10 +204,17 @@ def comment_delete(request, comment_id):
 
 @api_view(["PUT", "PATCH"])
 @permission_classes([IsAuthenticated])
-def comment_edit(request, comment_id):
+def comment_edit(request, post_id, comment_id):
     """
     Edit a comment on a post. Only the comment author can edit.
     """
+    comment = get_object_or_404(Comment, pk=comment_id, post_id=post_id)
+
+    if comment.author_id != request.user.id:
+        return Response(
+            {"error": "You do not have permission to edit this comment."},
+            status=status.HTTP_403_FORBIDDEN,
+        )
 
     content = request.data.get("content", "").strip()
     if not content:
@@ -239,7 +237,7 @@ def comment_edit(request, comment_id):
         )
 
     comment.content = content
-    comment.save(update_fields=["content", "updated_at"])
+    comment.save()
 
     post = comment.post
     serializer = PostSerializer(post, context={"request": request})

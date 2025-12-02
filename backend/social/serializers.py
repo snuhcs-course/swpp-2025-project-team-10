@@ -4,7 +4,7 @@ Serializers for the social app.
 
 from books.models import BookWishlist
 from rest_framework import serializers
-from social.models import Post
+from social.models import Comment, Post
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -196,7 +196,7 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
     class Meta:
-        model = Post  # Assuming Comment model is similar to Post for this example
+        model = Comment
         fields = [
             "id",
             "authorName",
@@ -212,6 +212,15 @@ class CommentSerializer(serializers.ModelSerializer):
             "createdAt",
             "updatedAt",
         ]
+    
+    def get_authorProfile(self, obj):
+        """Get author's profile picture URL."""
+        return {
+            "username": obj.author.username,
+            "profile_picture": obj.author.profile_picture.url
+            if getattr(obj.author, "profile_picture", None)
+            else None,
+        }
 
 class FeedResponseSerializer(serializers.Serializer):
     """

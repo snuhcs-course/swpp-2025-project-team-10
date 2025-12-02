@@ -184,12 +184,17 @@ class BookSerializer(serializers.ModelSerializer):
         write_only=True,
         required=False,
     )
-
+    # Fields for creating a new BookPublication if needed
     book_isbn_10 = serializers.CharField(write_only=True, required=False, allow_blank=True)
     book_isbn_13 = serializers.CharField(write_only=True, required=False, allow_blank=True)
     book_publisher = serializers.CharField(write_only=True, required=False, allow_blank=True)
     book_published_date = serializers.CharField(write_only=True, required=False, allow_blank=True)
     book_description = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    book_title = serializers.CharField(write_only=True, required=False, allow_blank=True)  # ADD THIS
+    book_authors = serializers.ListField(
+        child=serializers.CharField(), write_only=True, required=False
+    )
+
 
 
     class Meta:
