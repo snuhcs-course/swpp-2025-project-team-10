@@ -146,6 +146,13 @@ class HomeViewModel @Inject constructor(
         _barterError.value = null
     }
 
+    fun hidePost(postId: Int) {
+        originalPosts = originalPosts.filterNot { it.id == postId }
+        val current = _posts.value.orEmpty()
+        _posts.value = current.filterNot { it.id == postId }
+    }
+
+
     fun onErrorShown() {
         _error.value = null
     }

@@ -108,6 +108,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.livedata.ktx)
     coreLibraryDesugaring(libs.android.desugarJdkLibs)
     kapt (libs.glide.compiler)
+    kaptTest(libs.glide.compiler)
     implementation (libs.glide)
     implementation (libs.androidx.viewpager2)
     implementation(libs.retrofit)

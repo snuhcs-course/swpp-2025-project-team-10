@@ -31,6 +31,22 @@ open class LibraryRepository @Inject constructor(
         }
     }
 
+    open suspend fun updateReview(reviewId: Int, review: PostReview) {
+        try {
+            libraryApi.updateReview(reviewId, review)
+        } catch (e: Exception) {
+            Log.e("LibraryRepository", "Error updating review", e)
+        }
+    }
+
+    open suspend fun deleteReview(reviewId: Int){
+        try {
+            libraryApi.deleteReview(reviewId)
+        } catch (e: Exception) {
+            Log.e("LibraryRepository", "Error deleting review", e)
+        }
+    }
+
     open suspend fun toggleLike(reviewId: Int): Review {
         return try {
             val response = libraryApi.toggleReviewLike(reviewId)

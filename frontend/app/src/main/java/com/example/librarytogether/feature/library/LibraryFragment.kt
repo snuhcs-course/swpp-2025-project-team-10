@@ -1,4 +1,5 @@
 package com.example.librarytogether.feature.library
+import android.app.AlertDialog
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -18,8 +19,11 @@ import com.example.librarytogether.R
 import com.example.librarytogether.databinding.FragmentLibraryBinding
 import com.example.librarytogether.feature.bookdetail.BookDetailFragmentDirections
 import com.example.librarytogether.feature.bookdetail.EntrySource
+import com.example.librarytogether.feature.library.data.Review
 import com.example.librarytogether.feature.library.data.UserProfile
 import com.example.librarytogether.util.loadAvatar
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -47,6 +51,12 @@ class LibraryFragment : Fragment() {
             onClickLike = { review ->
                 viewModel.toggleLike(review)
             },
+            onClickEdit = { review ->
+                navigateToEditReview(review)
+            },
+            onClickDelete = { review ->
+                confirmDeleteReview(review)
+            },
         )
     ) }
 
@@ -60,7 +70,8 @@ class LibraryFragment : Fragment() {
                             bookId = book.id,
                             source = EntrySource.WISHLIST
                         )
-                    findNavController().navigate(dir)
+                    if (!isEditingProfile)
+                        findNavController().navigate(dir)
                 }
             )
         )
@@ -204,6 +215,7 @@ class LibraryFragment : Fragment() {
     }
 
     override fun onDestroyView() {
+        isEditingProfile = false
         super.onDestroyView()
         _binding = null
     }
@@ -231,12 +243,39 @@ class LibraryFragment : Fragment() {
     private fun setupTabs() {
         binding.contentTabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
-                currentTab = when (tab?.position) {
+                val newTab = when (tab?.position) {
                     0 -> Tab.REVIEWS
                     1 -> Tab.BOOKS
                     else -> Tab.PROFILE
                 }
 
+                val newIndex = tab?.position ?: 0
+
+                if (currentTab == Tab.PROFILE &&
+                    newTab != Tab.PROFILE &&
+                    isEditingProfile
+                ) {
+//                    showLeaveProfileEditDialog(newIndex)
+                    handleLeaveFromLibrary(
+                        onLeave = {
+                            val newTab = when (newIndex) {
+                                0 -> Tab.REVIEWS
+                                1 -> Tab.BOOKS
+                                else -> Tab.PROFILE
+                            }
+                            currentTab = newTab
+
+                            binding.contentTabs.getTabAt(newIndex)?.select()
+                            render()
+                        },
+                        onCancelled = {
+                            binding.contentTabs.getTabAt(2)?.select()
+                        }
+                    )
+                    return
+                }
+
+                currentTab = newTab
                 render()
             }
 
@@ -246,8 +285,12 @@ class LibraryFragment : Fragment() {
             override fun onTabReselected(tab: TabLayout.Tab?) {
             }
         })
-
-        currentTab = Tab.REVIEWS
+        val index = when (currentTab) {
+            Tab.REVIEWS -> 0
+            Tab.BOOKS -> 1
+            Tab.PROFILE -> 2
+        }
+        binding.contentTabs.getTabAt(index)?.select()
         render()
     }
 
@@ -530,18 +573,18 @@ class LibraryFragment : Fragment() {
         val district = autoCompleteLocation2.text?.toString()?.trim().orEmpty()
 
         if (selectedLocations.size >= 1) {
-            Toast.makeText(requireContext(), "선택한 지역을 취소하고 추가해주세요.", Toast.LENGTH_SHORT).show()
+            Snackbar.make(requireView(), "선택한 지역을 취소하고 추가해주세요.", Snackbar.LENGTH_SHORT).show()
             return@with
         }
 
         if (city.isEmpty() || district.isEmpty()) {
-            Toast.makeText(requireContext(), "시/도와 시/군/구를 모두 선택하세요.", Toast.LENGTH_SHORT).show()
+            Snackbar.make(requireView(), "시/도와 시/군/구를 모두 선택하세요.", Snackbar.LENGTH_SHORT).show()
             return@with
         }
 
         val pair = city to district
         if (selectedLocations.any { it.first == city && it.second == district }) {
-            Toast.makeText(requireContext(), "이미 추가된 지역입니다.", Toast.LENGTH_SHORT).show()
+            Snackbar.make(requireView(), "이미 추가된 지역입니다.", Snackbar.LENGTH_SHORT).show()
             return@with
         }
 
@@ -576,4 +619,57 @@ class LibraryFragment : Fragment() {
             text = value
         }
     }
+
+    private fun navigateToEditReview(review: Review) {
+        val bundle = Bundle().apply {
+            putBoolean("isEdit", true)
+            putInt("reviewId", review.id)
+
+            putString("bookTitle", review.bookTitle)
+            putString("authorName", review.authorName)
+            putString("content", review.content)
+            putStringArrayList("imageUrls", ArrayList(review.imageUrls))
+            putString("bookId", review.bookId)
+        }
+
+        findNavController().navigate(
+            R.id.action_libraryFragment_to_writeReviewFragment,
+            bundle
+        )
+    }
+
+    private fun confirmDeleteReview(review: Review) {
+        AlertDialog.Builder(requireContext())
+            .setMessage("이 리뷰를 삭제할까요?")
+            .setPositiveButton("삭제") { _, _ ->
+                viewModel.deleteNewReview(review.id)
+            }
+            .setNegativeButton("취소", null)
+            .show()
+    }
+
+    fun handleLeaveFromLibrary(
+        onLeave: () -> Unit,
+        onCancelled: () -> Unit = {}
+    ) {
+        if (!isEditingProfile) {
+            onLeave()
+            return
+        }
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("편집을 종료할까요?")
+            .setMessage("작성 중인 프로필 변경 사항이 저장되지 않습니다.")
+            .setPositiveButton("나가기") { _, _ ->
+                if (isEditingProfile) {
+                    toggleProfileEdit()
+                    onLeave()
+                }
+            }
+            .setNegativeButton("취소") { _, _ ->
+                onCancelled()
+            }
+            .show()
+    }
+
 }

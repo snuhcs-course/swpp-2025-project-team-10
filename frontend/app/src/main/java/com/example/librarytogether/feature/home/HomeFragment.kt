@@ -201,8 +201,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     }
 
     private fun showMoreOptions(post: Post) {
-        Toast.makeText(requireContext(), "메뉴", Toast.LENGTH_SHORT).show()
-        // TODO: 메뉴 구현
+        homeviewModel.hidePost(post.id)
     }
 
     private fun searchTitle(post: Post) {

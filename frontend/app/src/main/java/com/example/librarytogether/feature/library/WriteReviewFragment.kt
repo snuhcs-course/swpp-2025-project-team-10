@@ -43,6 +43,9 @@ class WriteReviewFragment : Fragment(R.layout.fragment_write_review) {
     private var _binding: FragmentWriteReviewBinding? = null
     private val binding get() = _binding!!
 
+    private var isEditMode: Boolean = false
+    private var editingReviewId: Int? = null
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentWriteReviewBinding.bind(view)
@@ -53,6 +56,7 @@ class WriteReviewFragment : Fragment(R.layout.fragment_write_review) {
         setupSearch()
         setupListeners()
 
+        initFromArguments()
     }
 
     private fun setupToolbar() = with(binding) {
@@ -178,6 +182,25 @@ class WriteReviewFragment : Fragment(R.layout.fragment_write_review) {
         }
     }
 
+    private fun initFromArguments() = with(binding) {
+        val args = arguments ?: return@with
+
+        isEditMode = args.getBoolean("isEdit", false)
+        if (!isEditMode) return@with
+
+        editingReviewId = args.getInt("reviewId")
+        selectedBookId = args.getString("bookId")
+
+        etBookTitle.setText(args.getString("bookTitle").orEmpty())
+        etAuthor.setText(args.getString("authorName").orEmpty())
+        etBody.setText(args.getString("content").orEmpty())
+
+        val urls = args.getStringArrayList("imageUrls") ?: arrayListOf()
+        selectedUrls.clear()
+        selectedUrls.addAll(urls.map(Uri::parse))
+        photoAdapter.submitList(selectedUrls.toList())
+        togglePhotoViews()
+    }
 
     private fun submitReview() = with(binding) {
         val title = etBookTitle.text?.toString()?.trim().orEmpty()
@@ -198,7 +221,12 @@ class WriteReviewFragment : Fragment(R.layout.fragment_write_review) {
             bookId = selectedBookId
         )
 
-        parentViewModel.addNewReview(newReview)
+        if (isEditMode) {
+            val id = editingReviewId ?: return@with
+            parentViewModel.updateNewReview(id, newReview)
+        } else {
+            parentViewModel.addNewReview(newReview)
+        }
 
         findNavController().previousBackStackEntry
             ?.savedStateHandle

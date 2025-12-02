@@ -102,6 +102,50 @@ class LibraryRepositoryTest {
         mockedLog.verify { Log.e(any(), any(), any()) }
     }
 
+    // --- updateReview 테스트 ---
+
+    @Test
+    fun updateReview_success_calls_api_with_id_and_body() = runTest {
+        val review = LibraryFixtures.postReview()
+        whenever(libraryApi.updateReview(1, review)).thenReturn(Response.success(Unit))
+
+        repository.updateReview(1, review)
+
+        verify(libraryApi).updateReview(1, review)
+    }
+
+    @Test
+    fun updateReview_exception_logs_error() = runTest {
+        val review = LibraryFixtures.postReview()
+        whenever(libraryApi.updateReview(1, review)).thenThrow(RuntimeException("Error"))
+
+        repository.updateReview(1, review)
+
+        // Log.e(TAG, "Error updating review", e) 형태 가정
+        mockedLog.verify { Log.e(any(), any(), any()) }
+    }
+
+    // --- deleteReview 테스트 ---
+
+    @Test
+    fun deleteReview_success_calls_api_with_id() = runTest {
+        whenever(libraryApi.deleteReview(1)).thenReturn(Response.success(Unit))
+
+        repository.deleteReview(1)
+
+        verify(libraryApi).deleteReview(1)
+    }
+
+    @Test
+    fun deleteReview_exception_logs_error() = runTest {
+        whenever(libraryApi.deleteReview(1)).thenThrow(RuntimeException("Error"))
+
+        repository.deleteReview(1)
+
+        // Log.e(TAG, "Error deleting review", e) 형태 가정
+        mockedLog.verify { Log.e(any(), any(), any()) }
+    }
+
     // --- toggleLike 테스트 ---
 
     @Test

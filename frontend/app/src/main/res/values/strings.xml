@@ -14,7 +14,7 @@
 
     <string name="hint_email">이메일</string>
     <string name="hint_password">비밀번호</string>
-    <string name="password_hint">비밀번호는 영문 포함 6자 이상이어야 합니다</string>
+    <string name="password_hint">비밀번호는 영문 포함 8자 이상이어야 합니다</string>
     <string name="text_or">또는</string>
 
     <!-- 로그인 화면 (log_in.xml) -->
@@ -61,8 +61,8 @@
     <string name="feed_content">책을 읽은 후 느낀점</string>
     <string name="feed_time">1시간 전</string>
     <string name="like_count_short">%1$d</string>
-    <string name="like_with_count">좋아요 %1$s</string>
-    <string name="comment_with_count">댓글 %1$s</string>
+    <string name="like_with_count">%1$s 좋아요</string>
+    <string name="comment_with_count">%1$s 댓글</string>
 
 
     <!-- a11y descriptions -->

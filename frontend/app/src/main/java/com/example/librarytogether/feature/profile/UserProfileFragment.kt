@@ -118,6 +118,12 @@ class UserProfileFragment : Fragment(R.layout.fragment_user_profile) {
             override fun onTabUnselected(tab: TabLayout.Tab?) {}
             override fun onTabReselected(tab: TabLayout.Tab?) {}
         })
+        val index = when (currentTab) {
+            Tab.REVIEWS -> 0
+            Tab.BOOKS   -> 1
+            Tab.PROFILE -> 2
+        }
+        binding.contentTabs.getTabAt(index)?.select()
     }
 
     private fun setupRecyclerViews() {

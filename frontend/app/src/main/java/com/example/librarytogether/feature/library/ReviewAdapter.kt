@@ -18,12 +18,14 @@ import com.example.librarytogether.feature.library.data.Review
 import com.example.librarytogether.util.TimeUtils
 import com.example.librarytogether.util.loadAvatar
 import com.google.android.material.tabs.TabLayoutMediator
+import android.widget.PopupMenu
 
 data class ReviewClicks(
     val onClickLike: (Review) -> Unit = {},
     val onClickReview: (Review) -> Unit = {},
     val onClickExchange: (Review) -> Unit = {},
-    val onClickMore: (Review) -> Unit = {},
+    val onClickEdit: (Review) -> Unit = {},
+    val onClickDelete: (Review) -> Unit = {},
     val onClickProfile: (Review) -> Unit = {},
     val onClickUserName: (Review) -> Unit = {},
     val onClickTitle: (Review) -> Unit = {},
@@ -76,13 +78,35 @@ class ReviewAdapter(
 
                 btnLike.safeClick(clicks.onClickLike)
                 btnBookReview.safeClick(clicks.onClickReview)
-                btnMore.safeClick(clicks.onClickMore)
                 ivProfileImage.safeClick(clicks.onClickProfile)
                 tvPoster.safeClick(clicks.onClickUserName)
                 tvTitle.safeClick(clicks.onClickTitle)
                 tvAuthor.safeClick(clicks.onClickAuthor)
                 tvContent.safeClick(clicks.onClickContent)
+                btnMore.setOnClickListener { view ->
+                    val review = current ?: return@setOnClickListener
+                    showMoreMenu(view, review)
+                }
             }
+        }
+
+        private fun showMoreMenu(anchor: View, review: Review) {
+            val popup = PopupMenu(anchor.context, anchor)
+            popup.menuInflater.inflate(R.menu.my_review_more, popup.menu)
+            popup.setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    R.id.action_edit -> {
+                        clicks.onClickEdit(review)
+                        true
+                    }
+                    R.id.action_delete -> {
+                        clicks.onClickDelete(review)
+                        true
+                    }
+                    else -> false
+                }
+            }
+            popup.show()
         }
 
         fun bind(item: Review) = with(binding) {

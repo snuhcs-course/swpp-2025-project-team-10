@@ -6,6 +6,7 @@ import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
@@ -81,13 +82,32 @@ class FeedAdapter(
                 btnBookReview.safeClick(clicks.onClickReview)
                 btnExchange.safeClick(clicks.onClickExchange)
                 btnAdd.safeClick(clicks.onClickAdd)
-                btnMore.safeClick(clicks.onClickMore)
                 ivProfileImage.safeClick(clicks.onClickProfile)
                 tvPoster.safeClick(clicks.onClickUserName)
                 tvTitle.safeClick(clicks.onClickTitle)
                 tvAuthor.safeClick(clicks.onClickAuthor)
                 tvContent.safeClick(clicks.onClickContent)
+                btnMore.setOnClickListener { view ->
+                    val post = current ?: return@setOnClickListener
+                    showMoreMenu(view, post)
+                }
             }
+        }
+
+        private fun showMoreMenu(anchor: View, post: Post) {
+            val popup = PopupMenu(anchor.context, anchor)
+            popup.menuInflater.inflate(R.menu.post_more, popup.menu)
+            popup.setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    R.id.action_hide -> {
+                        // 실제 동작은 Fragment/HomeViewModel 쪽으로 넘김
+                        clicks.onClickMore(post)
+                        true
+                    }
+                    else -> false
+                }
+            }
+            popup.show()
         }
 
         fun bind(post: Post) = with(binding) {
