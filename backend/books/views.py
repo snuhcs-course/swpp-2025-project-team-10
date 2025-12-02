@@ -172,9 +172,11 @@ class UserReviewListCreateView(generics.ListCreateAPIView):
 
 class UserReviewDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
-    API endpoint for retrieving, updating, and deleting a single review.
+    API endpoint for retrieving, updating, and deleting a specific user review.
+    GET /library/reviews/<id>/ - Retrieve a specific review
+    PATCH /library/reviews/<id>/ - Update a review
+    DELETE /library/reviews/<id>/ - Delete a review
     """
-
     permission_classes = [permissions.IsAuthenticated]
     lookup_field = "pk"
 
