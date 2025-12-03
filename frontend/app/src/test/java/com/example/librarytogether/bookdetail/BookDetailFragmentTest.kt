@@ -8,6 +8,7 @@ import androidx.navigation.Navigation
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.RootMatchers.isDialog
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.runner.AndroidJUnit4
 import com.example.librarytogether.R
@@ -31,6 +32,8 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.*
 import org.robolectric.annotation.Config
+import org.robolectric.shadows.ShadowLooper
+import java.util.concurrent.TimeUnit
 
 @HiltAndroidTest
 @Config(application = HiltTestApplication::class, sdk = [33])
@@ -183,7 +186,6 @@ class BookDetailFragmentTest {
     }
 
     // --- 3. Interaction Tests ---
-
     @Test
     fun clickRequestBarter_callsHomeRepository() {
         // Given
@@ -194,15 +196,19 @@ class BookDetailFragmentTest {
         }
         launchBookDetailFragment(testBookId, EntrySource.SEARCH)
 
-        // When
+        // When 1
         onView(withId(R.id.btnPrimary)).perform(click())
+
+        // When 2
+        onView(withText(R.string.barter_apply))
+            .inRoot(isDialog())
+            .perform(click())
 
         // Then
         runBlocking {
             verify(mockHomeRepo).createRequest(testOwnerId, testBookId)
         }
     }
-
     @Test
     fun clickBarterApprove_navigatesBack() {
         // Given
@@ -288,8 +294,15 @@ class BookDetailFragmentTest {
         }
         launchBookDetailFragment(testBookId, EntrySource.SEARCH)
 
-        // When
+        // When 1
         onView(withId(R.id.btnPrimary)).perform(click())
+
+        // When 2
+        onView(withText(R.string.barter_apply))
+            .inRoot(isDialog())
+            .perform(click())
+
+        ShadowLooper.idleMainLooper(300, TimeUnit.MILLISECONDS)
 
         // Then
         onView(withText(errorMessage)).check(matches(isDisplayed()))
