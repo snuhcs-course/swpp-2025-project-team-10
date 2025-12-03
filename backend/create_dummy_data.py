@@ -558,7 +558,6 @@ def create_books(users, genres, authors, publishers, count=50):
     }
     
     conditions = ["new", "like_new", "very_good", "good", "acceptable"]
-    trade_statuses = ["available", "available", "available", "available", "available", "available", "pending", "not_available"]
     
     book_copies = []
     publications = []
@@ -611,9 +610,9 @@ def create_books(users, genres, authors, publishers, count=50):
             publication=publication,
             owner=owner,
             condition=random.choice(conditions),
-            trade_status=random.choice(trade_statuses),
+            trade_status= "available",
             owner_notes=random.choice(["깨끗한 상태입니다", "밑줄 조금 있어요", "상태 좋아요", ""]),
-            is_for_barter=random.choice([True, True, True, True, True, False]),
+            is_for_barter= True,
         )
         book_copies.append(book_copy)
     
