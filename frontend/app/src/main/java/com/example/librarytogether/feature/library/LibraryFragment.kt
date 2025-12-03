@@ -1,10 +1,12 @@
 package com.example.librarytogether.feature.library
+import android.app.AlertDialog
 import android.content.Context
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -17,8 +19,11 @@ import com.example.librarytogether.R
 import com.example.librarytogether.databinding.FragmentLibraryBinding
 import com.example.librarytogether.feature.bookdetail.BookDetailFragmentDirections
 import com.example.librarytogether.feature.bookdetail.EntrySource
+import com.example.librarytogether.feature.library.data.Review
 import com.example.librarytogether.feature.library.data.UserProfile
 import com.example.librarytogether.util.loadAvatar
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -46,6 +51,12 @@ class LibraryFragment : Fragment() {
             onClickLike = { review ->
                 viewModel.toggleLike(review)
             },
+            onClickEdit = { review ->
+                navigateToEditReview(review)
+            },
+            onClickDelete = { review ->
+                confirmDeleteReview(review)
+            },
         )
     ) }
 
@@ -59,7 +70,8 @@ class LibraryFragment : Fragment() {
                             bookId = book.id,
                             source = EntrySource.WISHLIST
                         )
-                    findNavController().navigate(dir)
+                    if (!isEditingProfile)
+                        findNavController().navigate(dir)
                 }
             )
         )
@@ -73,7 +85,7 @@ class LibraryFragment : Fragment() {
                     val dir = BookDetailFragmentDirections
                         .actionGlobalBookDetail(
                             bookId = book.id,
-                            source = EntrySource.BOOKSHELF
+                            source = EntrySource.MYBOOKSHELF
                         )
                     findNavController().navigate(dir)
                 }
@@ -125,7 +137,7 @@ class LibraryFragment : Fragment() {
         if (currentTab == Tab.PROFILE) {
             rvWishlist.visibility = if (!isWishlistEmpty) View.VISIBLE else View.GONE
             tvWishlistEmpty.visibility = if (isWishlistEmpty)  View.VISIBLE else View.GONE
-            btnAddWishlist.visibility = if (isEditingProfile)  View.VISIBLE else View.GONE
+            btnAddWishlist.visibility = View.GONE
             tvGenreNone.visibility = if (!isEditingProfile && isGenreEmpty) View.VISIBLE else View.GONE
         } else {
             rvWishlist.visibility = View.GONE
@@ -155,22 +167,27 @@ class LibraryFragment : Fragment() {
             val bioPlaceholder = getString(R.string.profile_bio_empty)
 
             binding.tvName.text = profile.username
-            binding.tvBio.text = profile.bio.takeIf { !it.isNullOrEmpty() } ?: bioPlaceholder
+            binding.tvBio.text = profile.preferences.readingHabit.takeIf { !it.isNullOrEmpty() } ?: bioPlaceholder
             binding.ivProfileImage.loadAvatar(profile.profileUrl)
             binding.tvReviewCount.text = profile.reviewCount.toString()
             binding.tvFollowerCount.text = profile.followerCount.toString()
             binding.tvFollowingCount.text = profile.followingCount.toString()
 
             binding.tvTradeLocation1.text = profile.preferences.tradeLocation1
-            binding.tvTradeLocation2.text = profile.preferences.tradeLocation2
+            binding.tvTradeLocation2.visibility = View.GONE
             binding.tvTradeSpot1.text = profile.preferences.tradeSpot1
-            binding.tvTradeSpot2.text = profile.preferences.tradeSpot2
-            binding.tvFavBook.text = profile.preferences.favBooks.firstOrNull().orEmpty()
-            binding.tvFavBookNote.text = profile.preferences.favBookNotes.firstOrNull().orEmpty()
-            binding.tvFavAuthor.text = profile.preferences.favAuthors.firstOrNull().orEmpty()
-            binding.tvFavAuthorNote.text = profile.preferences.favAuthorNotes.firstOrNull().orEmpty()
             binding.tvReadingHabit.text = profile.preferences.readingHabit
             isGenreEmpty = profile.favoriteGenres.isEmpty()
+
+            val favBook      = profile.preferences.favBooks?.firstOrNull()
+            val favBookNote  = profile.preferences.favBookNotes?.firstOrNull()
+            val favAuthor    = profile.preferences.favAuthors?.firstOrNull()
+            val favAuthorNote= profile.preferences.favAuthorNotes?.firstOrNull()
+
+            binding.tvFavBook.setTextOrGone(favBook)
+            binding.tvFavBookNote.setTextOrGone(favBookNote)
+            binding.tvFavAuthor.setTextOrGone(favAuthor)
+            binding.tvFavAuthorNote.setTextOrGone(favAuthorNote)
 
             renderSelectedGenresFromViewModel(profile.favoriteGenres)
             syncEditChipsFromViewModel(profile.favoriteGenres)
@@ -198,6 +215,7 @@ class LibraryFragment : Fragment() {
     }
 
     override fun onDestroyView() {
+        isEditingProfile = false
         super.onDestroyView()
         _binding = null
     }
@@ -225,12 +243,39 @@ class LibraryFragment : Fragment() {
     private fun setupTabs() {
         binding.contentTabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
-                currentTab = when (tab?.position) {
+                val newTab = when (tab?.position) {
                     0 -> Tab.REVIEWS
                     1 -> Tab.BOOKS
                     else -> Tab.PROFILE
                 }
 
+                val newIndex = tab?.position ?: 0
+
+                if (currentTab == Tab.PROFILE &&
+                    newTab != Tab.PROFILE &&
+                    isEditingProfile
+                ) {
+//                    showLeaveProfileEditDialog(newIndex)
+                    handleLeaveFromLibrary(
+                        onLeave = {
+                            val newTab = when (newIndex) {
+                                0 -> Tab.REVIEWS
+                                1 -> Tab.BOOKS
+                                else -> Tab.PROFILE
+                            }
+                            currentTab = newTab
+
+                            binding.contentTabs.getTabAt(newIndex)?.select()
+                            render()
+                        },
+                        onCancelled = {
+                            binding.contentTabs.getTabAt(2)?.select()
+                        }
+                    )
+                    return
+                }
+
+                currentTab = newTab
                 render()
             }
 
@@ -240,8 +285,12 @@ class LibraryFragment : Fragment() {
             override fun onTabReselected(tab: TabLayout.Tab?) {
             }
         })
-
-        currentTab = Tab.REVIEWS
+        val index = when (currentTab) {
+            Tab.REVIEWS -> 0
+            Tab.BOOKS -> 1
+            Tab.PROFILE -> 2
+        }
+        binding.contentTabs.getTabAt(index)?.select()
         render()
     }
 
@@ -282,7 +331,6 @@ class LibraryFragment : Fragment() {
                             tradeLocation1 = location1,
                             tradeLocation2 = location2,
                             tradeSpot1 = binding.editTradeSpot1.text.toString(),
-                            tradeSpot2 = binding.editTradeSpot2.text.toString(),
                             favBooks = prependAndShift(
                                 newValue = binding.editFavBook.text.toString(),
                                 oldList = currentProfile.preferences.favBooks
@@ -332,8 +380,8 @@ class LibraryFragment : Fragment() {
 
         setGroupVisible(
             edit = edit,
-            viewViews = listOf(tvTradeLocation1, tvTradeLocation2, tvTradeSpot1, tvTradeSpot2),
-            editViews = listOf(locationEditorRow, menuTradeCity, menuTradeDistrict, chipGroupLocations, btnAddLocation, editTradeSpot1, editTradeSpot2)
+            viewViews = listOf(tvTradeLocation1, tvTradeLocation2, tvTradeSpot1),
+            editViews = listOf(locationEditorRow, menuTradeCity, menuTradeDistrict, chipGroupLocations, btnAddLocation, editTradeSpot1)
         )
 
         groupSelectedGenres.visibility = if (edit) View.GONE else View.VISIBLE
@@ -367,11 +415,10 @@ class LibraryFragment : Fragment() {
             tvGenreNone.visibility = if (profile.favoriteGenres.isEmpty()) View.VISIBLE else View.GONE
             syncChipsFromProfile(profile)
             editTradeSpot1.setText(profile.preferences.tradeSpot1)
-            editTradeSpot2.setText(profile.preferences.tradeSpot2)
-            editFavBook.setText(profile.preferences.favBooks.firstOrNull().orEmpty())
-            editFavBookNote.setText(profile.preferences.favBookNotes.firstOrNull().orEmpty())
-            editFavAuthor.setText(profile.preferences.favAuthors.firstOrNull().orEmpty())
-            editFavAuthorNote.setText(profile.preferences.favAuthorNotes.firstOrNull().orEmpty())
+            editFavBook.setText(profile.preferences.favBooks?.firstOrNull().orEmpty())
+            editFavBookNote.setText(profile.preferences.favBookNotes?.firstOrNull().orEmpty())
+            editFavAuthor.setText(profile.preferences.favAuthors?.firstOrNull().orEmpty())
+            editFavAuthorNote.setText(profile.preferences.favAuthorNotes?.firstOrNull().orEmpty())
             editReadingHabit.setText(profile.preferences.readingHabit)
             syncEditChipsFromViewModel(profile.favoriteGenres)
 
@@ -525,19 +572,19 @@ class LibraryFragment : Fragment() {
         val city = autoCompleteLocation1.text?.toString()?.trim().orEmpty()
         val district = autoCompleteLocation2.text?.toString()?.trim().orEmpty()
 
-        if (selectedLocations.size >= 2) {
-            Toast.makeText(requireContext(), "최대 2곳까지 추가할 수 있어요.", Toast.LENGTH_SHORT).show()
+        if (selectedLocations.size >= 1) {
+            Snackbar.make(requireView(), "선택한 지역을 취소하고 추가해주세요.", Snackbar.LENGTH_SHORT).show()
             return@with
         }
 
         if (city.isEmpty() || district.isEmpty()) {
-            Toast.makeText(requireContext(), "시/도와 시/군/구를 모두 선택하세요.", Toast.LENGTH_SHORT).show()
+            Snackbar.make(requireView(), "시/도와 시/군/구를 모두 선택하세요.", Snackbar.LENGTH_SHORT).show()
             return@with
         }
 
         val pair = city to district
         if (selectedLocations.any { it.first == city && it.second == district }) {
-            Toast.makeText(requireContext(), "이미 추가된 지역입니다.", Toast.LENGTH_SHORT).show()
+            Snackbar.make(requireView(), "이미 추가된 지역입니다.", Snackbar.LENGTH_SHORT).show()
             return@with
         }
 
@@ -550,16 +597,79 @@ class LibraryFragment : Fragment() {
 
     private fun prependAndShift(
         newValue: String,
-        oldList: List<String>,
+        oldList: List<String>?,
         maxSize: Int = 10
-    ): List<String> {
+    ): List<String>? {
         val trimmed = newValue.trim()
         if (trimmed.isEmpty())
-            return oldList
+            return emptyList()
 
         val result = mutableListOf<String>()
         result.add(trimmed)
-        result.addAll(oldList)
+        result.addAll(oldList ?: emptyList())
         return result.take(maxSize)
     }
+
+    private fun TextView.setTextOrGone(value: String?) {
+        if (value.isNullOrBlank()) {
+            visibility = View.GONE
+            text = ""
+        } else {
+            visibility = View.VISIBLE
+            text = value
+        }
+    }
+
+    private fun navigateToEditReview(review: Review) {
+        val bundle = Bundle().apply {
+            putBoolean("isEdit", true)
+            putInt("reviewId", review.id)
+
+            putString("bookTitle", review.bookTitle)
+            putString("authorName", review.authorName)
+            putString("content", review.content)
+            putStringArrayList("imageUrls", ArrayList(review.imageUrls))
+            putString("bookId", review.bookId)
+        }
+
+        findNavController().navigate(
+            R.id.action_libraryFragment_to_writeReviewFragment,
+            bundle
+        )
+    }
+
+    private fun confirmDeleteReview(review: Review) {
+        AlertDialog.Builder(requireContext())
+            .setMessage("이 리뷰를 삭제할까요?")
+            .setPositiveButton("삭제") { _, _ ->
+                viewModel.deleteNewReview(review.id)
+            }
+            .setNegativeButton("취소", null)
+            .show()
+    }
+
+    fun handleLeaveFromLibrary(
+        onLeave: () -> Unit,
+        onCancelled: () -> Unit = {}
+    ) {
+        if (!isEditingProfile) {
+            onLeave()
+            return
+        }
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("편집을 종료할까요?")
+            .setMessage("작성 중인 프로필 변경 사항이 저장되지 않습니다.")
+            .setPositiveButton("나가기") { _, _ ->
+                if (isEditingProfile) {
+                    toggleProfileEdit()
+                    onLeave()
+                }
+            }
+            .setNegativeButton("취소") { _, _ ->
+                onCancelled()
+            }
+            .show()
+    }
+
 }

@@ -189,6 +189,7 @@ class BookSerializer(serializers.ModelSerializer):
     """
 
     owner = serializers.ReadOnlyField(source="owner.username")
+    ownerId = serializers.IntegerField(source="owner.id", read_only=True)
     title = serializers.CharField(read_only=True)
     authors = serializers.SerializerMethodField()
     authors_display = serializers.SerializerMethodField()
@@ -237,6 +238,8 @@ class BookSerializer(serializers.ModelSerializer):
             "owner_notes",
             "trade_status",
             "owner",
+            "ownerId",
+            #post
             "publication",
             #When a user adds a book that does not exist in BookPublication,
             #these fields are used to create a new BookPublication.
@@ -253,6 +256,7 @@ class BookSerializer(serializers.ModelSerializer):
         read_only_fields = [
             "id",
             "owner",
+            "ownerId",
             "title",
             "authors",
             "authors_display",
@@ -264,6 +268,7 @@ class BookSerializer(serializers.ModelSerializer):
             "cover_image",
             "coverUrl",
             "trade_status",
+            "publicationId",
         ]
         extra_kwargs = {"publication": {"write_only": True}}
 

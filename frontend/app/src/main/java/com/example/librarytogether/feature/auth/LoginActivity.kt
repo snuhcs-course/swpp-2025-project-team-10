@@ -99,7 +99,6 @@ class LoginActivity : AppCompatActivity() {
                             refresh = body.refreshToken
                         )
 
-                        Toast.makeText(this@LoginActivity, "로그인 성공!", Toast.LENGTH_SHORT).show()
                         email.setText("")
                         password.setText("")
 
@@ -124,7 +123,7 @@ class LoginActivity : AppCompatActivity() {
                 }
             } catch (e: Exception) {
                 Log.e("LoginActivity", "Login error: ${e.message}")
-                Toast.makeText(this@LoginActivity, "네트워크 오류 발생. 잠시 후 다시 시도해주세요.", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@LoginActivity, "로그인 실패 ${e.message}", Toast.LENGTH_LONG).show()
             } finally {
                 btnLogin.isEnabled = true
             }

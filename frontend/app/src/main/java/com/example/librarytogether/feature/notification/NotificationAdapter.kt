@@ -24,12 +24,19 @@ class NotificationAdapter(
     private val clicks: NotificationClicks
 ) : ListAdapter<NotificationDto, NotificationAdapter.NotiVH>(Diff) {
 
+    private var closedBarterIds: Set<String> = emptySet()
+
     companion object Diff : DiffUtil.ItemCallback<NotificationDto>() {
         override fun areItemsTheSame(oldItem: NotificationDto, newItem: NotificationDto): Boolean =
             oldItem.id == newItem.id
 
         override fun areContentsTheSame(oldItem: NotificationDto, newItem: NotificationDto): Boolean =
             oldItem == newItem
+    }
+
+    fun updateClosedBarterIds(ids: Set<String>) {
+        closedBarterIds = ids
+        notifyDataSetChanged()
     }
 
     inner class NotiVH(v: View) : RecyclerView.ViewHolder(v) {
@@ -46,17 +53,44 @@ class NotificationAdapter(
             tvUser.setTypeface(null, if (item.is_read) Typeface.NORMAL else Typeface.BOLD)
 
             Glide.with(itemView)
-                .load(R.drawable.sample_profile)
+                .load(R.drawable.person_icon)
                 .into(imgProfile)
+
+            btnAction.visibility = View.GONE
+            btnAction.isEnabled = false
+            btnAction.setOnClickListener(null)
+
+            val barterId = item.related_object_id
+            val isBarterClosed = barterId != null && closedBarterIds.contains(barterId)
 
             when (item.type) {
                 "barter_request" -> {
-                    btnAction.visibility = View.VISIBLE
-                    btnAction.text = "교환 보기"
+                    if (isBarterClosed) {
+                        btnAction.visibility = View.GONE
+                        btnAction.isEnabled = false
+                    } else {
+                        btnAction.visibility = View.VISIBLE
+                        btnAction.isEnabled = true
+                        btnAction.text = "교환 보기"
+                        btnAction.setOnClickListener { clicks.onClickAction(item) }
+                    }
                 }
                 "barter_request_sent" -> {
-                    btnAction.visibility = View.VISIBLE
-                    btnAction.text = "교환 취소"
+                    if (isBarterClosed) {
+                        btnAction.visibility = View.GONE
+                        btnAction.isEnabled = false
+                    } else {
+                        btnAction.visibility = View.VISIBLE
+                        btnAction.isEnabled = true
+                        btnAction.text = "교환 취소"
+                        btnAction.setOnClickListener { clicks.onClickAction(item) }
+                    }
+                }
+                "barter_completed",
+                "barter_accepted",
+                "barter_rejected" -> {
+                    btnAction.visibility = View.GONE
+                    btnAction.isEnabled = false
                 }
                 else -> {
                     btnAction.visibility = View.GONE
@@ -64,7 +98,6 @@ class NotificationAdapter(
             }
 
             itemView.setOnClickListener { clicks.onClickItem(item) }
-            btnAction.setOnClickListener { clicks.onClickAction(item) }
         }
     }
 

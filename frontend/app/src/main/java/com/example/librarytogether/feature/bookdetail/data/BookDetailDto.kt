@@ -9,5 +9,6 @@ data class BookDetail(
     val description: String?,
     val cover_image: String?,
     val is_for_barter: Boolean,
-    val owner: String?
+    val owner: String?,
+    val ownerId: Int
 )

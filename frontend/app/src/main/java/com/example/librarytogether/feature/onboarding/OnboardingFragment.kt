@@ -44,15 +44,6 @@ class OnboardingFragment : Fragment(R.layout.fragment_onboarding) {
                 if (isFinished) navigateToMain()
             }
         }
-
-        // [건너뛰기] 버튼
-        binding.btnSkip.setOnClickListener {
-            viewLifecycleOwner.lifecycleScope.launch {
-                val isFinished = viewModel.skipStep()
-                if (isFinished) navigateToMain()
-            }
-        }
-
         viewModel.loadInitial()
     }
 

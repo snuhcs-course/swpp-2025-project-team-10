@@ -72,8 +72,9 @@ class BarterApprovalFragment : Fragment(R.layout.fragment_barter_approval) {
             BarterApprovalFragmentDirections
                 .actionBarterApprovalFragmentToBookDetailFragment(
                     bookId = book.id,
-                    source = EntrySource.EXPLORE,
-                    barterMessage = messageForThisBook
+                    source = EntrySource.BARTERAPPROVAL,
+                    barterMessage = messageForThisBook,
+                    barterRequestId = requestId
                 )
         findNavController().navigate(action)
     }

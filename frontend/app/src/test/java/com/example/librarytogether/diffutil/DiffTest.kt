@@ -176,10 +176,11 @@ class DiffTest {
     private fun sampleBook(
         id: String = "1",
         title: String = "T$id",
-        authors: String? = "Author",
+        authors: List<String>? = listOf("Author"),
         coverImage: String? = null,
         publisher: String? = null,
         isbn: String? = null,
+        publicationId: String? = null,
     ): Book = Book(
         id = id,
         title = title,
@@ -187,6 +188,7 @@ class DiffTest {
         cover_image = coverImage,
         publisher = publisher,
         isbn = isbn,
+        publicationId = publicationId
     )
 
     @Test

@@ -7,7 +7,7 @@ data class NotificationDto(
     val created_at: String,
     val is_read: Boolean,
     val deepLink: String?,
-    val type: String?,
+    val type: String,
     val related_object_id: String?
 )
 

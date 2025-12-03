@@ -55,6 +55,11 @@ urlpatterns = [
     path("auth/", include("accounts.urls")),  # Matches frontend expectations
     path("library/", include("books.urls")),  # User's library (reviews, books)
     # Root-level AI/Explore shortcuts (kept alongside library/ paths for compatibility)
+    path(
+        "explore/recommendations/",
+        explore_recommendations,
+        name="explore-recommendations-list",
+    ),
     path("explore/", explore_recommendations, name="explore-recommendations"),
     path("ai/barter-context/", get_barter_context, name="barter-context"),
     path("", include("social.urls")),  # Social features (home feed, posts)

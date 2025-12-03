@@ -325,63 +325,95 @@ class AIRecommendationService:
     def recommend_books_for_exploration(user, limit: int = 10) -> List[Dict[str, Any]]:
         """
         AI를 사용하여 탐색 탭에서 보여줄 책들을 추천.
-        실제 모델 호출 예시 포함.
         """
         context_data = AIRecommendationService.get_exploration_context_data(user)
         try:
-            from pipeline.recommender import BarterRecommender
-            from data.entities import BarterContext, Item, UserProfile, TradeRequest
-            # 컨텍스트 변환 (간단 예시)
-            items = {}
-            # ... (탐색용 변환 로직 필요)
-            context = BarterContext(
-                items=items,
-                profiles={},
-                requests=[]
+            taste = context_data["user"].get("taste", {})
+            favorite_genres = {g.lower() for g in (taste.get("favorite_genres") or [])}
+            favorite_authors = {
+                a.lower() for a in (taste.get("favorite_authors") or [])
+            }
+
+            # 내 서재에 있는 출판물 제외
+            owned_publication_ids = set(
+                BookCopy.objects.filter(owner=user).values_list(
+                    "publication_id", flat=True
+                )
             )
-            recommender = BarterRecommender()
-            recommendations = recommender.recommend(context, limit=limit)
-            # 예시: 추천 결과를 표준화된 dict로 변환
-            return [
-                {
-                    'id': rec.candidate.item_id,
-                    'title': rec.candidate.title,
-                    'authors': [],
-                    'genres': [],
-                    'owner': {},
-                    'condition': '',
-                    'cover_image': None,
-                }
-                for rec in recommendations
-            ]
+
+            candidates = (
+                BookCopy.objects.filter(
+                    is_for_barter=True, trade_status="available"
+                )
+                .exclude(owner=user)
+                .exclude(publication_id__in=owned_publication_ids)
+                .select_related("publication", "publication__publisher", "owner")
+                .prefetch_related("publication__authors", "publication__genres")
+            )
+
+            def _score(book: BookCopy) -> float:
+                publication = book.publication
+                categories = publication.category_scores or []
+                top_score = 0.15  # small base so empty scores still rank
+                if categories:
+                    top_score = max(
+                        float(entry.get("score") or 0.0) for entry in categories
+                    )
+
+                genre_match = 0.0
+                if favorite_genres and categories:
+                    genre_hits = [
+                        float(entry.get("score") or 0.0)
+                        for entry in categories
+                        if (entry.get("label") or "").lower() in favorite_genres
+                    ]
+                    genre_match = max(genre_hits) if genre_hits else 0.0
+
+                author_names = {a.name.lower() for a in publication.authors.all()}
+                author_match = 0.2 if favorite_authors & author_names else 0.0
+
+                return top_score + genre_match + author_match
+
+            # 동일한 출판물은 가장 높은 점수를 주는 단일 소유자 선택
+            best_per_publication: Dict[str, Dict[str, Any]] = {}
+            for book in candidates:
+                score = _score(book)
+                pub_id = str(book.publication_id)
+                current = best_per_publication.get(pub_id)
+                if not current or score > current["score"]:
+                    best_per_publication[pub_id] = {"book": book, "score": score}
+
+            ranked = sorted(
+                best_per_publication.values(),
+                key=lambda entry: entry["score"],
+                reverse=True,
+            )[:limit]
+
+            results: List[Dict[str, Any]] = []
+            for entry in ranked:
+                book = entry["book"]
+                pub = book.publication
+                results.append(
+                    {
+                        "id": str(book.id),
+                        "title": pub.title,
+                        "authors": [a.name for a in pub.authors.all()],
+                        "genres": [g.name for g in pub.genres.all()],
+                        "publisher": pub.publisher.name if pub.publisher else None,
+                        "isbn": pub.isbn_13 or pub.isbn_10,
+                        "owner": {
+                            "id": str(book.owner.id),
+                            "username": book.owner.username,
+                        },
+                        "condition": book.condition,
+                        "cover_image": pub.cover_image.url
+                        if pub.cover_image
+                        else None,
+                        "score": round(entry["score"], 4),
+                    }
+                )
+
+            return results
         except Exception as e:
-            # Log the exception for visibility and debugging
             logger.exception("AI exploration recommendation failed: %s", e)
-            # 임시: 사용자가 갖고 있지 않은 교환 가능한 책들 반환
-            owned_ids = BookCopy.objects.filter(owner=user).values_list('publication_id', flat=True)
-            recommended_books = BookCopy.objects.filter(
-                is_for_barter=True,
-                trade_status="available"
-            ).exclude(
-                publication_id__in=owned_ids
-            ).exclude(
-                owner=user
-            ).select_related('publication', 'owner').prefetch_related(
-                'publication__authors',
-                'publication__genres'
-            ).order_by('?')[:limit]
-            return [
-                {
-                    'id': str(book.id),
-                    'title': book.publication.title,
-                    'authors': [a.name for a in book.publication.authors.all()],
-                    'genres': [g.name for g in book.publication.genres.all()],
-                    'owner': {
-                        'id': str(book.owner.id),
-                        'username': book.owner.username,
-                    },
-                    'condition': book.condition,
-                    'cover_image': book.publication.cover_image.url if book.publication.cover_image else None,
-                }
-                for book in recommended_books
-            ]
+            return []

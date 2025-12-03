@@ -44,7 +44,7 @@ class NotificationViewModelTest {
         created_at = "2025-01-01",
         is_read = read,
         deepLink = null,
-        type = null,
+        type = "barter_request",
         related_object_id = null
     )
 
