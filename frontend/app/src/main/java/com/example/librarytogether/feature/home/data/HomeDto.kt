@@ -1,5 +1,7 @@
 package com.example.librarytogether.feature.home.data
 
+import com.example.librarytogether.feature.comment.data.CommentDto
+
 //data class ApiResponse<T>(
 //    val success: Boolean,
 //    val data: T? = null,
@@ -37,6 +39,7 @@ data class Post(
     val bookId: String, // 교환 대상 책 uuid
     val bookAvailableForBarter: Boolean,
     val posterLocation: String? = null,
+    val comments: List<CommentDto> = emptyList(),
     // 지역
 )
 
@@ -51,4 +54,12 @@ data class FeedResponse(
 
 data class LikeResponse(
     val post: Post
+)
+
+data class PostResponse(
+    val post: Post
+)
+
+data class CommentLikeResponse(
+    val comment: CommentDto
 )

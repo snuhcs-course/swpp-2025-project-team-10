@@ -7,6 +7,15 @@ import retrofit2.http.POST
 
 interface OnboardingApi {
 
-    @POST("auth/onboarding/submit/")
-    suspend fun submit(@Body body: OnboardingSubmitRequest): Response<Unit>
+    @GET("library/onboarding/books/")
+    suspend fun getBooks(): List<OnboardingItem>
+
+    @GET("library/onboarding/authors/")
+    suspend fun getAuthors(): List<OnboardingItem>
+
+    @GET("library/onboarding/genres/")
+    suspend fun getGenres(): List<OnboardingItem>
+
+    @POST("auth/users/onboarding/") // 온보딩 결과 제출 경로는 auth/users/onboarding/ 으로 변경.
+    suspend fun submit(@Body request: OnboardingSubmitRequest): Response<Unit>
 }
