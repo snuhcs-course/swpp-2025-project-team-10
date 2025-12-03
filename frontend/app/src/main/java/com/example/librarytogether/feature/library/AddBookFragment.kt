@@ -18,6 +18,7 @@ import com.example.librarytogether.databinding.FragmentAddBookBinding
 import com.example.librarytogether.feature.library.data.Book
 import com.example.librarytogether.feature.library.data.PostBook
 import com.example.librarytogether.util.loadCover
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import reactivecircus.flowbinding.android.widget.textChanges
@@ -36,6 +37,8 @@ class AddBookFragment : Fragment(R.layout.fragment_add_book) {
     private val binding get() = _binding!!
 
     private val viewModel: LibraryViewModel by activityViewModels()
+
+    private var selectedPublicationId: String? = null
 
     private val searchAdapter by lazy {
         SearchBookAdapter(::onBookSearchResultClicked) // 클릭 시 onBookSearchResultClicked 함수 호출
@@ -69,6 +72,11 @@ class AddBookFragment : Fragment(R.layout.fragment_add_book) {
     }
 
     private fun saveToBookshelf() {
+        val publicationId = selectedPublicationId
+        if (publicationId.isNullOrBlank()) {
+            Snackbar.make(requireView(), "먼저 검색 결과에서 책을 선택해 주세요.", Snackbar.LENGTH_SHORT).show()
+            return
+        }
         val title = binding.etTitle.text.toString()
         val authors = binding.etAuthor.text.toString()
         val publisher = binding.etPublisher.text.toString()
@@ -76,11 +84,12 @@ class AddBookFragment : Fragment(R.layout.fragment_add_book) {
         val isBarterAvailable = binding.switchBarterAvailable.isChecked
 
         if (title.isBlank() || authors.isBlank()) {
-            Toast.makeText(requireContext(), "책 제목과 저자는 필수입니다.", Toast.LENGTH_SHORT).show()
+            Snackbar.make(requireView(), "책 제목과 저자는 필수입니다.", Snackbar.LENGTH_SHORT).show()
             return
         }
 
         val postBook = PostBook(
+            publication = publicationId,
             title = title,
             authors = authors,
             publisher = publisher.takeIf { it.isNotBlank() },
@@ -151,6 +160,8 @@ class AddBookFragment : Fragment(R.layout.fragment_add_book) {
     }
 
     private fun onBookSearchResultClicked(book: Book) {
+        selectedPublicationId = book.publicationId
+
         binding.etTitle.setText(book.title)
         binding.etAuthor.setText(book.authors?.joinToString(", ") ?: "")
         binding.etPublisher.setText(book.publisher)

@@ -44,6 +44,7 @@ import androidx.test.espresso.matcher.ViewMatchers.hasDescendant
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
+import org.mockito.Mockito.verify
 
 @HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
@@ -71,10 +72,10 @@ class LibraryFragmentTest {
             tradeLocation2 = null,
             tradeSpot1 = "Gangnam Station",
             tradeSpot2 = null,
-            favBook = "Dune",
-            favBookNote = "Best Sci-Fi",
-            favAuthor = "Frank Herbert",
-            favAuthorNote = "Genius",
+            favBooks = listOf("Dune"),
+            favBookNotes = listOf("Best Sci-Fi"),
+            favAuthors = listOf("Frank Herbert"),
+            favAuthorNotes = listOf("Genius"),
             readingHabit = "Night"
         )
     )
@@ -100,7 +101,7 @@ class LibraryFragmentTest {
         onView(withText(R.string.profile)).perform(click())
 
         onView(withId(R.id.tvName)).check(matches(withText("TestUser")))
-        onView(withId(R.id.tvBio)).check(matches(withText("Hello World")))
+        onView(withId(R.id.tvBio)).check(matches(withText("Night")))
 
 //        onView(withId(R.id.chipGroupLocations))
 //            .check(matches(hasDescendant(withText("Seoul Gangnam"))))
@@ -114,13 +115,20 @@ class LibraryFragmentTest {
             .check(matches(withContentDescription(R.string.fab_add_review)))
 
         onView(withText(R.string.shelf)).perform(click())
+
+        onView(withId(R.id.tvBookEmpty)).check(matches(isDisplayed()))
+
         onView(withId(R.id.fabAdd))
             .check(matches(withContentDescription(R.string.fab_add_book)))
 
         onView(withText(R.string.profile)).perform(click())
+
+        onView(withId(R.id.profileContainer)).check(matches(isDisplayed()))
+
         onView(withId(R.id.fabAdd))
             .check(matches(withContentDescription(R.string.fab_edit_profile)))
     }
+
 
     @Test
     fun clickEditProfile_togglesUiVisibility() {
@@ -170,6 +178,58 @@ class LibraryFragmentTest {
                 }
             }
         }
+    }
+
+    @Test
+    fun fab_onReviewsTab_navigatesToWriteReview() {
+        launchLibraryFragment()
+
+        onView(withId(R.id.fabAdd)).perform(click())
+
+        verify(navController).navigate(R.id.action_libraryFragment_to_writeReviewFragment)
+    }
+
+    @Test
+    fun fab_onShelfTab_navigatesToAddBook() {
+        launchLibraryFragment()
+
+        onView(withText(R.string.shelf)).perform(click())
+        onView(withId(R.id.fabAdd)).perform(click())
+
+        verify(navController).navigate(
+            LibraryFragmentDirections.actionLibraryFragmentToAddBookFragment()
+        )
+    }
+
+    @Test
+    fun saveProfileFromEditMode_exitsEditModeAndKeepsViewVisible() {
+        launchLibraryFragment()
+
+        onView(withText(R.string.profile)).perform(click())
+
+        onView(withId(R.id.fabAdd)).perform(click())
+
+        onView(withId(R.id.editFavBook))
+            .perform(scrollTo(), replaceText("New Fav Book"), closeSoftKeyboard())
+
+        onView(withId(R.id.fabAdd)).perform(click())
+
+        onView(withId(R.id.editFavBook)).check(matches(not(isDisplayed())))
+        onView(withId(R.id.tvFavBook)).check(matches(isDisplayed()))
+    }
+
+    @Test
+    fun profileGenres_renderedAsChips() {
+        launchLibraryFragment()
+
+        onView(withText(R.string.profile)).perform(click())
+
+        onView(withId(R.id.groupSelectedGenres))
+            .check(matches(hasDescendant(withText("SF"))))
+        onView(withId(R.id.groupSelectedGenres))
+            .check(matches(hasDescendant(withText("Mystery"))))
+
+        onView(withId(R.id.tvGenreNone)).check(matches(not(isDisplayed())))
     }
 
     private fun forceClick(): ViewAction {

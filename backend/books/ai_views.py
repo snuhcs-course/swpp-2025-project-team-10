@@ -45,15 +45,7 @@ def explore_recommendations(request):
         limit=limit
     )
     
-    # 표준화된 응답: recommendations, count, user_id
-    return Response(
-        {
-            "recommendations": recommendations,
-            "count": len(recommendations),
-            "user_id": str(request.user.id)
-        },
-        status=status.HTTP_200_OK
-    )
+    return Response(recommendations, status=status.HTTP_200_OK)
 
 
 @api_view(["POST"])

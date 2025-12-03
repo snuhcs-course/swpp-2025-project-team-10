@@ -33,6 +33,7 @@ truth = "1.4.4"
 hamcrest = "2.2"
 hiltNavigationFragment = "1.2.0"
 flowbinding = "1.2.0"
+kover = "0.8.3"
 
 [libraries]
 androidx-navigation-testing = { group = "androidx.navigation", name = "navigation-testing", version.ref = "navigation" }
@@ -85,4 +86,5 @@ kotlin-kapt = { id = "org.jetbrains.kotlin.kapt", version.ref = "kotlin" }
 hilt = {id = "com.google.dagger.hilt.android", version.ref = "hilt"}
 safeargs = {id = "androidx.navigation.safeargs.kotlin", version.ref = "navigation"}
 jacoco = {id = "jacoco"}
+kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
 

@@ -42,16 +42,17 @@ class SearchViewModelTest {
     private fun createSearchItem(
         id: String = "book-1",
         title: String = "Kotlin In Action",
-        authors: List<Int> = listOf(101)
+        author: String = "A"
     ): SearchItem {
         return SearchItem(
             id = id,
             title = title,
-            authors = authors,
-            publisher = 1,
-            isbn13 = "978-1234567890",
+            author = author,
+            publisher_name = "Pub",
+            isbn = "978-1234567890",
             cover_image = null,
-            is_for_barter = true
+            is_for_barter = true,
+            description = "des"
         )
     }
 

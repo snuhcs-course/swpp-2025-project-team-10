@@ -2,6 +2,7 @@ package com.example.librarytogether.feature.library
 
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
+import androidx.navigation.NavDirections
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
@@ -31,6 +32,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.argThat
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
@@ -57,10 +59,10 @@ class LibraryNavigationTest {
         )
     )
     private val mockBooks = listOf(
-        Book(id = "book-1", title = "my book", authors = "author", cover_image = null, publisher = null, isbn = null)
+        Book(id = "book-1", title = "my book", authors = listOf("author"), cover_image = null, publisher = null, isbn = null, publicationId = null)
     )
     private val mockWishlist = listOf(
-        Book(id = "wish-1", title = "wish book", authors = "author", cover_image = null, publisher = null, isbn = null)
+        Book(id = "wish-1", title = "wish book", authors = listOf("author"), cover_image = null, publisher = null, isbn = null, publicationId = null)
     )
     private val mockProfile = UserProfile(
         username = "Me", bio = "Bio", profileUrl = null,
@@ -112,7 +114,7 @@ class LibraryNavigationTest {
         verify(navController).navigate(
             LibraryFragmentDirections.actionGlobalBookDetail(
                 bookId = "book-1",
-                source = EntrySource.BOOKSHELF
+                source = EntrySource.MYBOOKSHELF
             )
         )
     }
@@ -127,7 +129,6 @@ class LibraryNavigationTest {
 
         verify(navController).navigate(
             LibraryFragmentDirections.actionLibraryFragmentToAddBookFragment(
-                mode = AddBookMode.BOOKSHELF
             )
         )
     }

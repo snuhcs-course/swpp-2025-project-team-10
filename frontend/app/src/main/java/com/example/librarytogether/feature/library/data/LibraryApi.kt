@@ -16,6 +16,12 @@ interface LibraryApi {
     @POST("library/reviews/")
     suspend fun addReview(@Body review: PostReview): Response<Unit>
 
+    @PATCH("library/reviews/{id}/")
+    suspend fun updateReview(@Path("id") reviewId: Int, @Body review: PostReview): Response<Unit>
+
+    @DELETE("library/reviews/{id}/")
+    suspend fun deleteReview(@Path("id") reviewId: Int): Response<Unit>
+
     @POST("library/reviews/{id}/like/")
     suspend fun toggleReviewLike(@Path("id") reviewId: Int): Response<ReviewLikeResponse>
 
@@ -40,11 +46,6 @@ interface LibraryApi {
 
     @GET("library/wishlist/")
     suspend fun getMyWishlist(): Response<List<Book>>
-
-    //legacy
-    @POST("library/wishlist/")
-    suspend fun addToWishlist(@Body body: WishlistRequest): Response<Unit>
-
 
     @POST("library/books/{bookId}/wishlist/")
     suspend fun addToWishlistById(@Path("bookId") bookId: String): Response<Unit>

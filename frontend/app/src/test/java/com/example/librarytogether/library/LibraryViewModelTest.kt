@@ -197,60 +197,12 @@ class LibraryViewModelTest {
         assertThat(vm.error.getOrAwaitValue(), equalTo("위시리스트 변경에 실패했어요."))
     }
 
-    // --- addToWishlist (Object) 테스트 ---
-
-    @Test
-    fun addToWishlist_alreadyExists_setsError() = runTest {
-        setupDefaultMocks()
-        val book = LibraryFixtures.book(1)
-        whenever(repo.getMyWishlist()).thenReturn(listOf(book))
-
-        val vm = createVM()
-        advanceUntilIdle()
-
-        vm.addToWishlist(book)
-        advanceUntilIdle()
-
-        assertThat(vm.error.getOrAwaitValue(), equalTo("이미 위시리스트에 있어요."))
-    }
-
-    @Test
-    fun addToWishlist_success_refreshesList() = runTest {
-        setupDefaultMocks()
-        val book = LibraryFixtures.book(99)
-        whenever(repo.addToWishlist(book)).thenReturn(true)
-
-        val vm = createVM()
-        advanceUntilIdle()
-
-        vm.addToWishlist(book)
-        advanceUntilIdle()
-
-        verify(repo).addToWishlist(book)
-        verify(repo, times(2)).getMyWishlist()
-    }
-
-    @Test
-    fun addToWishlist_failure_setsError() = runTest {
-        setupDefaultMocks()
-        val book = LibraryFixtures.book(99)
-        whenever(repo.addToWishlist(book)).thenReturn(false)
-
-        val vm = createVM()
-        advanceUntilIdle()
-
-        vm.addToWishlist(book)
-        advanceUntilIdle()
-
-        assertThat(vm.error.getOrAwaitValue(), equalTo("위시리스트 추가에 실패했어요."))
-    }
-
     // --- addNewBook 테스트 ---
 
     @Test
     fun addNewBook_success_navigates() = runTest {
         setupDefaultMocks()
-        val postBook = PostBook("T", "A", null, null, true)
+        val postBook = PostBook("p","T", "A", null, null, true)
         whenever(repo.addBook(postBook)).thenReturn(true)
 
         val vm = createVM()
@@ -268,7 +220,7 @@ class LibraryViewModelTest {
     @Test
     fun addNewBook_failure_setsError() = runTest {
         setupDefaultMocks()
-        val postBook = PostBook("T", "A", null, null, true)
+        val postBook = PostBook("p","T", "A", null, null, true)
         whenever(repo.addBook(postBook)).thenReturn(false)
 
         val vm = createVM()
@@ -283,7 +235,7 @@ class LibraryViewModelTest {
     @Test
     fun addNewBook_exception_setsError() = runTest {
         setupDefaultMocks()
-        val postBook = PostBook("T", "A", null, null, true)
+        val postBook = PostBook("p","T", "A", null, null, true)
         whenever(repo.addBook(postBook)).thenThrow(RuntimeException("Api Error"))
 
         val vm = createVM()

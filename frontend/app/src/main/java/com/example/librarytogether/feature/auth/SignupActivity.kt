@@ -83,9 +83,9 @@ class SignupActivity : AppCompatActivity() {
             Toast.makeText(this, "모든 필드를 입력하세요", Toast.LENGTH_SHORT).show()
             return
         }
-        val passwordRegex = Regex("^(?=.*[A-Za-z]).{6,}$")
+        val passwordRegex = Regex("^(?=.*[A-Za-z]).{8,}$")
         if(!pw.matches(passwordRegex)){
-            Toast.makeText(this, "비밀번호는 6자 이상 영문을 포함해야 합니다", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "비밀번호는 8자 이상 영문을 포함해야 합니다", Toast.LENGTH_SHORT).show()
             return
         }
 

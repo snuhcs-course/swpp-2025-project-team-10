@@ -15,11 +15,12 @@ import com.example.librarytogether.R
 import com.example.librarytogether.databinding.FragmentBookDetailBinding
 import com.example.librarytogether.feature.bookdetail.BookDetailViewModel.UiState
 import com.example.librarytogether.feature.bookdetail.data.BookDetail
+import com.example.librarytogether.feature.home.HomeViewModel
 import com.example.librarytogether.feature.library.LibraryViewModel
 import com.example.librarytogether.util.loadCover
 import dagger.hilt.android.AndroidEntryPoint
 
-enum class EntrySource {SEARCH, WISHLIST, EXPLORE, BOOKSHELF, BARTERAPPROVAL}
+enum class EntrySource {SEARCH, WISHLIST, EXPLORE, BOOKSHELF, MYBOOKSHELF, BARTERAPPROVAL}
 
 @AndroidEntryPoint
 class BookDetailFragment : Fragment(R.layout.fragment_book_detail) {
@@ -28,6 +29,7 @@ class BookDetailFragment : Fragment(R.layout.fragment_book_detail) {
     private val binding get() = _binding!!
     private val viewModel: BookDetailViewModel by viewModels()
     private val libraryViewModel: LibraryViewModel by activityViewModels()
+    private val homeViewModel: HomeViewModel by activityViewModels()
     private val args: BookDetailFragmentArgs by navArgs()
     private val bookId by lazy { args.bookId }
     private val source get() = args.source
@@ -55,10 +57,26 @@ class BookDetailFragment : Fragment(R.layout.fragment_book_detail) {
     private fun setupClicks() {
         binding.btnPrimary.setOnClickListener {
             val state = viewModel.state.value as? UiState.Data ?: return@setOnClickListener
+            val book = state.book
             when (source) {
                 EntrySource.BARTERAPPROVAL -> {
+                    viewModel.acceptSelectedBook()
+                    findNavController().popBackStack(
+                        R.id.nav_notification,
+                        false
+                    )
+                }
+                EntrySource.MYBOOKSHELF -> {
                 }
                 else -> {
+                    homeViewModel.requestBarter(
+                        ownerId = book.ownerId,
+                        bookId = bookId
+                    )
+                    findNavController().popBackStack(
+                        R.id.nav_notification,
+                        false
+                    )
                 }
             }
         }
@@ -124,12 +142,17 @@ class BookDetailFragment : Fragment(R.layout.fragment_book_detail) {
                 binding.btnPrimary.text = getString(R.string.action_barter_approve)
                 setBtnBg(R.color.black)
             }
+            EntrySource.MYBOOKSHELF -> {
+                binding.btnPrimary.isEnabled = false
+                binding.btnPrimary.text = getString(R.string.unavailable_for_barter)
+                setBtnBg(R.color.grey)
+            }
             else -> {
                 binding.btnPrimary.isEnabled = b.is_for_barter
                 binding.btnPrimary.text = if (b.is_for_barter)
                     getString(R.string.action_request_barter)
                 else
-                    getString(R.string.unavailable_for_trade)
+                    getString(R.string.unavailable_for_barter)
                 setBtnBg(if (b.is_for_barter) R.color.black else R.color.grey)
             }
         }

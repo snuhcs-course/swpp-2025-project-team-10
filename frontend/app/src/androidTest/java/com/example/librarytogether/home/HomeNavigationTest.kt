@@ -1,5 +1,6 @@
 package com.example.librarytogether.feature.home
 
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.RecyclerView
@@ -8,6 +9,7 @@ import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.matcher.RootMatchers.isDialog
+import androidx.test.espresso.matcher.ViewMatchers.assertThat
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withText
@@ -15,12 +17,14 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.librarytogether.R
 import com.example.librarytogether.feature.home.data.HomeRepository
 import com.example.librarytogether.feature.home.data.Post
+import com.example.librarytogether.feature.search.SearchSharedViewModel
 import com.example.librarytogether.testing.launchFragmentInHiltContainer
 import com.example.librarytogether.util.CustomViewActions
 import dagger.hilt.android.testing.BindValue
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import kotlinx.coroutines.runBlocking
+import org.hamcrest.Matchers.equalTo
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -125,6 +129,58 @@ class HomeNavigationTest {
             .inRoot(isDialog())
             .check(matches(isDisplayed()))
     }
+
+    @Test
+    fun clickTitle_setsSearchQuery_andSelectsSearchTab() {
+        lateinit var searchVm: SearchSharedViewModel
+
+        launchFragmentInHiltContainer<HomeFragment>(
+            themeResId = R.style.Theme_LibraryTogether
+        ) {
+            searchVm = ViewModelProvider(requireActivity())[SearchSharedViewModel::class.java]
+        }
+
+        onView(withId(R.id.rvFeed))
+            .perform(
+                RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(
+                    0,
+                    com.example.librarytogether.util.CustomViewActions
+                        .clickChildViewWithId(R.id.tvTitle)   // ← 실제 ID로 변경
+                )
+            )
+
+        assertThat(
+            searchVm.pendingQuery.value,
+            equalTo(mockPosts.first().bookTitle)
+        )
+    }
+
+    @Test
+    fun clickAuthor_setsSearchQuery_andSelectsSearchTab() {
+        lateinit var searchVm: SearchSharedViewModel
+
+        launchFragmentInHiltContainer<HomeFragment>(
+            themeResId = R.style.Theme_LibraryTogether
+        ) {
+            searchVm = ViewModelProvider(requireActivity())[SearchSharedViewModel::class.java]
+        }
+
+        onView(withId(R.id.rvFeed))
+            .perform(
+                RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(
+                    0,
+                    com.example.librarytogether.util.CustomViewActions
+                        .clickChildViewWithId(R.id.tvAuthor)   // ← 실제 ID로 변경
+                )
+            )
+
+        assertThat(
+            searchVm.pendingQuery.value,
+            equalTo(mockPosts.first().authorName)
+        )
+    }
+
+
 
     private fun launchHomeFragment() {
         launchFragmentInHiltContainer<HomeFragment> {

@@ -164,6 +164,7 @@ class BookSerializer(serializers.ModelSerializer):
     """
 
     owner = serializers.ReadOnlyField(source="owner.username")
+    ownerId = serializers.IntegerField(source="owner.id", read_only=True)
     title = serializers.CharField(read_only=True)
     authors = serializers.SerializerMethodField()
     authors_display = serializers.SerializerMethodField()
@@ -184,6 +185,10 @@ class BookSerializer(serializers.ModelSerializer):
         write_only=True,
         required=False,
     )
+    publicationId = serializers.UUIDField(
+        source="publication.id",
+        read_only=True,
+    )
 
     class Meta:
         model = BookCopy
@@ -203,11 +208,16 @@ class BookSerializer(serializers.ModelSerializer):
             "owner_notes",
             "trade_status",
             "owner",
+            "ownerId",
+            #post
             "publication",
+            #get
+            "publicationId",
         ]
         read_only_fields = [
             "id",
             "owner",
+            "ownerId",
             "title",
             "authors",
             "authors_display",
@@ -219,6 +229,7 @@ class BookSerializer(serializers.ModelSerializer):
             "cover_image",
             "coverUrl",
             "trade_status",
+            "publicationId",
         ]
         extra_kwargs = {"publication": {"write_only": True}}
 
