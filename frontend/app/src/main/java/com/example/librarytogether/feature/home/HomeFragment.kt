@@ -170,7 +170,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private fun navigateToReview(post: Post) {
         CommentBottomSheet.newInstance(
             postId = post.id,
-            comments = post.comments
+            comments = post.comments ?: emptyList()
         ).show(parentFragmentManager, "comments")
     }
 

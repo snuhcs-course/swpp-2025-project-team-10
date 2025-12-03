@@ -62,6 +62,12 @@ android {
     testOptions {
         unitTests.isReturnDefaultValues = true
         unitTests.isIncludeAndroidResources = true
+        unitTests.all {
+            it.maxHeapSize = "2g"
+            it.maxParallelForks = 1
+            it.forkEvery = 100
+            it.jvmArgs("-XX:+HeapDumpOnOutOfMemoryError")
+        }
     }
     packaging {
         resources {
