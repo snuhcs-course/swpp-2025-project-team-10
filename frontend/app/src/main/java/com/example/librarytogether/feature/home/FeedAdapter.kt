@@ -6,7 +6,6 @@ import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
@@ -82,32 +81,13 @@ class FeedAdapter(
                 btnBookReview.safeClick(clicks.onClickReview)
                 btnExchange.safeClick(clicks.onClickExchange)
                 btnAdd.safeClick(clicks.onClickAdd)
+                btnMore.safeClick(clicks.onClickMore)
                 ivProfileImage.safeClick(clicks.onClickProfile)
                 tvPoster.safeClick(clicks.onClickUserName)
                 tvTitle.safeClick(clicks.onClickTitle)
                 tvAuthor.safeClick(clicks.onClickAuthor)
                 tvContent.safeClick(clicks.onClickContent)
-                btnMore.setOnClickListener { view ->
-                    val post = current ?: return@setOnClickListener
-                    showMoreMenu(view, post)
-                }
             }
-        }
-
-        private fun showMoreMenu(anchor: View, post: Post) {
-            val popup = PopupMenu(anchor.context, anchor)
-            popup.menuInflater.inflate(R.menu.post_more, popup.menu)
-            popup.setOnMenuItemClickListener { item ->
-                when (item.itemId) {
-                    R.id.action_hide -> {
-                        // 실제 동작은 Fragment/HomeViewModel 쪽으로 넘김
-                        clicks.onClickMore(post)
-                        true
-                    }
-                    else -> false
-                }
-            }
-            popup.show()
         }
 
         fun bind(post: Post) = with(binding) {
@@ -196,27 +176,6 @@ class FeedAdapter(
                 btnLike.setIconResource(R.drawable.like_icon)
             }
 
-            val likeText = if (post.likeCount > 0) {
-                itemView.context.getString(
-                    R.string.like_with_count,
-                    formatCount(post.likeCount)
-                )
-            } else {
-                itemView.context.getString(R.string.like)
-            }
-            btnLike.text = likeText
-
-            val commentText = if (post.commentCount > 0) {
-                itemView.context.getString(
-                    R.string.comment_with_count,
-                    formatCount(post.commentCount)
-                )
-            } else {
-                itemView.context.getString(R.string.comment)
-            }
-            btnBookReview.text = commentText
-
-
             val barterAvailable = post.bookAvailableForBarter
 
             btnExchange.isEnabled = barterAvailable
@@ -246,22 +205,6 @@ class FeedAdapter(
     override fun onViewRecycled(holder: PostVH) {
         holder.cleanup()
         super.onViewRecycled(holder)
-    }
-}
-
-private fun formatCount(count: Int): String {
-    return when {
-        count >= 1_000_000 -> {
-            val value = count / 1_000_000.0
-            val formatted = String.format("%.1f", value)
-            (if (formatted.endsWith(".0")) formatted.dropLast(2) else formatted) + "M"
-        }
-        count >= 1_000 -> {
-            val value = count / 1_000.0
-            val formatted = String.format("%.1f", value)
-            (if (formatted.endsWith(".0")) formatted.dropLast(2) else formatted) + "K"
-        }
-        else -> count.toString()
     }
 }
 
