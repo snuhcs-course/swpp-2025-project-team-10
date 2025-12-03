@@ -75,5 +75,4 @@
             android:contentDescription="전송"
             android:layout_gravity="bottom"/>
     </LinearLayout>
-
 </LinearLayout>

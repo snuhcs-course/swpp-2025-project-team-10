@@ -6,11 +6,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import android.widget.FrameLayout
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.librarytogether.databinding.CommentBinding
 import com.example.librarytogether.feature.comment.data.CommentDto
+import com.example.librarytogether.feature.home.data.Post
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
@@ -23,37 +24,41 @@ class CommentBottomSheet : BottomSheetDialogFragment() {
     private val binding get() = _binding!!
 
     private val viewModel: CommentViewModel by activityViewModels()
-    private lateinit var adapter: CommentAdapter
 
-    private var postId: Int = -1
-    private var currentUserName = "You"
+    private lateinit var adapter: CommentAdapter
+    private lateinit var post: Post
+
+    private var currentUserName = "You" // TODO: 실제 사용자 이름으로 교체 필요
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        postId = requireArguments().getInt("postId")
-        // 스타일 적용 (배경 투명화가 안 될 경우를 대비해 스타일도 지정 가능)
-        // setStyle(STYLE_NORMAL, R.style.CustomBottomSheetDialogTheme)
+
+        // PostDto가 아닌 Post(프론트 DTO) 전달받음
+        post = requireArguments().getSerializable("post") as Post
+
+        // ViewModel 초기화
+        viewModel.initialize(post)
     }
 
-    // ★ 핵심 수정 부분: 다이얼로그 생성 시점 설정
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dialog = super.onCreateDialog(savedInstanceState) as BottomSheetDialog
 
         dialog.setOnShowListener { dialogInterface ->
             val bottomSheetDialog = dialogInterface as BottomSheetDialog
-            val bottomSheet = bottomSheetDialog.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet) as FrameLayout?
+            val bottomSheet =
+                bottomSheetDialog.findViewById<View>(
+                    com.google.android.material.R.id.design_bottom_sheet
+                )
 
             bottomSheet?.let { sheet ->
-                // 1. 배경 투명화 (XML에서 만든 둥근 배경이 잘 보이도록)
                 sheet.background = null
-
-                // 2. 동작 설정 (화면 꽉 차게 펼치기)
                 val behavior = BottomSheetBehavior.from(sheet)
                 behavior.state = BottomSheetBehavior.STATE_EXPANDED
-                behavior.skipCollapsed = true // 접히는 단계 건너뛰기
-                behavior.isDraggable = true   // 드래그로 닫기 가능
+                behavior.skipCollapsed = true
+                behavior.isDraggable = true
             }
         }
+
         return dialog
     }
 
@@ -64,8 +69,9 @@ class CommentBottomSheet : BottomSheetDialogFragment() {
     ): View {
         _binding = CommentBinding.inflate(inflater, container, false)
 
-        // ★ 키보드 올라올 때 입력창이 가려지지 않게 설정
-        dialog?.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+        dialog?.window?.setSoftInputMode(
+            WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
+        )
 
         return binding.root
     }
@@ -74,65 +80,81 @@ class CommentBottomSheet : BottomSheetDialogFragment() {
         super.onStart()
 
         val sheetDialog = dialog as? BottomSheetDialog
-        val bottomSheet = sheetDialog?.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
+        val bottomSheet =
+            sheetDialog?.findViewById<View>(
+                com.google.android.material.R.id.design_bottom_sheet
+            )
 
         bottomSheet?.let { sheet ->
-            // 1. 화면 전체 높이 구하기
-            val displayMetrics = resources.displayMetrics
-            val windowHeight = displayMetrics.heightPixels
-
-            // 2. 바텀 시트의 높이를 화면의 85% (또는 원하시면 MATCH_PARENT)로 강제 고정
+            val height = (resources.displayMetrics.heightPixels * 0.85).toInt()
             val layoutParams = sheet.layoutParams
-            layoutParams.height = (windowHeight * 0.85).toInt() // 원하는 비율 (예: 0.9, 1.0 등)
+            layoutParams.height = height
             sheet.layoutParams = layoutParams
 
-            // 3. 상태를 '펼침(EXPANDED)'으로 고정
             val behavior = BottomSheetBehavior.from(sheet)
             behavior.state = BottomSheetBehavior.STATE_EXPANDED
-            behavior.skipCollapsed = true // 접힌 상태 무시
         }
     }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
 
-        adapter = CommentAdapter(mutableListOf())
-        binding.recyclerComments.layoutManager = LinearLayoutManager(requireContext())
+        adapter = CommentAdapter(
+            items = mutableListOf(),
+            currentUserName = currentUserName,
+            onDelete = { dto -> showDeleteDialog(dto) },
+            onEdit = { dto -> showEditDialog(dto) }
+        )
+
+        binding.recyclerComments.layoutManager =
+            LinearLayoutManager(requireContext())
         binding.recyclerComments.adapter = adapter
-
-        viewModel.loadComments(postId)
 
         viewModel.comments.observe(viewLifecycleOwner) { list ->
             adapter.updateComments(list)
             updateEmptyState(list)
-
-            // 데이터 로드 시 맨 아래로 스크롤 (선택 사항)
-            // if (list.isNotEmpty()) binding.recyclerComments.scrollToPosition(list.size - 1)
         }
 
         binding.btnSend.setOnClickListener {
             val text = binding.etComment.text.toString().trim()
             if (text.isNotEmpty()) {
-                viewModel.writeComment(postId, text)
-                viewModel.addCommentLocal(text, currentUserName)
-
+                viewModel.writeComment(text)
                 binding.etComment.setText("")
-
-                // ★ 편의 기능: 댓글 작성 후 리스트 맨 아래로 스크롤
-                binding.recyclerComments.post {
-                    if (adapter.itemCount > 0) {
-                        binding.recyclerComments.smoothScrollToPosition(adapter.itemCount - 1)
-                    }
-                }
             }
         }
     }
 
     private fun updateEmptyState(list: List<CommentDto>) {
-        if (list.isEmpty()) {
-            binding.emptyMessage.visibility = View.VISIBLE
-        } else {
-            binding.emptyMessage.visibility = View.GONE
+        binding.emptyMessage.visibility =
+            if (list.isEmpty()) View.VISIBLE else View.GONE
+    }
+
+    private fun showDeleteDialog(dto: CommentDto) {
+        AlertDialog.Builder(requireContext())
+            .setMessage("댓글을 삭제할까요?")
+            .setPositiveButton("삭제") { _, _ ->
+                viewModel.deleteComment(dto)
+            }
+            .setNegativeButton("취소", null)
+            .show()
+    }
+
+    private fun showEditDialog(dto: CommentDto) {
+        val editText = android.widget.EditText(requireContext()).apply {
+            setText(dto.content)
+            setSelection(dto.content.length)
         }
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("댓글 수정")
+            .setView(editText)
+            .setPositiveButton("저장") { _, _ ->
+                val newContent = editText.text.toString().trim()
+                if (newContent.isNotEmpty()) {
+                    viewModel.editComment(dto.id, newContent)
+                }
+            }
+            .setNegativeButton("취소", null)
+            .show()
     }
 
     override fun onDestroyView() {
@@ -141,8 +163,10 @@ class CommentBottomSheet : BottomSheetDialogFragment() {
     }
 
     companion object {
-        fun newInstance(postId: Int) = CommentBottomSheet().apply {
-            arguments = Bundle().apply { putInt("postId", postId) }
+        fun newInstance(post: Post) = CommentBottomSheet().apply {
+            arguments = Bundle().apply {
+                putSerializable("post", post)
+            }
         }
     }
 }
