@@ -1212,19 +1212,99 @@ def onboarding_submit(request):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Get or create UserTaste
-        taste, created = UserTaste.objects.get_or_create(user=request.user)
+        # Mapping used by frontend local IDs -> names
+        frontend_books = {
+            1: "채식주의자",
+            2: "사피엔스",
+            3: "데미안",
+            4: "코스모스",
+            5: "총균쇠",
+            6: "82년생 김지영",
+            7: "우리들의 일그러진 영웅",
+            8: "살인자의 기억법",
+            9: "미움받을 용기",
+        }
+        frontend_authors = {
+            1: "한강",
+            2: "무라카미 하루키",
+            3: "김영하",
+            4: "유발 하라리",
+            5: "베르나르 베르베르",
+            6: "마이클 샌델",
+            7: "톨스토이",
+            8: "정재승",
+            9: "유시민",
+        }
+        frontend_genres = {
+            1: "현대소설",
+            2: "고전소설",
+            3: "시",
+            4: "자기계발",
+            5: "과학·기술",
+            6: "인문·사회",
+            7: "역사·철학",
+            8: "예술·언어",
+            9: "경제·경영",
+        }
 
-        # Store IDs directly (frontend sends hardcoded IDs)
-        # In future, these could be mapped to actual database objects
-        if book_ids:
-            taste.favorite_books = book_ids
+        # Ensure UserTaste exists
+        taste, _ = UserTaste.objects.get_or_create(user=request.user)
 
-        if author_ids:
-            taste.favorite_authors = author_ids
+        # We'll store readable strings (names) so AI/service layers can consume them
+        saved_books = []
+        saved_authors = []
+        saved_genres = []
 
-        if genre_ids:
-            taste.favorite_genres = genre_ids
+        # Local imports to avoid top-level cycles
+        from books.models import BookPublication, Author as BookAuthorModel, Genre as BookGenreModel
+
+        # Helper: resolve an incoming value (int id or string) to a name
+        def resolve_name(value, mapping):
+            try:
+                # if it's an int-like value (from frontend local ids)
+                if isinstance(value, int):
+                    return mapping.get(value)
+                # sometimes JSON numbers may be strings
+                if isinstance(value, str) and value.isdigit():
+                    return mapping.get(int(value))
+            except Exception:
+                pass
+            # If it's a non-empty string assume it's already a name
+            if isinstance(value, str) and value.strip():
+                return value.strip()
+            return None
+
+        # Process books: find or create BookPublication, but store title strings in taste
+        for b in book_ids:
+            title = resolve_name(b, frontend_books)
+            if not title:
+                continue
+            # try to find publication by title (case-insensitive)
+            pub = BookPublication.objects.filter(title__iexact=title).first()
+            if not pub:
+                pub = BookPublication.objects.create(title=title)
+            saved_books.append(pub.title)
+
+        # Process authors: ensure Author records exist, store author names
+        for a in author_ids:
+            name = resolve_name(a, frontend_authors)
+            if not name:
+                continue
+            author_obj, _ = BookAuthorModel.objects.get_or_create(name=name)
+            saved_authors.append(author_obj.name)
+
+        # Process genres: ensure Genre records exist, store genre names
+        for g in genre_ids:
+            name = resolve_name(g, frontend_genres)
+            if not name:
+                continue
+            genre_obj, _ = BookGenreModel.objects.get_or_create(name=name)
+            saved_genres.append(genre_obj.name)
+
+        # Deduplicate
+        taste.favorite_books = list(dict.fromkeys(saved_books))
+        taste.favorite_authors = list(dict.fromkeys(saved_authors))
+        taste.favorite_genres = list(dict.fromkeys(saved_genres))
 
         taste.save()
 
