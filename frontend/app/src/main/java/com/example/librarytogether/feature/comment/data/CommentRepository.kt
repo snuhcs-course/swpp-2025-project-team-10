@@ -7,40 +7,22 @@ class CommentRepository @Inject constructor(
     private val api: CommentApi
 ) {
 
-    /**
-     * 댓글 작성
-     * Response: 최신 Post
-     */
     suspend fun writeComment(postId: Int, content: String): Post {
-        val response = api.createComment(
-            postId = postId,
-            body = CommentCreateDto(content)
-        )
-        return response.post
+        val res = api.createComment(postId, CommentCreateDto(content))
+        return res.post
     }
 
-    /**
-     * 댓글 삭제
-     * Response: 최신 Post
-     */
     suspend fun deleteComment(postId: Int, commentId: String): Post {
-        val response = api.deleteComment(
-            postId = postId,
-            commentId = commentId
-        )
-        return response.post
+        val res = api.deleteComment(postId, commentId)
+        return res.post
     }
 
-    /**
-     * 댓글 수정
-     * Response: 최신 Post
-     */
     suspend fun editComment(postId: Int, commentId: String, content: String): Post {
-        val response = api.editComment(
-            postId = postId,
-            commentId = commentId,
-            body = CommentCreateDto(content)
-        )
-        return response.post
+        val res = api.editComment(postId, commentId, CommentCreateDto(content))
+        return res.post
+    }
+    suspend fun toggleCommentLike(postId: Int, commentId: String): CommentDto {
+        val res = api.toggleCommentLike(postId, commentId)
+        return res.comment
     }
 }

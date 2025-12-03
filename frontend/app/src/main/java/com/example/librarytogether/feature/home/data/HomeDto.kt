@@ -58,3 +58,7 @@ data class LikeResponse(
 data class PostResponse(
     val post: Post
 )
+
+data class CommentLikeResponse(
+    val comment: CommentDto
+)

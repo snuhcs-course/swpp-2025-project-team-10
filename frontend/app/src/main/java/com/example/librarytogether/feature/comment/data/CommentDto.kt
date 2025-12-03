@@ -6,7 +6,9 @@ data class CommentDto(
     val authorProfile: ProfileDto?,
     val content: String,
     val createdAt: String,
-    val updatedAt: String
+    val updatedAt: String,
+    val like_count: Int,
+    val isLiked: Boolean
 )
 
 data class ProfileDto(
@@ -14,7 +16,6 @@ data class ProfileDto(
     val profile_picture: String?
 )
 
-// 댓글 작성 요청 바디
 data class CommentCreateDto(
     val content: String
 )

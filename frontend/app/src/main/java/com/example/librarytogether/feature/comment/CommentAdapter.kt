@@ -14,83 +14,80 @@ import com.example.librarytogether.feature.comment.data.CommentDto
 class CommentAdapter(
     private val items: MutableList<CommentDto>,
     private val currentUserName: String,
+    private val onLike: (CommentDto) -> Unit,
     private val onDelete: (CommentDto) -> Unit,
-    private val onEdit: (CommentDto) -> Unit
-) : RecyclerView.Adapter<CommentAdapter.CommentVH>() {
+    private val onEdit: (CommentDto) -> Unit,
+) : RecyclerView.Adapter<CommentAdapter.VH>() {
 
-    inner class CommentVH(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class VH(v: View) : RecyclerView.ViewHolder(v) {
+        private val tvAuthor = v.findViewById<TextView>(R.id.tvAuthor)
+        private val tvComment = v.findViewById<TextView>(R.id.tvComment)
+        private val tvCreatedAt = v.findViewById<TextView>(R.id.tvCreatedAt)
+        private val ivProfile = v.findViewById<ImageView>(R.id.imgProfile)
+        private val btnMore = v.findViewById<ImageView>(R.id.btnMore)
 
-        private val tvAuthor = itemView.findViewById<TextView>(R.id.tvAuthor)
-        private val tvComment = itemView.findViewById<TextView>(R.id.tvComment)
-        private val tvCreatedAt = itemView.findViewById<TextView>(R.id.tvCreatedAt)
-        private val imgProfile = itemView.findViewById<ImageView>(R.id.imgProfile)
-        private val btnMore = itemView.findViewById<ImageView>(R.id.btnMore)
+        // 좋아요 UI
+        private val btnLike = v.findViewById<ImageView>(R.id.btnLike)
+        private val tvLikeCount = v.findViewById<TextView>(R.id.tvLikeCount)
 
         fun bind(dto: CommentDto) {
+
             tvAuthor.text = dto.authorName
             tvComment.text = dto.content
-            tvCreatedAt.text = formatCreatedAt(dto.createdAt)
+            tvCreatedAt.text = dto.createdAt.substringBefore("T")
 
-            // 🔥 프로필 이미지 로딩
-            val profileUrl = dto.authorProfile?.profile_picture
             Glide.with(itemView.context)
-                .load(profileUrl)
+                .load(dto.authorProfile?.profile_picture)
                 .placeholder(R.drawable.person_icon)
                 .error(R.drawable.person_icon)
                 .circleCrop()
-                .into(imgProfile)
+                .into(ivProfile)
 
-            // 🔥 본인 댓글만 더보기 메뉴 표시
+            tvLikeCount.text = dto.like_count.toString()
+            btnLike.setImageResource(
+                if (dto.isLiked) R.drawable.ic_heart_filled
+                else R.drawable.ic_heart_outline
+            )
+
+            btnLike.setOnClickListener { onLike(dto) }
+
             if (dto.authorName == currentUserName) {
                 btnMore.visibility = View.VISIBLE
-                btnMore.setOnClickListener { showPopup(dto, btnMore) }
+                btnMore.setOnClickListener { showMenu(dto, btnMore) }
             } else {
                 btnMore.visibility = View.GONE
             }
         }
 
-        private fun showPopup(dto: CommentDto, anchor: View) {
+        private fun showMenu(dto: CommentDto, anchor: View) {
             val menu = PopupMenu(anchor.context, anchor)
-            menu.inflate(R.menu.menu_comment)  // 삭제/수정 메뉴 리소스 필요
-
-            menu.setOnMenuItemClickListener { item ->
-                when (item.itemId) {
-                    R.id.action_edit -> {
-                        onEdit(dto)
-                        true
-                    }
-                    R.id.action_delete -> {
-                        onDelete(dto)
-                        true
-                    }
-                    else -> false
+            menu.inflate(R.menu.menu_comment)
+            menu.setOnMenuItemClickListener {
+                when (it.itemId) {
+                    R.id.action_edit -> onEdit(dto)
+                    R.id.action_delete -> onDelete(dto)
                 }
+                true
             }
-
             menu.show()
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CommentVH {
-        val view = LayoutInflater.from(parent.context)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
+        val v = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_comment, parent, false)
-        return CommentVH(view)
+        return VH(v)
     }
 
-    override fun onBindViewHolder(holder: CommentVH, position: Int) {
+    override fun onBindViewHolder(holder: VH, position: Int) {
         holder.bind(items[position])
     }
 
-    override fun getItemCount(): Int = items.size
+    override fun getItemCount() = items.size
 
     fun updateComments(list: List<CommentDto>) {
         items.clear()
         items.addAll(list)
         notifyDataSetChanged()
-    }
-
-    // TODO: 이후 util 파일로 분리해도 좋음
-    private fun formatCreatedAt(isoTime: String): String {
-        return isoTime  // 실제로는 변환 필요하지만 지금은 원본 유지
     }
 }

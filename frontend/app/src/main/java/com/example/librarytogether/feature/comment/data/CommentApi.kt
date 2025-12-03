@@ -1,6 +1,6 @@
 package com.example.librarytogether.feature.comment.data
 
-import com.example.librarytogether.feature.home.data.Post
+import com.example.librarytogether.feature.home.data.CommentLikeResponse
 import com.example.librarytogether.feature.home.data.PostResponse
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -45,4 +45,11 @@ interface CommentApi {
         @Path("commentId") commentId: String,
         @Body body: CommentCreateDto
     ): PostResponse
+
+    @POST("posts/{postId}/comments/{commentId}/like/")
+    suspend fun toggleCommentLike(
+        @Path("postId") postId: Int,
+        @Path("commentId") commentId: String
+    ): CommentLikeResponse
+
 }
