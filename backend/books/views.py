@@ -37,6 +37,12 @@ from .services.publication_categories import PublicationCategorizer
 
 User = get_user_model()
 
+# --- Onboarding Views ---
+from .models import Author, Genre, BookPublication
+from .serializers import OnboardingAuthorSerializer, OnboardingBookSerializer, OnboardingGenreSerializer
+from rest_framework.permissions import AllowAny
+
+
 
 def _build_book_card(book: BookCopy, request) -> dict:
     """Return a lightweight payload for library/wishlist endpoints."""
@@ -713,3 +719,31 @@ def publication_recommendations(request):
         )
 
     return Response({"results": results}, status=status.HTTP_200_OK)
+
+
+class OnboardingBookListView(generics.ListAPIView):
+    """
+    온보딩 과정에서 보여줄 책 목록은 "is_onboarding_choice=True"인 항목들만 반환합니다.
+    """
+    queryset = BookPublication.objects.filter(is_onboarding_choice=True)
+    serializer_class = OnboardingBookSerializer
+    permission_classes = [AllowAny]
+    pagination_class = None # 페이지네이션 비활성화
+
+class OnboardingAuthorListView(generics.ListAPIView):
+    """
+    온보딩 과정에서 보여줄 작가 목록은 "is_onboarding_choice=True"인 항목들만 반환합니다.
+    """
+    queryset = Author.objects.filter(is_onboarding_choice=True)
+    serializer_class = OnboardingAuthorSerializer
+    permission_classes = [AllowAny]
+    pagination_class = None # 페이지네이션 비활성화
+
+class OnboardingGenreListView(generics.ListAPIView):
+    """
+    온보딩 과정에서 보여줄 장르 목록은 "is_onboarding_choice=True"인 항목들만 반환합니다.
+    """
+    queryset = Genre.objects.filter(is_onboarding_choice=True)
+    serializer_class = OnboardingGenreSerializer
+    permission_classes = [AllowAny]
+    pagination_class = None # 페이지네이션 비활성화

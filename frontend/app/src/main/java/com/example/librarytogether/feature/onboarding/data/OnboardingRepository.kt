@@ -8,9 +8,9 @@ class OnboardingRepository @Inject constructor(
     private val api: OnboardingApi
 ) {
 
-    private val selectedBooks = mutableListOf<Int>()
-    private val selectedAuthors = mutableListOf<Int>()
-    private val selectedGenres = mutableListOf<Int>()
+    private val selectedBooks = mutableListOf<String>()
+    private val selectedAuthors = mutableListOf<String>()
+    private val selectedGenres = mutableListOf<String>()
 
     fun getBooks() = listOf(
         LabelId(1, "채식주의자"),
@@ -48,7 +48,7 @@ class OnboardingRepository @Inject constructor(
         LabelId(9,"경제·경영")
     )
 
-    fun saveSelection(step: Int, ids: List<Int>) {
+    fun saveSelection(step: Int, ids: List<String>) {
         when (step) {
             0 -> {
                 selectedBooks.clear()
@@ -67,15 +67,13 @@ class OnboardingRepository @Inject constructor(
 
     suspend fun submitSelections(): Boolean {
         val req = OnboardingSubmitRequest(
+            // 백엔드 Serializer가 String과 Int를 모두 처리하므로, 그대로 전송
             book_ids = selectedBooks,
-            author_ids = selectedAuthors,
-            genre_ids = selectedGenres
+            author_ids = selectedAuthors.mapNotNull { it.toIntOrNull() },
+            genre_ids = selectedGenres.mapNotNull { it.toIntOrNull() }
         )
-        return try {
-            api.submit(req).isSuccessful
-        } catch (e: Exception) {
-            Log.e("OnboardingRepo", "submitSelections", e)
-            false
-        }
+        Log.d("OnboardingRepository", "Submitting: $req")
+        val response = api.submit(req)
+        return response.isSuccessful
     }
 }

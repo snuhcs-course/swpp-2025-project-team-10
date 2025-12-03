@@ -20,6 +20,9 @@ class Genre(models.Model):
     name = models.CharField(max_length=50, unique=True)
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    is_onboarding_choice = models.BooleanField(
+        default=True, help_text="온보딩 설문 선택지에 포함할지 여부"
+    )
 
     class Meta:
         db_table = "books_genre"
@@ -41,6 +44,9 @@ class Author(models.Model):
     birth_date = models.DateField(null=True, blank=True)
     death_date = models.DateField(null=True, blank=True)
     nationality = models.CharField(max_length=50, blank=True)
+    is_onboarding_choice = models.BooleanField(
+        default=False, help_text="온보딩 설문 선택지에 포함할지 여부"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -122,6 +128,9 @@ class BookPublication(models.Model):
     description = models.TextField(blank=True)
     genres = models.ManyToManyField(
         Genre, related_name="publications", blank=True
+    )
+    is_onboarding_choice = models.BooleanField(
+        default=False, help_text="온보딩 설문 선택지에 포함할지 여부"
     )
 
     cover_image = models.ImageField(

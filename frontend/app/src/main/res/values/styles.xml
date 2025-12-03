@@ -154,6 +154,11 @@
         <item name="android:textSize">@dimen/text_body</item>
         <item name="android:letterSpacing">0.04</item>
     </style>
+    <style name="CustomPopupMenu" parent="Widget.AppCompat.PopupMenu">
+        <item name="android:popupBackground">@drawable/bg_popup_menu</item>
+    </style>
+
+
 
 
 </resources>

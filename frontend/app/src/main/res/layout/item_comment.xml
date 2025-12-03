@@ -1,13 +1,105 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:padding="12dp">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="?attr/selectableItemBackground"
+    android:paddingHorizontal="16dp"
+    android:paddingVertical="12dp">
 
+    <!-- 프로필 이미지 -->
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/imgProfile"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/person_icon"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:shapeAppearanceOverlay="@style/ShapeAppearance.MaterialComponents.SmallComponent" />
+
+    <!-- 작성자 -->
+    <TextView
+        android:id="@+id/tvAuthor"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
+        android:textColor="@android:color/black"
+        android:textSize="14sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toEndOf="@id/imgProfile"
+        app:layout_constraintTop_toTopOf="@id/imgProfile"
+        tools:text="User Name" />
+
+    <!-- 작성 시간 -->
+    <TextView
+        android:id="@+id/tvCreatedAt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="12sp"
+        app:layout_constraintBaseline_toBaselineOf="@id/tvAuthor"
+        app:layout_constraintStart_toEndOf="@id/tvAuthor"
+        tools:text="2시간 전" />
+
+    <!-- 수정/삭제 메뉴 버튼 -->
+    <ImageView
+        android:id="@+id/btnMore"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:contentDescription="더보기"
+        android:src="@drawable/ic_more_vert"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@android:color/darker_gray" />
+
+    <!-- 댓글 내용 -->
     <TextView
         android:id="@+id/tvComment"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:textSize="14sp" />
-</LinearLayout>
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="8dp"
+        android:ellipsize="end"
+        android:lineSpacingExtra="4dp"
+        android:maxLines="10"
+        android:textColor="@android:color/black"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toStartOf="@id/btnMore"
+        app:layout_constraintStart_toStartOf="@id/tvAuthor"
+        app:layout_constraintTop_toBottomOf="@id/tvAuthor"
+        tools:text="댓글 내용입니다." />
+
+    <!-- 좋아요 레이아웃 -->
+    <LinearLayout
+        android:id="@+id/layoutLike"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingTop="8dp"
+        android:paddingBottom="4dp"
+        app:layout_constraintStart_toStartOf="@id/tvAuthor"
+        app:layout_constraintTop_toBottomOf="@id/tvComment">
+
+        <ImageView
+            android:id="@+id/btnLike"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:src="@drawable/ic_heart_outline"
+            app:tint="@android:color/darker_gray"
+            android:contentDescription="좋아요 버튼" />
+
+        <TextView
+            android:id="@+id/tvLikeCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="12sp"
+            tools:text="12" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
