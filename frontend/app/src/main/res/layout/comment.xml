@@ -1,83 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/bg_bottom_sheet_rounded"
-    android:orientation="vertical">
-
-    <View
-        android:layout_width="40dp"
-        android:layout_height="4dp"
-        android:layout_gravity="center"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="12dp"
-        android:alpha="0.2"
-        android:background="?attr/colorOnSurface" />
-
-    <TextView
-        android:id="@+id/emptyMessage"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:padding="40dp"
-        android:text="아직 댓글이 없습니다.\n첫 번째 댓글을 남겨보세요!"
-        android:textColor="?android:attr/textColorSecondary"
-        android:visibility="gone" />
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:padding="16dp">
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerComments"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:clipToPadding="false"
-        android:paddingBottom="10dp"
-        android:scrollbars="vertical" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:alpha="0.12"
-        android:background="?attr/colorOnSurface" />
+        android:layout_height="300dp" />
 
     <LinearLayout
-        android:id="@+id/inputLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?android:attr/colorBackground"
-        android:gravity="bottom"
         android:orientation="horizontal"
-        android:paddingHorizontal="16dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="16dp">
+        android:paddingTop="12dp">
 
         <EditText
             android:id="@+id/etComment"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
             android:layout_weight="1"
-            android:background="@drawable/bg_input_rounded"
-            android:hint="댓글을 입력하세요..."
-            android:inputType="textMultiLine"
-            android:maxLines="4"
+            android:hint="댓글 입력..."
             android:minHeight="48dp"
-            android:paddingHorizontal="16dp"
-            android:paddingVertical="10dp"
-            android:textColor="?attr/colorOnSurface"
-            android:textColorHint="?android:attr/textColorSecondary"
-            android:textSize="15sp" />
+            android:paddingVertical="8dp" />
 
-        <ImageView
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSend"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_gravity="bottom"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="전송"
-            android:padding="10dp"
-            android:scaleType="fitCenter"
-            android:src="@drawable/ic_send"
-            app:tint="?attr/colorPrimary" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="게시"
+            app:cornerRadius="8dp"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp"
+            app:backgroundTint="@color/black"
+            android:textColor="@color/white" />
+
     </LinearLayout>
+
 </LinearLayout>

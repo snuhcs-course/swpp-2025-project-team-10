@@ -60,8 +60,7 @@
 
         <activity
             android:name=".feature.main.MainActivity"
-            android:exported="false"
-            android:windowSoftInputMode="adjustResize" />
+            android:exported="false" />
 
     </application>
 
