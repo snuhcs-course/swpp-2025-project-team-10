@@ -8,8 +8,8 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from social.models import Comment, Post, PostLike
-from social.serializers import PostCreateSerializer, PostSerializer
+from social.models import Comment, Post, PostLike, CommentLike
+from social.serializers import PostCreateSerializer, PostSerializer, CommentSerializer
 from django.shortcuts import get_object_or_404
 
 
@@ -242,6 +242,46 @@ def comment_edit(request, post_id, comment_id):
     post = comment.post
     serializer = PostSerializer(post, context={"request": request})
     return Response({"post": serializer.data}, status=status.HTTP_200_OK)
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def like_comment(request, post_id, comment_id):
+    """
+    Like or unlike a comment.
+    """
+    try:
+        comment = (
+            Comment.objects.select_related("author", "post")
+            .prefetch_related("likes")
+            .get(id=comment_id, post_id=post_id)
+        )
+    except Comment.DoesNotExist:
+        return Response(
+            {"error": "Comment not found"}, status=status.HTTP_404_NOT_FOUND
+        )
+
+    like, created = CommentLike.objects.get_or_create(
+        comment=comment, user=request.user
+    )
+
+    if not created:
+        like.delete()
+    else:
+        if comment.author_id != request.user.id:
+            Notification.objects.create(
+                recipient=comment.author,
+                sender=request.user,
+                notification_type="comment_liked",
+                title="Your comment was liked",
+                message=f"{request.user.username} liked your comment.",
+                content_object=comment,
+            )
+
+    comment.refresh_from_db()
+    
+    serializer = CommentSerializer(comment, context={"request": request})
+    return Response({"comment": serializer.data}, status=status.HTTP_200_OK)
+
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])

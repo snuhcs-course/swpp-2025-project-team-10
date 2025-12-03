@@ -33,6 +33,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     userName = serializers.CharField(
         source="reviewer.username", read_only=True
     )
+    rating = serializers.IntegerField(min_value=1, max_value=5)
     userId = serializers.IntegerField(source="reviewer.id", read_only=True)
     userProfile = serializers.SerializerMethodField()
     content = serializers.CharField(read_only=True)
@@ -58,6 +59,7 @@ class ReviewSerializer(serializers.ModelSerializer):
             "likeCount",
             "createdAt",
             "isLiked",
+            "rating", # Added rating field
         ]
 
     def get_bookId(self, obj):
@@ -116,6 +118,27 @@ class CreateReviewSerializer(serializers.Serializer):
     imageUrls = serializers.ListField(
         child=serializers.URLField(), required=False, default=list
     )
+    rating = serializers.IntegerField(min_value=1, max_value=5)
+
+    def update(self, instance, validated_data):
+        """Update an existing review."""
+        instance.book_title = validated_data.get("bookTitle", instance.book_title)
+        instance.author_name = validated_data.get("authorName", instance.author_name)
+        instance.content = validated_data.get("content", instance.content)
+        instance.image_urls = validated_data.get("imageUrls", instance.image_urls)
+        instance.rating = validated_data.get("rating", instance.rating)
+
+        # Book ID (bookId) is optional
+        book_id = validated_data.get("bookId")
+        if book_id:
+            try:
+                instance.book = BookCopy.objects.get(pk=book_id)
+            except BookCopy.DoesNotExist:
+                pass  # ignore invalid bookId — keeps existing book
+
+        instance.save()
+        return instance
+
 
     def create(self, validated_data):
         """Create a new BookReview instance."""
@@ -137,6 +160,7 @@ class CreateReviewSerializer(serializers.Serializer):
             author_name=validated_data.get("authorName", ""),
             content=validated_data["content"],
             image_urls=validated_data.get("imageUrls", []),
+            rating=validated_data["rating"],
         )
         return review
 

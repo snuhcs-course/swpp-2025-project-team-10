@@ -16,6 +16,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.exceptions import NotFound
 
 from .models import (
     BookCollection,
@@ -122,59 +123,12 @@ class UserReviewListCreateView(generics.ListCreateAPIView):
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-# class UserReviewDetailView(generics.RetrieveUpdateDestroyAPIView):
-#     """
-#     API endpoint for retrieving, updating, and deleting a single review.
-    
-#     PATCH /library/reviews/<id>/
-#     DELETE /library/reviews/<id>/
-#     """
-
-#     permission_classes = [permissions.IsAuthenticated]
-#     lookup_field = "pk"
-#     def get_queryset(self):
-#         """Only allow the user to access their own reviews."""
-#         return BookReview.objects.filter(reviewer=self.request.user)
-
-#     def get_serializer_class(self):
-#         """Use the same serializer for create/update."""
-#         if self.request.method in ("PATCH", "PUT"):
-#             return CreateReviewSerializer
-#         return ReviewSerializer
-
-#     @extend_schema(
-#         summary="Update Review",
-#         description="Edit an existing book review",
-#         request=CreateReviewSerializer,
-#         responses={
-#             200: OpenApiResponse(
-#                 description="Review updated successfully",
-#                 response=ReviewSerializer,
-#             ),
-#             400: OpenApiResponse(description="Invalid input"),
-#             404: OpenApiResponse(description="Review not found"),
-#         },
-#     )
-#     def patch(self, request, *args, **kwargs):
-#         return self.update(request, *args, **kwargs)
-
-#     @extend_schema(
-#         summary="Delete Review",
-#         description="Delete the selected book review",
-#         responses={
-#             204: OpenApiResponse(description="Review deleted successfully"),
-#             404: OpenApiResponse(description="Review not found"),
-#         },
-#     )
-#     def delete(self, request, *args, **kwargs):
-#         return self.destroy(request, *args, **kwargs)
-
-
 class UserReviewDetailView(generics.RetrieveUpdateDestroyAPIView):
     """
     API endpoint for retrieving, updating, and deleting a specific user review.
     GET /library/reviews/<id>/ - Retrieve a specific review
-    PATCH /library/reviews/<id>/ - Update a review
+    PATCH /library/reviews/<id>/ - Partially update a review
+    PUT /library/reviews/<id>/ - Fully update a review
     DELETE /library/reviews/<id>/ - Delete a review
     """
     permission_classes = [permissions.IsAuthenticated]
@@ -182,28 +136,64 @@ class UserReviewDetailView(generics.RetrieveUpdateDestroyAPIView):
 
     def get_queryset(self):
         """Only allow the user to access their own reviews."""
-        return BookReview.objects.filter(reviewer=self.request.user)
+        return BookReview.objects.filter(reviewer=self.request.user).select_related('book', 'reviewer')
 
     def get_object(self):
         """
-        Ensure incorrect access (e.g., editing someone else’s review)
-        returns 404 instead of 405 (DRF default behavior).
+        Ensure incorrect access (e.g., editing someone else's review)
+        returns 404 instead of exposing that the review exists.
         """
+        queryset = self.get_queryset()
+        filter_kwargs = {self.lookup_field: self.kwargs[self.lookup_field]}
+        
         try:
-            return super().get_object()
-        except Exception:
-            from rest_framework.exceptions import NotFound
+            obj = queryset.get(**filter_kwargs)
+        except BookReview.DoesNotExist:
             raise NotFound("Review not found.")
+        except (ValueError, TypeError):
+            # Handle invalid PK format (e.g., non-integer)
+            raise NotFound("Review not found.")
+        
+        # May raise a permission denied
+        self.check_object_permissions(self.request, obj)
+        return obj
 
     def get_serializer_class(self):
-        """Use the same serializer for create/update."""
+        """Use appropriate serializer based on action."""
         if self.request.method in ("PATCH", "PUT"):
             return CreateReviewSerializer
         return ReviewSerializer
+    
+    def get_serializer_context(self):
+        """Add request to serializer context."""
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+    
+    def perform_update(self, serializer):
+        """
+        Ensure the reviewer field cannot be changed during update.
+        """
+        # Explicitly set reviewer to current user to prevent tampering
+        serializer.save(reviewer=self.request.user)
 
     @extend_schema(
-        summary="Update Review",
-        description="Edit an existing book review",
+        summary="Retrieve Review",
+        description="Get details of a specific book review",
+        responses={
+            200: OpenApiResponse(
+                description="Review retrieved successfully",
+                response=ReviewSerializer,
+            ),
+            404: OpenApiResponse(description="Review not found"),
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    @extend_schema(
+        summary="Update Review (Partial)",
+        description="Partially update an existing book review",
         request=CreateReviewSerializer,
         responses={
             200: OpenApiResponse(
@@ -215,6 +205,22 @@ class UserReviewDetailView(generics.RetrieveUpdateDestroyAPIView):
         },
     )
     def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
+    @extend_schema(
+        summary="Update Review (Full)",
+        description="Fully replace an existing book review",
+        request=CreateReviewSerializer,
+        responses={
+            200: OpenApiResponse(
+                description="Review updated successfully",
+                response=ReviewSerializer,
+            ),
+            400: OpenApiResponse(description="Invalid input"),
+            404: OpenApiResponse(description="Review not found"),
+        },
+    )
+    def put(self, request, *args, **kwargs):
         return self.update(request, *args, **kwargs)
 
     @extend_schema(

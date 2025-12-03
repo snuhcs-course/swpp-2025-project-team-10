@@ -2,7 +2,7 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework.test import APITestCase
 from django.contrib.auth import get_user_model
-from social.models import Post, Comment
+from social.models import Post, Comment, CommentLike
 
 User = get_user_model()
 
@@ -80,3 +80,49 @@ class TestCommentViews(APITestCase):
         # Ensure comment content did not change
         self.comment_by_other.refresh_from_db()
         assert self.comment_by_other.content == "Other user's comment"
+
+
+    def test_user_can_like_and_unlike_others_comment(self):
+        self.client.force_authenticate(self.reviewer)
+        # Like other user's comment
+        like_url = reverse("like-comment", args=[self.post.id, self.comment_by_other.id])
+        res = self.client.post(like_url)
+        assert res.status_code == 200
+
+        # Check that like exists
+        assert CommentLike.objects.filter(comment=self.comment_by_other, user=self.reviewer).exists()
+        assert res.data["comment"]["like_count"] == 1
+
+        # Unlike the same comment
+        res = self.client.post(like_url)
+        assert res.status_code == 200
+        assert not CommentLike.objects.filter(comment=self.comment_by_other, user=self.reviewer).exists()
+        assert res.data["comment"]["like_count"] == 0
+
+    def test_user_can_like_and_unlike_own_comment(self):
+        self.client.force_authenticate(self.reviewer)
+        # Like own comment
+        like_url = reverse("like-comment", args=[self.post.id, self.comment.id])
+        res = self.client.post(like_url)
+        assert res.status_code == 200
+
+        # Check that like exists
+        assert CommentLike.objects.filter(comment=self.comment, user=self.reviewer).exists()
+        assert res.data["comment"]["like_count"] == 1
+
+        # Unlike own comment
+        res = self.client.post(like_url)
+        assert res.status_code == 200
+        assert not CommentLike.objects.filter(comment=self.comment, user=self.reviewer).exists()
+        assert res.data["comment"]["like_count"] == 0
+    
+    def test_user_cannot_like_nonexistent_comment(self):
+        self.client.force_authenticate(self.reviewer)
+        # Use a random UUID that doesn't exist
+        import uuid
+        fake_comment_id = uuid.uuid4()
+        like_url = reverse("like-comment", args=[self.post.id, fake_comment_id])
+        res = self.client.post(like_url)
+        assert res.status_code == 404
+        assert res.data["error"] == "Comment not found"
+

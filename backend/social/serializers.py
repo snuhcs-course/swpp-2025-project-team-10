@@ -4,7 +4,7 @@ Serializers for the social app.
 
 from books.models import BookWishlist
 from rest_framework import serializers
-from social.models import Comment, Post
+from social.models import Comment, Post, CommentLike
 
 
 class PostSerializer(serializers.ModelSerializer):
@@ -181,38 +181,75 @@ class PostSerializer(serializers.ModelSerializer):
         return CommentSerializer(comments, many=True, context=self.context).data
 
 
+# class CommentSerializer(serializers.ModelSerializer):
+#     """
+#     Serializer for Comment model.
+#     """
+
+#     id = serializers.UUIDField(read_only=True)
+#     authorName = serializers.CharField(source="author.username", read_only=True)
+#     authorProfile = serializers.SerializerMethodField()
+
+#     content = serializers.CharField()
+#     createdAt = serializers.DateTimeField(source="created_at", read_only=True)
+#     updatedAt = serializers.DateTimeField(source="updated_at", read_only=True)
+
+
+#     class Meta:
+#         model = Comment
+#         fields = [
+#             "id",
+#             "authorName",
+#             "authorProfile",
+#             "content",
+#             "createdAt",
+#             "updatedAt",
+#         ]
+#         read_only_fields = [
+#             "id",
+#             "authorName",
+#             "authorProfile",
+#             "createdAt",
+#             "updatedAt",
+#         ]
+    
+#     def get_authorProfile(self, obj):
+#         """Get author's profile picture URL."""
+#         return {
+#             "username": obj.author.username,
+#             "profile_picture": obj.author.profile_picture.url
+#             if getattr(obj.author, "profile_picture", None)
+#             else None,
+#         }
+
+
 class CommentSerializer(serializers.ModelSerializer):
-    """
-    Serializer for Comment model.
-    """
-
-    id = serializers.UUIDField(read_only=True)
-    authorName = serializers.CharField(source="author.username", read_only=True)
+    authorName = serializers.CharField(source='author.username', read_only=True)
     authorProfile = serializers.SerializerMethodField()
-
-    content = serializers.CharField()
-    createdAt = serializers.DateTimeField(source="created_at", read_only=True)
-    updatedAt = serializers.DateTimeField(source="updated_at", read_only=True)
-
+    like_count = serializers.SerializerMethodField()
 
     class Meta:
         model = Comment
         fields = [
-            "id",
-            "authorName",
-            "authorProfile",
-            "content",
-            "createdAt",
-            "updatedAt",
+            'id',
+            'author',
+            'authorName',
+            'content',
+            'replies',
+            'authorProfile',
+            'like_count',
+            'created_at',
+            'updated_at',
         ]
-        read_only_fields = [
-            "id",
-            "authorName",
-            "authorProfile",
-            "createdAt",
-            "updatedAt",
-        ]
-    
+        read_only_fields = ['author', 'authorProfile', 'created_at', 'updated_at', 'like_count', 'replies']
+
+    def create(self, validated_data):
+        """Automatically assign the author from the request user."""
+        request = self.context.get('request')
+        if request and hasattr(request, 'user'):
+            validated_data['author'] = request.user
+        return super().create(validated_data)
+
     def get_authorProfile(self, obj):
         """Get author's profile picture URL."""
         return {
@@ -221,6 +258,10 @@ class CommentSerializer(serializers.ModelSerializer):
             if getattr(obj.author, "profile_picture", None)
             else None,
         }
+    
+    def get_like_count(self, obj):
+        return obj.like_count  # calls your @property from the model
+
 
 class FeedResponseSerializer(serializers.Serializer):
     """

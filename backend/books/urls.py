@@ -34,13 +34,19 @@ urlpatterns = [
     path("reviews/", UserReviewListCreateView.as_view(), name="user-reviews"),
     # Other user's book reviews by ID
     path(
-        "reviews/<int:user_id>/",
+        "users/reviews/<int:user_id>/",
         user_reviews_by_id,
         name="user-reviews-by-id",
     ),
 
-    # Delete or update a review
-    path("library/reviews/<int:pk>/", UserReviewDetailView.as_view(), name="review-modify"),
+    
+    # GET /library/reviews/<id>/ - Retrieve a specific review
+    # PATCH /library/reviews/<id>/ - Partially update a review
+    # PUT /library/reviews/<id>/ - Fully update a review
+    # DELETE /library/reviews/<id>/ - Delete a review
+    
+
+    path("reviews/<int:pk>/", UserReviewDetailView.as_view(), name="review-modify"),
 
     # Like/unlike a review
     path(
