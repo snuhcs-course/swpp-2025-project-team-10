@@ -169,9 +169,17 @@ else:
         "default": dj_database_url.parse(
             DATABASE_URL,
             conn_max_age=DATABASE_CONN_MAX_AGE,
-            ssl_require=DATABASE_SSL_
+            ssl_require=DATABASE_SSL,
             REQUIRE,
         )
+        'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',       # database name
+        'USER': 'butemjb',        # your mac username
+        'PASSWORD': '',           # leave empty unless you set one
+        'HOST': 'localhost',
+        'PORT': '5432',
+        }
     }
 
 # Cache Configuration
