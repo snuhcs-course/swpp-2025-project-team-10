@@ -410,6 +410,16 @@
                         android:visibility="visible"
                         tools:visibility="visible" />
 
+                    <TextView
+                        android:id="@+id/tvTradeSpot2"
+                        style="@style/Text.Body.Medium"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_xs"
+                        android:text="@string/profile_spot_example_2"
+                        android:visibility="visible"
+                        tools:visibility="visible" />
+
                     <!-- 편집모드 -->
                     <EditText
                         android:id="@+id/editTradeSpot1"
@@ -418,6 +428,20 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/space_s"
                         android:hint="@string/profile_spot_hint_1"
+                        android:background="@drawable/underline"
+                        android:paddingBottom="@dimen/space_xs"
+                        android:inputType="textCapWords"
+                        android:importantForAutofill="no"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
+
+                    <EditText
+                        android:id="@+id/editTradeSpot2"
+                        style="@style/Text.Body.Medium"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_xs"
+                        android:hint="@string/profile_spot_hint_2"
                         android:background="@drawable/underline"
                         android:paddingBottom="@dimen/space_xs"
                         android:inputType="textCapWords"

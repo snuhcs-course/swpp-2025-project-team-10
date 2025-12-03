@@ -15,8 +15,8 @@
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbarAddBook"
-            style="@style/Widget.Library.Toolbar"
             android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
             android:theme="@style/ThemeOverlay.MaterialComponents.ActionBar"
             app:navigationIcon="@drawable/arrow_back_icon"
             app:title="@string/add_book_title"
@@ -57,7 +57,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="8dp"
-                    android:visibility="gone"
                     app:backgroundTint="@color/white"
                     app:fabSize="mini"
                     app:layout_constraintBottom_toBottomOf="@id/imgCover"

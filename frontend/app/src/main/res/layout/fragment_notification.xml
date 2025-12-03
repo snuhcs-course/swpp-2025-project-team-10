@@ -39,9 +39,9 @@
             android:layout_height="wrap_content" />
 
         <com.google.android.material.chip.Chip
-            android:id="@+id/chipSocial"
+            android:id="@+id/chipCategory"
             style="@style/Widget.MaterialComponents.Chip.Choice"
-            android:text="소셜"
+            android:text="카테고리"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
     </com.google.android.material.chip.ChipGroup>

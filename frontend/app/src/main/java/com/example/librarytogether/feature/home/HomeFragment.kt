@@ -171,9 +171,10 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     }
 
     private fun navigateToReview(post: Post) {
-        // Toast.makeText(requireContext(), "서평", Toast.LENGTH_SHORT).show()
-        // TODO: 서평 댓글 화면으로 이동
-        CommentBottomSheet().show(parentFragmentManager, "comments")
+        CommentBottomSheet.newInstance(
+            postId = post.id,
+            comments = post.comments
+        ).show(parentFragmentManager, "comments")
     }
 
     private fun onClickExchange(post: Post) {

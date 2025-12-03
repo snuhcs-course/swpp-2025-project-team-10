@@ -10,15 +10,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-enum class SortType { LATEST, POPULAR, NEARBY }
+enum class SortType { LATEST, POPULAR }
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val repository: HomeRepository
 ) : ViewModel() {
     private var originalPosts: List<Post> = emptyList()
-    private var currentSort: SortType = SortType.LATEST
-    private var userRegion: String? = null
     private val _posts = MutableLiveData<List<Post>>(emptyList())
     val posts: LiveData<List<Post>> = _posts
 
@@ -47,7 +45,7 @@ class HomeViewModel @Inject constructor(
             try {
                 val feedPosts = repository.getFeed()
                 originalPosts = feedPosts
-                applySort(currentSort)
+                applySort(SortType.LATEST)
             } catch (e: Exception) {
                 _error.value = "네트워크 오류가 발생했습니다."
             } finally {
@@ -57,44 +55,11 @@ class HomeViewModel @Inject constructor(
     }
 
     fun applySort(type: SortType) {
-        currentSort = type
-
-        val allPosts: List<Post> = originalPosts.orEmpty()
-
-        val baseList = when (type) {
-            SortType.NEARBY -> {
-                val region = userRegion
-                    ?.trim()
-                    ?.takeIf { it.length >= 2 }
-                    ?.take(2)
-                if (region.isNullOrBlank()) {
-                    allPosts
-                } else {
-                    allPosts.filter { post ->
-                        val posterRegion = post.posterLocation
-                            ?.trim()
-                            ?.takeIf { it.length >= 2 }
-                            ?.take(2)
-
-                        posterRegion == region
-                    }
-                }
-            }
-            else -> allPosts
-        }
         val sorted = when (type) {
-            SortType.LATEST -> allPosts.sortedByDescending { it.createdAt }
-            SortType.POPULAR -> allPosts.sortedByDescending { it.likeCount }
-            SortType.NEARBY -> baseList.sortedByDescending { it.createdAt }
+            SortType.LATEST -> originalPosts.sortedByDescending { it.createdAt }
+            SortType.POPULAR -> originalPosts.sortedByDescending { it.likeCount }
         }
-        if (type == SortType.NEARBY && sorted.isEmpty() && originalPosts.isNotEmpty()) {
-            _error.value = "현재 지역 근처에는 게시글이 없습니다."
-
-            _posts.value = allPosts.sortedByDescending { it.createdAt }.toList()
-            currentSort = SortType.LATEST
-        } else {
-            _posts.value = sorted.toList()
-        }
+        _posts.value = sorted.toList()
     }
 
     fun toggleLike(post: Post) {
@@ -111,8 +76,7 @@ class HomeViewModel @Inject constructor(
 
     private fun applyLocalUpdate(updated: Post) {
         originalPosts = originalPosts.map { if (it.id == updated.id) updated else it }
-        val current = _posts.value.orEmpty()
-        _posts.value = current.map { if (it.id == updated.id) updated else it }
+        _posts.value = _posts.value?.map { if (it.id == updated.id) updated else it }
     }
 
     fun requestBarter(ownerId: Int, bookId: String) {
@@ -124,7 +88,6 @@ class HomeViewModel @Inject constructor(
                 )
                 _barterSuccess.value = ok
             } catch (e: Exception) {
-                _barterSuccess.value = false
                 _barterError.value = e.message ?: "네트워크 오류가 발생했습니다."
             } finally {
                 _barterLoading.value = false
@@ -132,26 +95,10 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun setUserLocation(location: String?) {
-        userRegion = location
-            ?.trim()
-            ?.takeIf { it.length >= 2 }
-            ?.take(2)
-
-        applySort(currentSort)
-    }
-
     fun clearBarterResult() {
         _barterSuccess.value = null
         _barterError.value = null
     }
-
-    fun hidePost(postId: Int) {
-        originalPosts = originalPosts.filterNot { it.id == postId }
-        val current = _posts.value.orEmpty()
-        _posts.value = current.filterNot { it.id == postId }
-    }
-
 
     fun onErrorShown() {
         _error.value = null

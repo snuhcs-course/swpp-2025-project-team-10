@@ -4,6 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:paddingHorizontal="16dp"
     android:paddingVertical="10dp">
 
     <!-- Profile Image -->
@@ -11,11 +12,10 @@
         android:id="@+id/imgProfile"
         android:layout_width="42dp"
         android:layout_height="42dp"
-        android:src="@drawable/person_icon"
+        android:src="@drawable/sample_profile"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        android:paddingEnd="@dimen/space_s"
         android:layout_marginEnd="10dp" />
 
     <!-- Text 내용 -->
@@ -81,9 +81,7 @@
         android:textSize="13sp"
         android:paddingHorizontal="12dp"
         android:textColor="@android:color/white"
-        android:background="@drawable/bg_action"
-        android:backgroundTint="@null"
-        app:backgroundTint="@null"
+        android:backgroundTint="@color/black"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"

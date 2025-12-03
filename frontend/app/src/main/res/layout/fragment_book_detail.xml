@@ -18,8 +18,8 @@
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
-            style="@style/Widget.Library.Toolbar"
             android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
             app:navigationIcon="@drawable/arrow_back_icon"
             app:title="@string/book_detail_title" />
     </com.google.android.material.appbar.AppBarLayout>

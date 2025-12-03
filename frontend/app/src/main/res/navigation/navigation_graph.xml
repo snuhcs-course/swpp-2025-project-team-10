@@ -95,12 +95,6 @@
             app:nullable="true"
             app:argType="string"
             android:defaultValue="@null" />
-
-        <argument
-            android:name="barterRequestId"
-            app:argType="string"
-            app:nullable="true"
-            android:defaultValue="@null" />
     </fragment>
 
     <fragment

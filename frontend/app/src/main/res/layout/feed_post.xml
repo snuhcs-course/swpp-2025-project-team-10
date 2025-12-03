@@ -14,7 +14,7 @@
         android:id="@+id/contentFeed"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="@dimen/space_xs">
+        android:padding="@dimen/space_m">
 
         <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/ivProfileImage"
