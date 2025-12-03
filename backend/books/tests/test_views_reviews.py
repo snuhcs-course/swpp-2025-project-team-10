@@ -64,7 +64,6 @@ class ReviewListViewTestCase(APITestCase):
         """Test that authenticated users can list their own reviews."""
         self.client.force_authenticate(user=self.user1)
         response = self.client.get(self.list_url)
-
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("results", response.data)
         self.assertEqual(len(response.data["results"]), 2)
@@ -139,6 +138,7 @@ class ReviewCreateViewTestCase(APITestCase):
             "authorName": "New Author",
             "content": "Great book!",
             "imageUrls": ["https://example.com/new.jpg"],
+            "rating": 5,
         }
         response = self.client.post(self.list_url, data, format="json")
 
@@ -163,6 +163,7 @@ class ReviewCreateViewTestCase(APITestCase):
             "bookTitle": "Book Without Images",
             "authorName": "Author Name",
             "content": "Good book!",
+            "rating": 1,
         }
         response = self.client.post(self.list_url, data, format="json")
 
@@ -176,6 +177,7 @@ class ReviewCreateViewTestCase(APITestCase):
             "bookTitle": "Book Without Author",
             "authorName": "",
             "content": "Good book!",
+            "rating": 1,
         }
         response = self.client.post(self.list_url, data, format="json")
 

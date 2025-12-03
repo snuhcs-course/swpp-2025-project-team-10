@@ -94,7 +94,7 @@ def test_comment_post_without_content():
     )
 
     client.force_authenticate(commenter)
-    res = client.post(f"/comments/", {}, format="json")
+    res = client.post(f"/posts/{post.id}/comments/", {}, format="json")
 
     assert res.status_code == 400
 
@@ -122,35 +122,33 @@ def test_comment_post_with_empty_content():
 
     client.force_authenticate(commenter)
     res = client.post(
-        f"/comments/",
+        f"/posts/{post.id}/comments/",
         {"content": ""},
         format="json",
     )
 
     assert res.status_code == 400
 
-#Test below is not needed as comment_post endpoint uses /comments/ not /posts/{post_id}/comments/.
+@pytest.mark.django_db
+def test_comment_nonexistent_post():
+    """Test commenting on a nonexistent post."""
+    client = APIClient()
+    user = User.objects.create(
+        username="commenter_ne",
+        email="cne@test.com",
+        first_name="C",
+        last_name="User",
+    )
 
-# @pytest.mark.django_db
-# def test_comment_nonexistent_post():
-#     """Test commenting on a nonexistent post."""
-#     client = APIClient()
-#     user = User.objects.create(
-#         username="commenter_ne",
-#         email="cne@test.com",
-#         first_name="C",
-#         last_name="User",
-#     )
+    client.force_authenticate(user)
+    fake_uuid = 999999
+    res = client.post(
+        f"/posts/{fake_uuid}/comments/",
+        {"content": "Comment"},
+        format="json",
+    )
 
-#     client.force_authenticate(user)
-#     fake_uuid = 999999
-#     res = client.post(
-#         f"/posts/{fake_uuid}/comments/",
-#         {"content": "Comment"},
-#         format="json",
-#     )
-
-#     assert res.status_code == 404
+    assert res.status_code == 404
 
 
 # Error cases for barter

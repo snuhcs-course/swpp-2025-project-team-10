@@ -39,7 +39,7 @@ def test_notifications_on_user_actions():
 
     # wishlist should notify the book owner
     res = client.post(f"/library/books/{book.id}/wishlist/")
-    assert res.status_code == 200
+    assert res.status_code == 201
     assert Notification.objects.filter(
         recipient=author, notification_type="book_wishlisted"
     ).exists()

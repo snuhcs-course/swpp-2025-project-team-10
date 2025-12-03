@@ -3,6 +3,7 @@ Serializers for the books app.
 Handles book reviews and related data serialization.
 """
 
+import re
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
@@ -33,7 +34,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     userName = serializers.CharField(
         source="reviewer.username", read_only=True
     )
-    rating = serializers.IntegerField(min_value=1, max_value=5)
+    rating = serializers.IntegerField(min_value=1, max_value=5, required=False)
     userId = serializers.IntegerField(source="reviewer.id", read_only=True)
     userProfile = serializers.SerializerMethodField()
     content = serializers.CharField(read_only=True)
@@ -118,7 +119,7 @@ class CreateReviewSerializer(serializers.Serializer):
     imageUrls = serializers.ListField(
         child=serializers.URLField(), required=False, default=list
     )
-    rating = serializers.IntegerField(min_value=1, max_value=5)
+    rating = serializers.IntegerField(min_value=1, max_value=5, required=False, default=3)
 
     def update(self, instance, validated_data):
         """Update an existing review."""

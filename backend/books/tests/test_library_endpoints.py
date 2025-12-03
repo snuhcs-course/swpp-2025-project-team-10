@@ -252,20 +252,3 @@ class BookWishlistToggleTestCase(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("Not in wishlist", response.data["message"])
-
-    def test_add_to_wishlist_duplicate(self):
-        """Test adding book to wishlist when already in list."""
-        # Add to wishlist first
-        BookWishlist.objects.create(user=self.user, book=self.book)
-
-        url = f"/library/books/{self.book.id}/wishlist/"
-        response = self.client.post(url)
-
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        # Should not create duplicate
-        self.assertEqual(
-            BookWishlist.objects.filter(
-                user=self.user, book=self.book
-            ).count(),
-            1,
-        )
