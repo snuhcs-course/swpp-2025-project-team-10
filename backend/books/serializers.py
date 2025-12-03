@@ -219,9 +219,6 @@ class BookSerializer(serializers.ModelSerializer):
     book_authors = serializers.ListField(
         child=serializers.CharField(), write_only=True, required=False
     )
-
-
-
     class Meta:
         model = BookCopy
         fields = [
@@ -280,11 +277,14 @@ class BookSerializer(serializers.ModelSerializer):
         publisher = obj.publication.publisher
         return publisher.name if publisher else None
 
+
     def get_cover_image(self, obj):
-        if not obj.cover_image:
+        publication = obj.publication
+
+        if not publication.cover_image:
             return None
         request = self.context.get("request")
-        url = obj.cover_image.url
+        url = publication.cover_image.url
         return request.build_absolute_uri(url) if request else url
 
     def get_coverUrl(self, obj):
