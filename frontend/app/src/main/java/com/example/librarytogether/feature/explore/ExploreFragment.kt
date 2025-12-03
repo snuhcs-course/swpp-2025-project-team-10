@@ -24,6 +24,8 @@ class ExploreFragment : Fragment(R.layout.fragment_explore) {
     private val binding get() = _binding!!
     private val viewModel: ExploreViewModel by viewModels()
 
+    private var hasLoaded = false
+
     private val adapter by lazy {
         BookAdapter(
             mode = BookListMode.ROW,
@@ -46,7 +48,10 @@ class ExploreFragment : Fragment(R.layout.fragment_explore) {
 
         setupRecycler()
         observeViewModel()
-        viewModel.loadRecommendations()
+        if (!hasLoaded) {
+            viewModel.loadRecommendations()
+            hasLoaded = true
+        }
     }
 
     private fun setupRecycler() {

@@ -45,7 +45,7 @@ class BookDetailRepositoryTest {
         id = id,
         title = "Kotlin In Action",
         authors = listOf("JetBrains"),
-        publisher = "Manning",
+        publisher_name = "Manning",
         isbn = "978-1234567890",
         description = "Great book",
         cover_image = "http://example.com/cover.jpg",

@@ -23,13 +23,31 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNavigationView)
 
         bottomNav.setOnItemSelectedListener { item ->
-            val navOptions = NavOptions.Builder()
-                .setLaunchSingleTop(true)
-                .setPopUpTo(navController.graph.startDestinationId, false) // 상태 저장 X
-                .build()
-
             val currentDestId = navController.currentDestination?.id
             val targetDestId = item.itemId
+
+            if (currentDestId == targetDestId) {
+                return@setOnItemSelectedListener true
+            }
+
+            val doNavigate: () -> Unit = {
+                if (targetDestId == R.id.nav_home) {
+                    val popped = navController.popBackStack(
+                        R.id.nav_home,
+                        false
+                    )
+                    if (!popped) {
+                        navController.navigate(R.id.nav_home)
+                    }
+                } else {
+                    val navOptions = NavOptions.Builder()
+                        .setLaunchSingleTop(true)
+                        .setPopUpTo(navController.graph.startDestinationId, false)
+                        .build()
+
+                    navController.navigate(targetDestId, null, navOptions)
+                }
+            }
 
             if (currentDestId == R.id.nav_library && targetDestId != R.id.nav_library) {
                 val libraryFragment = navHost.childFragmentManager.fragments
@@ -38,7 +56,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 if (libraryFragment != null) {
                     libraryFragment.handleLeaveFromLibrary(
                         onLeave = {
-                            navController.navigate(targetDestId, null, navOptions)
+                            doNavigate()
                         },
                         onCancelled = {}
                     )
@@ -48,7 +66,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
             }
 
             return@setOnItemSelectedListener try {
-                navController.navigate(item.itemId, null, navOptions)
+                doNavigate()
                 true
             } catch (e: IllegalArgumentException) {
                 false
