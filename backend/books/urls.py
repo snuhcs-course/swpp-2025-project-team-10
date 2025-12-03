@@ -40,10 +40,10 @@ urlpatterns = [
     ),
 
     
-    # GET /library/reviews/<id>/ - Retrieve a specific review
-    # PATCH /library/reviews/<id>/ - Partially update a review
-    # PUT /library/reviews/<id>/ - Fully update a review
-    # DELETE /library/reviews/<id>/ - Delete a review
+    # GET reviews/<id>/ - Retrieve a specific review
+    # PATCH reviews/<id>/ - Partially update a review
+    # PUT reviews/<id>/ - Fully update a review
+    # DELETE reviews/<id>/ - Delete a review
     
 
     path("reviews/<int:pk>/", UserReviewDetailView.as_view(), name="review-modify"),
