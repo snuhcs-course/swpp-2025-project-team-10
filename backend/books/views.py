@@ -16,6 +16,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.exceptions import NotFound
 
 from .models import (
     BookCollection,
@@ -47,7 +48,8 @@ from rest_framework.permissions import AllowAny
 def _build_book_card(book: BookCopy, request) -> dict:
     """Return a lightweight payload for library/wishlist endpoints."""
     cover_url = None
-    if book.cover_image:
+    cover_image = getattr(book, "cover_image", None)
+    if cover_image and hasattr(cover_image, "url"):
         cover_url = (
             request.build_absolute_uri(book.cover_image.url)
             if request
@@ -59,7 +61,6 @@ def _build_book_card(book: BookCopy, request) -> dict:
         "author": book.author_names,
         "coverUrl": cover_url,
     }
-
 
 class UserReviewListCreateView(generics.ListCreateAPIView):
     """
@@ -127,6 +128,117 @@ class UserReviewListCreateView(generics.ListCreateAPIView):
                 status=status.HTTP_201_CREATED,
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class UserReviewDetailView(generics.RetrieveUpdateDestroyAPIView):
+    """
+    API endpoint for retrieving, updating, and deleting a specific user review.
+    GET /library/reviews/<id>/ - Retrieve a specific review
+    PATCH /library/reviews/<id>/ - Partially update a review
+    PUT /library/reviews/<id>/ - Fully update a review
+    DELETE /library/reviews/<id>/ - Delete a review
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    lookup_field = "pk"
+
+    def get_queryset(self):
+        """Only allow the user to access their own reviews."""
+        return BookReview.objects.filter(reviewer=self.request.user).select_related('book', 'reviewer')
+
+    def get_object(self):
+        """
+        Ensure incorrect access (e.g., editing someone else's review)
+        returns 404 instead of exposing that the review exists.
+        """
+        queryset = self.get_queryset()
+        filter_kwargs = {self.lookup_field: self.kwargs[self.lookup_field]}
+        
+        try:
+            obj = queryset.get(**filter_kwargs)
+        except BookReview.DoesNotExist:
+            raise NotFound("Review not found.")
+        except (ValueError, TypeError):
+            # Handle invalid PK format (e.g., non-integer)
+            raise NotFound("Review not found.")
+        
+        # May raise a permission denied
+        self.check_object_permissions(self.request, obj)
+        return obj
+
+    def get_serializer_class(self):
+        """Use appropriate serializer based on action."""
+        if self.request.method in ("PATCH", "PUT"):
+            return CreateReviewSerializer
+        return ReviewSerializer
+    
+    def get_serializer_context(self):
+        """Add request to serializer context."""
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        return context
+    
+    def perform_update(self, serializer):
+        """
+        Ensure the reviewer field cannot be changed during update.
+        """
+        # Explicitly set reviewer to current user to prevent tampering
+        serializer.save(reviewer=self.request.user)
+
+    @extend_schema(
+        summary="Retrieve Review",
+        description="Get details of a specific book review",
+        responses={
+            200: OpenApiResponse(
+                description="Review retrieved successfully",
+                response=ReviewSerializer,
+            ),
+            404: OpenApiResponse(description="Review not found"),
+        },
+    )
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    @extend_schema(
+        summary="Update Review (Partial)",
+        description="Partially update an existing book review",
+        request=CreateReviewSerializer,
+        responses={
+            200: OpenApiResponse(
+                description="Review updated successfully",
+                response=ReviewSerializer,
+            ),
+            400: OpenApiResponse(description="Invalid input"),
+            404: OpenApiResponse(description="Review not found"),
+        },
+    )
+    def patch(self, request, *args, **kwargs):
+        return self.partial_update(request, *args, **kwargs)
+
+    @extend_schema(
+        summary="Update Review (Full)",
+        description="Fully replace an existing book review",
+        request=CreateReviewSerializer,
+        responses={
+            200: OpenApiResponse(
+                description="Review updated successfully",
+                response=ReviewSerializer,
+            ),
+            400: OpenApiResponse(description="Invalid input"),
+            404: OpenApiResponse(description="Review not found"),
+        },
+    )
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    @extend_schema(
+        summary="Delete Review",
+        description="Delete the selected book review",
+        responses={
+            204: OpenApiResponse(description="Review deleted successfully"),
+            404: OpenApiResponse(description="Review not found"),
+        },
+    )
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
 
 
 class ReviewLikeView(APIView):
@@ -324,10 +436,21 @@ def user_wishlist_list(request):
 
     wishlist_items = (
         BookWishlist.objects.filter(user=request.user)
-        .select_related("book__publication")
-        .prefetch_related("book__publication__authors")
+        .select_related(
+            "user",
+            "book",
+            "book__publication",
+            "book__publication__publisher",
+        )
+        .prefetch_related(
+            "book__publication__authors",
+            "book__publication__translators",
+            "book__publication__genres",
+        )
     )
-    books = [item.book for item in wishlist_items]
+
+    books = [item.book for item in wishlist_items]  # list of BookCopy objects
+
     return Response(
         [_build_book_card(book, request) for book in books],
         status=status.HTTP_200_OK,
@@ -348,8 +471,18 @@ def user_wishlist_by_id(request, user_id: int):
 
     wishlist_items = (
         BookWishlist.objects.filter(user=target_user)
-        .select_related("book__publication")
-        .prefetch_related("book__publication__authors")
+        .select_related(
+            "user",
+            "book",
+            "book__publication",
+            "book__publication__publisher",
+        )
+        .prefetch_related(
+            "book__publication__authors",
+            "book__publication__translators",
+            "book__publication__genres",
+        )
+
     )
     books = [item.book for item in wishlist_items]
     return Response(
@@ -385,20 +518,41 @@ def user_reviews_by_id(request, user_id: int):
 @permission_classes([permissions.IsAuthenticated])
 def toggle_wishlist(request, book_id):
     """
-    Add or remove a book from user's wishlist.
-    POST adds (idempotent), DELETE removes.
+    Wishlist toggle endpoint.
+
+    POST  → Add book to wishlist (idempotent)
+    DELETE → Remove book from wishlist
+
+    Responses:
+        201 Created / 200 OK on POST
+        204 No Content on DELETE when removed
+        404 if book not found
+        400 for invalid actions (e.g., wishlisting own book)
     """
 
+    # Fetch book or return 404
     book = get_object_or_404(
         BookCopy.objects.select_related("owner", "publication"), pk=book_id
     )
-
+    
+    # --------------------------------------------------
+    # POST — Add to wishlist (idempotent)
+    # --------------------------------------------------
     if request.method == "POST":
+        # Prevent user from wishlisting their own book
+        if book.owner_id == request.user.id:
+            return Response(
+                {"error": "You cannot wishlist your own book."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
         wishlist_item, created = BookWishlist.objects.get_or_create(
             user=request.user,
             book=book,
         )
-        if created and book.owner_id and book.owner_id != request.user.id:
+
+        # Only send notification on FIRST wishlist action
+        if created and book.owner_id:
             Notification.objects.create(
                 recipient=book.owner,
                 sender=request.user,
@@ -407,24 +561,31 @@ def toggle_wishlist(request, book_id):
                 message=f"{request.user.username} added '{book.title}' to their wishlist.",
                 content_object=book,
             )
-        return Response({"wishlisted": True}, status=status.HTTP_200_OK)
 
+        return Response(
+            {"wishlisted": True, "created": created},
+            status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
+        )
+
+    # --------------------------------------------------
+    # DELETE — Remove from wishlist
+    # --------------------------------------------------
     deleted_count, _ = BookWishlist.objects.filter(
         user=request.user, book=book
     ).delete()
+
     if deleted_count > 0:
-        data = {
-            "wishlisted": False,
-            "removed": True,
-            "message": "Removed from wishlist",
-        }
-    else:
-        data = {
-            "wishlisted": False,
-            "removed": False,
-            "message": "Not in wishlist",
-        }
-    return Response(data, status=status.HTTP_200_OK)
+        return Response(
+            {"wishlisted": False, "removed": True},
+            status=status.HTTP_200_OK,
+        )
+
+    # Item was not in wishlist
+    return Response(
+        {"wishlisted": False, "removed": False, "message": "Not in wishlist"},
+        status=status.HTTP_200_OK,
+    )
+
 
 
 @api_view(["PATCH"])

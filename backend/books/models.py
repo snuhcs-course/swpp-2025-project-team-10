@@ -585,10 +585,16 @@ class ReadingStatus(models.Model):
 @receiver(post_save, sender=BookReview)
 def create_post_for_review(sender, instance, created, **kwargs):
     if created:
+        # Use the first image URL as book cover image if available
+        cover_image = instance.image_urls[0] if instance.image_urls else ""
+
         Post.objects.create(
             author=instance.reviewer,
             post_type="book_review",
             content=instance.content,
             related_book=instance.book,
             is_public=True,
+            book_title=instance.book_title,
+            author_name=instance.author_name,
+            book_cover_image = cover_image,
         )

@@ -52,6 +52,10 @@ class Post(models.Model):
     # Visibility
     is_public = models.BooleanField(default=True)
 
+    book_title = models.CharField(max_length=200, blank=True)
+    author_name = models.CharField(max_length=200, blank=True)
+    book_cover_image = models.URLField(blank=True)
+
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
