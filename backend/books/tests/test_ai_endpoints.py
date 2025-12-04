@@ -16,12 +16,24 @@ def test_explore_recommendations_basic():
     response = client.get(url)
     assert response.status_code == 200
     data = response.json()
-    assert "recommendations" in data
-    assert "count" in data
-    assert "user_id" in data
-    assert data["user_id"] == str(user.id)
-    assert isinstance(data["recommendations"], list)
+    assert isinstance(data, list)
+    if data:
+        first = data[0]
+        assert "id" in first
+        assert "title" in first
+        assert "authors" in first
 
+
+@pytest.mark.django_db
+def test_explore_recommendations_recommendations_path():
+    user = User.objects.create_user(username="aiuser2", email="aiuser2@test.com", password="pw1234")
+    client = APIClient()
+    client.force_authenticate(user=user)
+    url = reverse("explore-recommendations-list")
+    response = client.get(url)
+    assert response.status_code == 200
+    data = response.json()
+    assert isinstance(data, list)
 @pytest.mark.django_db
 def test_ai_barter_context_basic():
     user_a = User.objects.create_user(username="usera", email="usera@test.com", password="pw1234")

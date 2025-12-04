@@ -38,6 +38,7 @@ class Migration(migrations.Migration):
                 ("birth_date", models.DateField(blank=True, null=True)),
                 ("death_date", models.DateField(blank=True, null=True)),
                 ("nationality", models.CharField(blank=True, max_length=50)),
+                ("is_onboarding_choice", models.BooleanField(default=False, help_text="온보딩 설문 선택지에 포함할지 여부")),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
             ],
             options={
@@ -62,6 +63,7 @@ class Migration(migrations.Migration):
                 ("name", models.CharField(max_length=50, unique=True)),
                 ("description", models.TextField(blank=True)),
                 ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("is_onboarding_choice", models.BooleanField(default=True, help_text="온보딩 설문 선택지에 포함할지 여부")),
             ],
             options={
                 "verbose_name": "Genre",
@@ -229,6 +231,12 @@ class Migration(migrations.Migration):
                         blank=True,
                         related_name="publications",
                         to="books.genre",
+                    ),
+                ),
+                (
+                    "is_onboarding_choice",
+                    models.BooleanField(
+                        default=False, help_text="온보딩 설문 선택지에 포함할지 여부"
                     ),
                 ),
                 (

@@ -7,18 +7,19 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingHorizontal="16dp"
-    tools:context=".feature.library.UserProfileFragment">
+    tools:context=".feature.profile.UserProfileFragment">
 
-    <TextView
-        android:id="@+id/tvAppName"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/app_name"
-        android:textStyle="bold"
-        android:textSize="20sp"
-        android:paddingBottom="@dimen/space_s"
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        style="@style/Widget.Library.Toolbar"
+        android:layout_width="match_parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:title="@string/app_name"
+        app:titleTextColor="@color/black"
+        app:navigationIcon="@drawable/arrow_back_icon"
+        app:navigationIconTint="@color/black" />
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/ivProfileImage"
@@ -26,7 +27,7 @@
         android:layout_height="@dimen/avatar_m"
         android:src="@drawable/person_icon"
         app:shapeAppearanceOverlay="@style/ShapeAppearanceOverlay.App.Circle"
-        app:layout_constraintTop_toBottomOf="@id/tvAppName"
+        app:layout_constraintTop_toBottomOf="@id/toolbar"
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
@@ -295,16 +296,6 @@
                         tools:visibility="visible" />
 
                     <TextView
-                        android:id="@+id/tvTradeLocation2"
-                        style="@style/Text.Body.Medium"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/space_xs"
-                        android:text="@string/profile_location_example_2"
-                        android:visibility="visible"
-                        tools:visibility="visible" />
-
-                    <TextView
                         style="@style/Pill.Section"
                         android:textStyle="bold"
                         android:layout_width="wrap_content"
@@ -319,16 +310,6 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/space_s"
                         android:text="@string/profile_spot_example_1"
-                        android:visibility="visible"
-                        tools:visibility="visible" />
-
-                    <TextView
-                        android:id="@+id/tvTradeSpot2"
-                        style="@style/Text.Body.Medium"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/space_xs"
-                        android:text="@string/profile_spot_example_2"
                         android:visibility="visible"
                         tools:visibility="visible" />
                 </LinearLayout>
@@ -378,16 +359,6 @@
                         tools:visibility="visible" />
 
                     <TextView
-                        android:id="@+id/tvGenreNone"
-                        style="@style/Text.Body.Medium"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="@dimen/space_xs"
-                        android:text="@string/genre_none"
-                        android:visibility="gone"
-                        tools:visibility="visible" />
-
-                    <TextView
                         android:id="@+id/tvFavBookLabel"
                         style="@style/Pill.Section"
                         android:layout_width="wrap_content"
@@ -415,6 +386,41 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="@dimen/space_xs"
                         android:text="@string/profile_favorite_book_note_example"
+                        android:visibility="visible"
+                        tools:visibility="visible"/>
+
+                    <!-- ============ 좋아하는 작가 ============ -->
+
+                    <TextView
+                        android:id="@+id/tvFavAuthorLabel"
+                        style="@style/Pill.Section"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_m"
+                        android:text="@string/profile_favorite_author"
+                        android:textStyle="bold"
+                        android:visibility="visible"
+                        tools:visibility="visible"/>
+
+                    <TextView
+                        android:id="@+id/tvFavAuthor"
+                        style="@style/Text.Body.Medium"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_s"
+                        android:text="@string/profile_favorite_author_example"
+                        android:visibility="visible"
+                        tools:visibility="visible"/>
+
+                    <TextView
+                        android:id="@+id/tvFavAuthorNote"
+                        style="@style/Text.Caption"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_xs"
+                        android:text="@string/profile_favorite_author_note_example"
+                        android:maxLines="2"
+                        android:ellipsize="end"
                         android:visibility="visible"
                         tools:visibility="visible"/>
 
@@ -455,6 +461,16 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:padding="@dimen/space_l">
+
+                    <TextView
+                        android:id="@+id/tvGenreNone"
+                        style="@style/Text.Body.Medium"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="@dimen/space_xs"
+                        android:text="@string/genre_none"
+                        android:visibility="gone"
+                        tools:visibility="visible" />
 
                     <LinearLayout
                         android:layout_width="match_parent"

@@ -220,6 +220,7 @@ def create_barter_request(request):
     Notification.objects.create(
         recipient=request.user,
         notification_type="barter_request_sent",
+        title="Barter request sent",
         message=f"You requested a trade for '{requested_book.title}'.",
         content_object=barter,
     )
@@ -482,13 +483,22 @@ def reject_barter_request(request, request_id):
             ]
         )
 
-        other_user = (
-            barter_request.requester
-            if request.user.id == barter_request.recipient_id
-            else barter_request.recipient
-        )
+        # other_user = (
+        #     barter_request.requester
+        #     if request.user.id == barter_request.recipient_id
+        #     else barter_request.recipient
+        # )
         Notification.objects.create(
-            recipient=other_user,
+            recipient=barter_request.requester,
+            sender=request.user,
+            notification_type="barter_rejected",
+            title="Barter request declined",
+            message=f"{request.user.username} declined the barter request.",
+            content_object=barter_request,
+        )
+
+        Notification.objects.create(
+            recipient=barter_request.recipient,
             sender=request.user,
             notification_type="barter_rejected",
             title="Barter request declined",

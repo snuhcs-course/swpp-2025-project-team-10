@@ -8,6 +8,9 @@ from django.urls import path
 from .book_search_api import book_search
 from .views import (
     ReviewLikeView,
+    OnboardingBookListView,
+    OnboardingAuthorListView,
+    OnboardingGenreListView,
     UserReviewListCreateView,
     UserReviewDetailView,
     book_detail,
@@ -122,4 +125,20 @@ urlpatterns = [
         modify_reading_status,
         name="reading-status-detail",
     ),  # Single book status
+
+    # Onboarding API
+    path(
+        "onboarding/books/",
+        OnboardingBookListView.as_view(),
+        name="onboarding-book-list",
+    ),
+    path(
+        "onboarding/authors/",
+        OnboardingAuthorListView.as_view(),
+        name="onboarding-author-list",
+    ),
+    path(
+        "onboarding/genres/", OnboardingGenreListView.as_view(), 
+        name="onboarding-genre-list"
+    ),
 ]

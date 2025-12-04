@@ -310,7 +310,9 @@ class HomeViewModelTest {
     fun requestBarter_failure_sets_barterError() = runTest {
         val ownerId = 10
         val bookId = "book-uuid"
-        whenever(repo.createRequest(ownerId, bookId)).thenReturn(false)
+
+        whenever(repo.createRequest(ownerId, bookId))
+            .thenThrow(RuntimeException("교환 신청에 실패했습니다."))
 
         val vm = vm()
         vm.requestBarter(ownerId, bookId)
@@ -319,6 +321,7 @@ class HomeViewModelTest {
         assertThat(vm.barterSuccess.getOrAwaitValue(), equalTo(false))
         assertThat(vm.barterError.getOrAwaitValue(), equalTo("교환 신청에 실패했습니다."))
     }
+
 
     @Test
     fun requestBarter_exception_sets_barterError() = runTest {

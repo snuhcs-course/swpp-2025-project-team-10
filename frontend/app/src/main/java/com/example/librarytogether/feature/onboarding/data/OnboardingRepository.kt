@@ -8,38 +8,47 @@ class OnboardingRepository @Inject constructor(
     private val api: OnboardingApi
 ) {
 
-    private val selectedBooks = mutableListOf<Int>()
-    private val selectedAuthors = mutableListOf<Int>()
-    private val selectedGenres = mutableListOf<Int>()
+    private val selectedBooks = mutableListOf<String>()
+    private val selectedAuthors = mutableListOf<String>()
+    private val selectedGenres = mutableListOf<String>()
 
     fun getBooks() = listOf(
-        LabelId(1, "해리포터"),
-        LabelId(2, "데미안"),
-        LabelId(3, "나미야 잡화점의 기적"),
-        LabelId(4, "달러구트 꿈 백화점"),
-        LabelId(5, "1984")
+        LabelId(1, "채식주의자"),
+        LabelId(2, "사피엔스"),
+        LabelId(3, "데미안"),
+        LabelId(4, "코스모스"),
+        LabelId(5, "총균쇠"),
+        LabelId(6, "82년생 김지영"),
+        LabelId(7,"우리들의 일그러진 영웅" ),
+        LabelId(8,"살인자의 기억법" ),
+        LabelId(9, "미움받을 용기" )
     )
 
     fun getAuthors() = listOf(
-        LabelId(1, "J.K. 롤링"),
+        LabelId(1, "한강"),
         LabelId(2, "무라카미 하루키"),
-        LabelId(3, "조앤 조지"),
-        LabelId(4, "조지 오웰"),
-        LabelId(5, "히가시노 게이고")
+        LabelId(3, "김영하"),
+        LabelId(4, "유발 하라리"),
+        LabelId(5, "베르나르 베르베르"),
+        LabelId(6, "마이클 샌델"),
+        LabelId(7, "톨스토이"),
+        LabelId(8,"정재승"),
+        LabelId(9, "유시민")
     )
 
     fun getGenres() = listOf(
         LabelId(1, "현대소설"),
         LabelId(2, "고전소설"),
-        LabelId(3, "에세이"),
-        LabelId(4, "시/희곡"),
+        LabelId(3, "시"),
+        LabelId(4, "자기계발"),
         LabelId(5, "과학·기술"),
         LabelId(6, "인문·사회"),
         LabelId(7, "역사·철학"),
-        LabelId(8, "예술·언어")
+        LabelId(8, "예술·언어"),
+        LabelId(9,"경제·경영")
     )
 
-    fun saveSelection(step: Int, ids: List<Int>) {
+    fun saveSelection(step: Int, ids: List<String>) {
         when (step) {
             0 -> {
                 selectedBooks.clear()
@@ -58,15 +67,13 @@ class OnboardingRepository @Inject constructor(
 
     suspend fun submitSelections(): Boolean {
         val req = OnboardingSubmitRequest(
+            // 백엔드 Serializer가 String과 Int를 모두 처리하므로, 그대로 전송
             book_ids = selectedBooks,
-            author_ids = selectedAuthors,
-            genre_ids = selectedGenres
+            author_ids = selectedAuthors.mapNotNull { it.toIntOrNull() },
+            genre_ids = selectedGenres.mapNotNull { it.toIntOrNull() }
         )
-        return try {
-            api.submit(req).isSuccessful
-        } catch (e: Exception) {
-            Log.e("OnboardingRepo", "submitSelections", e)
-            false
-        }
+        Log.d("OnboardingRepository", "Submitting: $req")
+        val response = api.submit(req)
+        return response.isSuccessful
     }
 }

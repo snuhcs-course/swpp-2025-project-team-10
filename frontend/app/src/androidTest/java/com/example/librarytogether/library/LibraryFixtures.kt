@@ -11,13 +11,13 @@ object LibraryFixtures {
         isLiked = liked
     )
 
-    fun book(id: Int) = Book(id = id, title = "B$id", author = "Auth$id", publisher = "Pub$id", isbn = "isbn$id" ,coverUrl = null)
+    fun book(id: String) = Book(id = id, title = "B$id", authors = listOf("Auth$id"), publisher = "Pub$id", isbn = "isbn$id" , cover_image = null, publicationId = null)
 
     fun userPrefs() = UserPreferences(
         tradeLocation1 = "L1", tradeLocation2 = "L2",
         tradeSpot1 = "S1", tradeSpot2 = "S2",
-        favBooks = "FB", favBookNotes = "FBN",
-        favAuthors = "FA", favAuthorNotes = "FAN",
+        favBooks = listOf("FB"), favBookNotes = listOf("FBN"),
+        favAuthors = listOf("FA"), favAuthorNotes = listOf("FAN"),
         readingHabit = "Night"
     )
 

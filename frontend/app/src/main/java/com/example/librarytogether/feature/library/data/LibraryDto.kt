@@ -52,10 +52,12 @@ data class Book(
     val authors: List<String>?,
     val cover_image: String?,
     val publisher: String?,
-    val isbn: String?
+    val isbn: String?,
+    val publicationId: String?
 )
 
 data class PostBook(
+    val publication: String,
     val title: String,
     val authors: String,
     val publisher: String?,
@@ -80,10 +82,10 @@ data class UserPreferences(
     val tradeLocation2: String?,
     val tradeSpot1: String?,
     val tradeSpot2: String?,
-    val favBooks: List<String>,
-    val favBookNotes: List<String>,
-    val favAuthors: List<String>,
-    val favAuthorNotes: List<String>,
+    val favBooks: List<String>?,
+    val favBookNotes: List<String>?,
+    val favAuthors: List<String>?,
+    val favAuthorNotes: List<String>?,
     val readingHabit: String?,
 )
 

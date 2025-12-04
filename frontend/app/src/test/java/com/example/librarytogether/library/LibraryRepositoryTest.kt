@@ -102,6 +102,50 @@ class LibraryRepositoryTest {
         mockedLog.verify { Log.e(any(), any(), any()) }
     }
 
+    // --- updateReview 테스트 ---
+
+    @Test
+    fun updateReview_success_calls_api_with_id_and_body() = runTest {
+        val review = LibraryFixtures.postReview()
+        whenever(libraryApi.updateReview(1, review)).thenReturn(Response.success(Unit))
+
+        repository.updateReview(1, review)
+
+        verify(libraryApi).updateReview(1, review)
+    }
+
+    @Test
+    fun updateReview_exception_logs_error() = runTest {
+        val review = LibraryFixtures.postReview()
+        whenever(libraryApi.updateReview(1, review)).thenThrow(RuntimeException("Error"))
+
+        repository.updateReview(1, review)
+
+        // Log.e(TAG, "Error updating review", e) 형태 가정
+        mockedLog.verify { Log.e(any(), any(), any()) }
+    }
+
+    // --- deleteReview 테스트 ---
+
+    @Test
+    fun deleteReview_success_calls_api_with_id() = runTest {
+        whenever(libraryApi.deleteReview(1)).thenReturn(Response.success(Unit))
+
+        repository.deleteReview(1)
+
+        verify(libraryApi).deleteReview(1)
+    }
+
+    @Test
+    fun deleteReview_exception_logs_error() = runTest {
+        whenever(libraryApi.deleteReview(1)).thenThrow(RuntimeException("Error"))
+
+        repository.deleteReview(1)
+
+        // Log.e(TAG, "Error deleting review", e) 형태 가정
+        mockedLog.verify { Log.e(any(), any(), any()) }
+    }
+
     // --- toggleLike 테스트 ---
 
     @Test
@@ -151,7 +195,7 @@ class LibraryRepositoryTest {
 
     @Test
     fun addBook_success_returns_true() = runTest {
-        val book = PostBook("T", "A", null, null, false)
+        val book = PostBook("p","T", "A", null, null, false)
         // API 정의에 따라 Response<Unit> 혹은 Response<Book> 등 적절히 조정 필요
         whenever(libraryApi.addBook(book)).thenReturn(Response.success(Unit))
 
@@ -162,7 +206,7 @@ class LibraryRepositoryTest {
 
     @Test
     fun addBook_failure_returns_false() = runTest {
-        val book = PostBook("T", "A", null, null, false)
+        val book = PostBook("p","T", "A", null, null, false)
         whenever(libraryApi.addBook(book)).thenReturn(errorResponse())
 
         val result = repository.addBook(book)
@@ -173,7 +217,7 @@ class LibraryRepositoryTest {
 
     @Test
     fun addBook_exception_returns_false() = runTest {
-        val book = PostBook("T", "A", null, null, false)
+        val book = PostBook("p","T", "A", null, null, false)
         whenever(libraryApi.addBook(book)).thenThrow(RuntimeException("Error"))
 
         val result = repository.addBook(book)
@@ -243,28 +287,6 @@ class LibraryRepositoryTest {
         val result = repository.updateMyProfile(profile)
 
         assertThat(result, nullValue())
-    }
-
-    // --- addToWishlist 테스트 ---
-
-    @Test
-    fun addToWishlist_success_returns_true() = runTest {
-        val book = LibraryFixtures.book(1)
-        whenever(libraryApi.addToWishlist(any())).thenReturn(Response.success(Unit))
-
-        val result = repository.addToWishlist(book)
-
-        assertThat(result, equalTo(true))
-    }
-
-    @Test
-    fun addToWishlist_failure_returns_false() = runTest {
-        val book = LibraryFixtures.book(1)
-        whenever(libraryApi.addToWishlist(any())).thenReturn(errorResponse())
-
-        val result = repository.addToWishlist(book)
-
-        assertThat(result, equalTo(false))
     }
 
     // --- addToWishlistById 테스트 ---

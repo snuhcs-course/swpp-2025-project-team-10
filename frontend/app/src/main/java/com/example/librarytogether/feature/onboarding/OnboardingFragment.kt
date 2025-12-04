@@ -3,18 +3,15 @@ package com.example.librarytogether.feature.onboarding
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.librarytogether.R
 import com.example.librarytogether.databinding.FragmentOnboardingBinding
 import com.example.librarytogether.feature.main.MainActivity
 import com.example.librarytogether.util.GridSpacingItemDecoration
-import com.google.android.flexbox.FlexWrap
-import com.google.android.flexbox.JustifyContent
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class OnboardingFragment : Fragment(R.layout.fragment_onboarding) {
@@ -39,20 +36,8 @@ class OnboardingFragment : Fragment(R.layout.fragment_onboarding) {
 
         // [다음] 버튼
         binding.btnNext.setOnClickListener {
-            viewLifecycleOwner.lifecycleScope.launch {
-                val isFinished = viewModel.nextStep()
-                if (isFinished) navigateToMain()
-            }
+            viewModel.nextStep()
         }
-
-        // [건너뛰기] 버튼
-        binding.btnSkip.setOnClickListener {
-            viewLifecycleOwner.lifecycleScope.launch {
-                val isFinished = viewModel.skipStep()
-                if (isFinished) navigateToMain()
-            }
-        }
-
         viewModel.loadInitial()
     }
 
@@ -73,8 +58,7 @@ class OnboardingFragment : Fragment(R.layout.fragment_onboarding) {
 
     private fun observeViewModel() {
         viewModel.displayItems.observe(viewLifecycleOwner) { list ->
-            val items = list.map { ChipSelectableAdapter.Item(it.id, it.name) }
-            chipAdapter.submitList(items)
+            chipAdapter.submitList(list)
         }
 
         viewModel.selectedIds.observe(viewLifecycleOwner) { selectedIds ->
@@ -93,6 +77,21 @@ class OnboardingFragment : Fragment(R.layout.fragment_onboarding) {
 
         viewModel.canProceed.observe(viewLifecycleOwner) { canProceed ->
             binding.btnNext.isEnabled = canProceed
+        }
+
+        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
+            binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+            binding.btnNext.isEnabled = !isLoading && (viewModel.canProceed.value ?: false)
+        }
+
+        viewModel.error.observe(viewLifecycleOwner) { errorMessage ->
+            errorMessage?.let {
+                Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        viewModel.onboardingFinished.observe(viewLifecycleOwner) { isFinished ->
+            if (isFinished) navigateToMain()
         }
     }
 

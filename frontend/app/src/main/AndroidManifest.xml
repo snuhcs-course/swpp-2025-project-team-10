@@ -60,11 +60,8 @@
 
         <activity
             android:name=".feature.main.MainActivity"
-            android:exported="false" />
-
-        <activity
-            android:name=".util.HiltTestActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
 
     </application>
 

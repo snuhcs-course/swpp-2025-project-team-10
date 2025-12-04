@@ -3,11 +3,9 @@ import android.os.Bundle
 import android.view.View
 import android.widget.PopupMenu
 import android.widget.Toast
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.librarytogether.R
@@ -15,7 +13,6 @@ import com.example.librarytogether.databinding.FragmentHomeBinding
 import com.example.librarytogether.feature.comment.CommentBottomSheet
 import com.example.librarytogether.feature.home.data.Post
 import com.example.librarytogether.feature.library.LibraryViewModel
-import com.example.librarytogether.feature.library.data.Book
 import com.example.librarytogether.feature.search.SearchSharedViewModel
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -72,10 +69,23 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     }
 
     private fun setupRecyclerView() {
+        binding.swipeRefresh.setOnRefreshListener {
+            homeviewModel.loadFeed()
+        }
+
         binding.rvFeed.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = feedAdapter
         }
+    }
+
+    internal fun handleSortMenuClick(itemId: Int) {
+        when (itemId) {
+            R.id.sort_latest -> homeviewModel.applySort(SortType.LATEST)
+            R.id.sort_popular -> homeviewModel.applySort(SortType.POPULAR)
+            R.id.sort_region -> homeviewModel.applySort(SortType.NEARBY)
+        }
+        shouldScrollToTopAfterSort = true
     }
 
     private fun setupSortButton() {
@@ -83,11 +93,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             val popup = PopupMenu(requireContext(), anchorView)
             popup.menuInflater.inflate(R.menu.menu_feed_sort, popup.menu)
             popup.setOnMenuItemClickListener { item ->
-                when (item.itemId) {
-                    R.id.sort_latest -> homeviewModel.applySort(SortType.LATEST)
-                    R.id.sort_popular -> homeviewModel.applySort(SortType.POPULAR)
-                }
-                shouldScrollToTopAfterSort = true
+                handleSortMenuClick(item.itemId)
                 true
             }
             popup.show()
@@ -106,12 +112,13 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
         homeviewModel.error.observe(viewLifecycleOwner) { error ->
             error?.let {
-                Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+                Snackbar.make(binding.root, it, Snackbar.LENGTH_SHORT).show()
                 homeviewModel.onErrorShown()
             }
         }
         homeviewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-            //binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+            binding.swipeRefresh.isRefreshing = isLoading
+            shouldScrollToTopAfterSort = true
         }
 
         homeviewModel.barterLoading.observe(viewLifecycleOwner) { loading ->
@@ -128,6 +135,11 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 Snackbar.make(requireView(), msg, Snackbar.LENGTH_SHORT).show()
                 homeviewModel.clearBarterResult()
             }
+        }
+
+        libraryViewModel.userProfile.observe(viewLifecycleOwner) { profile ->
+            profile ?: return@observe
+            homeviewModel.setUserLocation(profile.preferences.tradeLocation1)
         }
 
         libraryViewModel.error.observe(viewLifecycleOwner) { msg ->
@@ -156,10 +168,12 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     }
 
     private fun navigateToReview(post: Post) {
-        // Toast.makeText(requireContext(), "서평", Toast.LENGTH_SHORT).show()
-        // TODO: 서평 댓글 화면으로 이동
-        CommentBottomSheet().show(parentFragmentManager, "comments")
+        CommentBottomSheet.newInstance(
+            postId = post.id,
+            comments = post.comments
+        ).show(parentFragmentManager, "comments")
     }
+
 
     private fun onClickExchange(post: Post) {
         val ownerName = post.posterName
@@ -186,8 +200,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     }
 
     private fun showMoreOptions(post: Post) {
-        Toast.makeText(requireContext(), "메뉴", Toast.LENGTH_SHORT).show()
-        // TODO: 메뉴 구현
+        homeviewModel.hidePost(post.id)
     }
 
     private fun searchTitle(post: Post) {
@@ -195,7 +208,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         searchSharedViewModel.setQuery(query)
 
         val bottomNav = requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
-        bottomNav.selectedItemId = R.id.nav_search
+        bottomNav?.selectedItemId = R.id.nav_search
     }
 
     private fun searchAuthor(post: Post) {
@@ -203,7 +216,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         searchSharedViewModel.setQuery(query)
 
         val bottomNav = requireActivity().findViewById<BottomNavigationView>(R.id.bottomNavigationView)
-        bottomNav.selectedItemId = R.id.nav_search
+        bottomNav?.selectedItemId = R.id.nav_search
     }
 
     private fun expandContent(post: Post) {
