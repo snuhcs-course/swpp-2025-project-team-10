@@ -181,7 +181,7 @@ def create_publishers():
     print(f"  Created/Found {len(publishers)} publishers")
     return publishers
 
-def create_users(count=20):
+def create_users(count=40):
     """Create dummy users with profiles."""
     print(f"Creating {count} users...")
     
@@ -619,7 +619,7 @@ def create_books(users, genres, authors, publishers, count=50):
     print(f"  Created {len(publications)} unique publications and {len(book_copies)} book copies")
     return book_copies
 
-def create_book_reviews(users, books, count=30):
+def create_book_reviews(users, books, count=50):
     """Create book reviews."""
     print(f"Creating {count} book reviews...")
     
@@ -1079,16 +1079,16 @@ def main():
         publishers = create_publishers()
         
         # Create users and relationships
-        users = create_users(count=20)
+        users = create_users(count=40)
         create_user_tastes(users)
         create_user_preferences(users)
         create_follows(users)
         
         # Create books
-        books = create_books(users, genres, authors, publishers, count=50)
+        books = create_books(users, genres, authors, publishers, count=100)
         
         # Create reviews and social content
-        create_book_reviews(users, books, count=30)
+        create_book_reviews(users, books, count=50)
         # posts = create_posts(users, books, count=40)  # 제거됨
         # create_comments(users, posts, count=50)  # posts가 없으므로 comments도 제거
         
