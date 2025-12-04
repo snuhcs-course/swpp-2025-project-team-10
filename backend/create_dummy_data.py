@@ -1085,7 +1085,7 @@ def main():
         create_follows(users)
         
         # Create books
-        books = create_books(users, genres, authors, publishers, count=100)
+        books = create_books(users, genres, authors, publishers, count=150)
         
         # Create reviews and social content
         create_book_reviews(users, books, count=50)
