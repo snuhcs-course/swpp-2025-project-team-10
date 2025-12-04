@@ -7,4 +7,5 @@
     <color name="light_gray">#C3C3C3</color>
     <color name="bg_gray">#E7E0E8</color>
     <color name="my_primary">#62ACC5</color>
+    <color name="my_secondary">#D9EBF1</color>
 </resources>
