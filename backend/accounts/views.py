@@ -1240,13 +1240,11 @@ def onboarding_submit(request):
             },
             status=status.HTTP_200_OK,
         )
-
     except Exception as e:
         return Response(
             {"ok": False, "message": str(e)},
             status=status.HTTP_400_BAD_REQUEST,
         )
-
 
 @api_view(["POST", "DELETE"])
 @permission_classes([permissions.IsAuthenticated])
@@ -1287,9 +1285,9 @@ def follow_view(request, user_id: int):
                     title=f"{request.user.username} started following you",
                     message=f"{request.user.username} is now following you.",
                 )
-            except Exception:  # ← ADD THIS LINE
+            except Exception:
                 # Notification failures should not break the API contract
-                pass  # ← ADD THIS LINE
+                pass
         
         return Response({}, status=status.HTTP_200_OK)
     
