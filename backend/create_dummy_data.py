@@ -135,6 +135,15 @@ def create_authors():
     ]
     
     authors = []
+    # Ensure requested authors exist
+    extra_authors = [
+        ("세이노", "한국의 작가", None, None, "한국"),
+        ("윤동주", "한국의 시인", "1917-12-30", "1945-02-16", "한국"),
+        ("알랭 드 보통", "스위스의 작가/철학자", "1969-12-20", None, "스위스"),
+    ]
+    for item in extra_authors:
+        if not any(a[0] == item[0] for a in authors_data):
+            authors_data.append(item)
     for name, bio, birth, death, nationality in authors_data:
         birth_date = datetime.strptime(birth, "%Y-%m-%d").date() if birth else None
         death_date = datetime.strptime(death, "%Y-%m-%d").date() if death else None
@@ -481,6 +490,9 @@ def create_books(users, genres, authors, publishers, count=50):
         {"title": "위대한 유산", "author": "찰스 디킨스"},
         {"title": "오페라의 유령", "author": "가스통 르루"},
         {"title": "레미제라블", "author": "빅토르 위고"},
+        {"title": "하늘과 바람과 별과 시", "author": "윤동주"},
+        {"title": "불안", "author": "알랭 드 보통"},
+        {"title": "세이노의 지혜", "author": "세이노"},
         # 필요시 더 추가
     ]
     
@@ -1088,7 +1100,7 @@ def main():
         books = create_books(users, genres, authors, publishers, count=150)
         
         # Create reviews and social content
-        create_book_reviews(users, books, count=50)
+        create_book_reviews(users, books, count=100)
         # posts = create_posts(users, books, count=40)  # 제거됨
         # create_comments(users, posts, count=50)  # posts가 없으므로 comments도 제거
         

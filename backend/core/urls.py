@@ -43,6 +43,8 @@ urlpatterns = [
     path(
         "api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"
     ),
+    # API Endpoints - Place accounts.urls BEFORE djoser to ensure custom endpoints are matched first
+    path("auth/", include("accounts.urls")),  # Matches frontend expectations
     # Authentication
     path("auth/", include("djoser.urls")),
     path("auth/", include("djoser.urls.jwt")),
@@ -52,7 +54,6 @@ urlpatterns = [
     ),
     path("accounts/", include("allauth.urls")),
     # API Endpoints
-    path("auth/", include("accounts.urls")),  # Matches frontend expectations
     path("library/", include("books.urls")),  # User's library (reviews, books)
     # Root-level AI/Explore shortcuts (kept alongside library/ paths for compatibility)
     path(

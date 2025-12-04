@@ -15,11 +15,11 @@ class OnboardingRepository @Inject constructor(
     fun getBooks() = listOf(
         LabelId(1, "채식주의자"),
         LabelId(2, "사피엔스"),
-        LabelId(3, "데미안"),
-        LabelId(4, "코스모스"),
-        LabelId(5, "총균쇠"),
+        LabelId(3, "생각의 탄생"),
+        LabelId(4, "연금술사"),
+        LabelId(5, "백년의 고독"),
         LabelId(6, "82년생 김지영"),
-        LabelId(7,"우리들의 일그러진 영웅" ),
+        LabelId(7,"해리포터와 마법사의 돌" ),
         LabelId(8,"살인자의 기억법" ),
         LabelId(9, "미움받을 용기" )
     )
@@ -30,10 +30,10 @@ class OnboardingRepository @Inject constructor(
         LabelId(3, "김영하"),
         LabelId(4, "유발 하라리"),
         LabelId(5, "베르나르 베르베르"),
-        LabelId(6, "마이클 샌델"),
-        LabelId(7, "톨스토이"),
-        LabelId(8,"정재승"),
-        LabelId(9, "유시민")
+        LabelId(6, "알랭 드 보통"),
+        LabelId(7, "움베르트 에코"),
+        LabelId(8,"세이노"),
+        LabelId(9, "운동주")
     )
 
     fun getGenres() = listOf(
