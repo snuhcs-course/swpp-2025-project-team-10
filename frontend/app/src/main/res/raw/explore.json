@@ -1,0 +1,112 @@
+[
+  {
+    "id": "1",
+    "title": "채식주의자",
+    "authors": [
+      "한강"
+    ],
+    "cover_image": "https://contents.kyobobook.co.kr/sih/fit-in/400x0/pdt/9788936434595.jpg",
+    "publisher": "창비",
+    "isbn": "9788936434595",
+    "publicationId": "pub_001"
+  },
+  {
+    "id": "2",
+    "title": "소년이 온다",
+    "authors": [
+      "한강"
+    ],
+    "cover_image": "https://covers.openlibrary.org/b/isbn/9788936434120-L.jpg",
+    "publisher": "창비",
+    "isbn": "9788936434120",
+    "publicationId": "pub_002"
+  },
+  {
+    "id": "3",
+    "title": "아몬드",
+    "authors": [
+      "손원평"
+    ],
+    "cover_image": "https://covers.openlibrary.org/b/isbn/9788936434267-L.jpg",
+    "publisher": "창비",
+    "isbn": "9788936434267",
+    "publicationId": "pub_003"
+  },
+  {
+    "id": "4",
+    "title": "파친코 1",
+    "authors": [
+      "이민진"
+    ],
+    "cover_image": "https://contents.kyobobook.co.kr/sih/fit-in/400x0/pdt/9791168340510.jpg",
+    "publisher": "인플루엔셜",
+    "isbn": "9791168340510",
+    "publicationId": "pub_004"
+  },
+  {
+    "id": "5",
+    "title": "1984",
+    "authors": [
+      "조지 오웰"
+    ],
+    "cover_image": "https://contents.kyobobook.co.kr/sih/fit-in/400x0/pdt/9788937460777.jpg",
+    "publisher": "민음사",
+    "isbn": "9788937460777",
+    "publicationId": "pub_005"
+  },
+  {
+    "id": "6",
+    "title": "동물농장",
+    "authors": [
+      "조지 오웰"
+    ],
+    "cover_image": "https://lh5.googleusercontent.com/proxy/WZVTj7Pd5cfDy-vJLvIVpDa6awNXObRrG6PwCFMvLRAlBGWOceRW7CYRX2Lx6MgoMQFyp_0ide5o5eG_KFSbHUCgqgerRQmDEvNy7afkgORgHRcon9_484j5hdfzzrGSOmbJMzsytqA",
+    "publisher": "민음사",
+    "isbn": "9788937460050",
+    "publicationId": "pub_006"
+  },
+  {
+    "id": "7",
+    "title": "호밀밭의 파수꾼",
+    "authors": [
+      "제롬 데이비드 샐린저"
+    ],
+    "cover_image": "https://i.namu.wiki/i/4p37vm3IKLvqqdah6w8aE84Vx24JVn_5zFGGFy1_lpHEc0p4iOcDt8fQx_rcqQWIHAE6QrFgFZEnnDJrPtto2A.webp",
+    "publisher": "민음사",
+    "isbn": "9788937460470",
+    "publicationId": "pub_007"
+  },
+  {
+    "id": "8",
+    "title": "노르웨이의 숲",
+    "authors": [
+      "무라카미 하루키"
+    ],
+    "cover_image": "https://covers.openlibrary.org/b/isbn/9788937463105-L.jpg",
+    "publisher": "민음사",
+    "isbn": "9788937463105",
+    "publicationId": "pub_008"
+  },
+  {
+    "id": "9",
+    "title": "이방인",
+    "authors": [
+      "알베르 카뮈"
+    ],
+    "cover_image": "https://contents.kyobobook.co.kr/sih/fit-in/400x0/pdt/9791190473767.jpg",
+    "publisher": "민음사",
+    "isbn": "9788937443848",
+    "publicationId": "pub_009"
+  },
+  {
+    "id": "10",
+    "title": "오만과 편견",
+    "authors": [
+      "제인 오스틴"
+    ],
+    "cover_image": "https://contents.kyobobook.co.kr/sih/fit-in/400x0/pdt/9788937460883.jpg",
+    "publisher": "민음사",
+    "isbn": "9788937482281",
+    "publicationId": "pub_010"
+  }
+]

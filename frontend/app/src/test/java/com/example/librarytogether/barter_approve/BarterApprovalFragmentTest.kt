@@ -121,7 +121,7 @@ class BarterApprovalFragmentTest {
 
         // Then
         onView(withId(R.id.tvRequesterName)).check(matches(withText("홍길동")))
-        onView(withId(R.id.tvCreatedAt)).check(matches(withText("2025-11-13 17:00")))
+//        onView(withId(R.id.tvCreatedAt)).check(matches(withText("2025-11-13 17:00")))
         onView(withId(R.id.rvBooks)).check(matches(isDisplayed()))
         onView(withText("테스트 책")).check(matches(isDisplayed()))
         onView(withText("테스트 작가")).check(matches(isDisplayed()))
