@@ -72,7 +72,7 @@ adb install app/build/outputs/apk/debug/app-debug.apk
          │                       │
          ▼                       ▼
 ┌─────────────────┐    ┌─────────────────┐
-│   Jetpack       │    │    SQLite       │
+│   Jetpack       │    │    Postgresql   │
 │   Compose UI    │    │    Database     │
 └─────────────────┘    └─────────────────┘
 ```
@@ -402,9 +402,9 @@ For detailed information about formatting tools and workflows, see **[tools/READ
 - ✅ Frontend mobile application (Android/Kotlin)
 - ✅ Book management system
 - ✅ User profiles
-- 🚧 Bartering system
-- 🚧 Social features (follow, messaging)
-- 🚧 Notifications
+- ✅ Bartering system
+- ✅ Social features (follow, likes)
+- ✅ Notifications
 - ⏳ Production deployment
 
 ## 🎓 SWPP Course Requirements
