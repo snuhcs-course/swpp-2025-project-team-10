@@ -122,11 +122,16 @@ class CreateReviewSerializer(serializers.Serializer):
         child=serializers.URLField(), required=False, default=list
     )
 
+
     def create(self, validated_data):
         """Create a new BookReview instance."""
         user = self.context["request"].user
         book_id = validated_data.get("bookId")
-        
+        book_title = validated_data.get("bookTitle")
+        author_name = validated_data.get("authorName", "")
+        content = validated_data["content"]
+        image_urls = validated_data.get("imageUrls", [])
+
         # Try to find the book if bookId is provided
         book = None
         if book_id:
@@ -135,15 +140,54 @@ class CreateReviewSerializer(serializers.Serializer):
             except BookCopy.DoesNotExist:
                 pass
 
+        # book_title은 반드시 값이 있어야 함
+        if not book_title:
+            if book:
+                book_title = book.title
+            else:
+                raise serializers.ValidationError({"bookTitle": "This field is required."})
+
         review = BookReview.objects.create(
             reviewer=user,
             book=book,
-            book_title=validated_data["bookTitle"],
-            author_name=validated_data.get("authorName", ""),
-            content=validated_data["content"],
-            image_urls=validated_data.get("imageUrls", []),
+            book_title=book_title,
+            author_name=author_name,
+            content=content,
+            image_urls=image_urls,
         )
         return review
+
+    def update(self, instance, validated_data):
+        """Update an existing BookReview instance."""
+        # reviewer는 변경 불가, 나머지 필드만 업데이트
+        book_id = validated_data.get("bookId", None)
+        book_title = validated_data.get("bookTitle", instance.book_title)
+        author_name = validated_data.get("authorName", instance.author_name)
+        content = validated_data.get("content", instance.content)
+        image_urls = validated_data.get("imageUrls", instance.image_urls)
+
+        # bookId가 있으면 book 객체로 변환
+        book = instance.book
+        if book_id:
+            try:
+                book = BookCopy.objects.get(pk=book_id)
+            except BookCopy.DoesNotExist:
+                book = None
+
+        # book_title은 반드시 값이 있어야 함
+        if not book_title:
+            if book:
+                book_title = book.title
+            else:
+                raise serializers.ValidationError({"bookTitle": "This field is required."})
+
+        instance.book = book
+        instance.book_title = book_title
+        instance.author_name = author_name
+        instance.content = content
+        instance.image_urls = image_urls
+        instance.save()
+        return instance
 
     def to_representation(self, instance):
         """Return the created review in the same format as ReviewSerializer."""

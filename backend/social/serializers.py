@@ -146,7 +146,7 @@ class PostSerializer(serializers.ModelSerializer):
     def get_bookTitle(self, obj):
          """Get book title from related_book if exists."""
          if obj.related_book:
-             return obj.related_book.title
+            return obj.related_book.title
          return ""
 
     def get_authorName(self, obj):

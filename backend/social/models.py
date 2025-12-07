@@ -30,6 +30,7 @@ class Post(models.Model):
 
     # Content
     content = models.TextField(help_text="Share your thoughts about books!")
+    book_title = models.CharField(max_length=200, blank=True, help_text="Title of the book for review posts")
 
     # Related Objects
     related_book = models.ForeignKey(

@@ -9,7 +9,7 @@ from .book_search_api import book_search
 from .views import (
     ReviewLikeView,
     UserReviewListCreateView,
-    UserReviewDetailView,
+    UserReviewHybridView,
     book_detail,
     book_list,
     collection_list_view,
@@ -33,11 +33,11 @@ urlpatterns = [
     # User's book reviews
     path("reviews/", UserReviewListCreateView.as_view(), name="user-reviews"),
     # Other user's book reviews by ID
-    path(
-        "users/reviews/<int:user_id>/",
-        user_reviews_by_id,
-        name="user-reviews-by-id",
-    ),
+    # path(
+    #     "reviews/<int:user_id>/",
+    #     user_reviews_by_id,
+    #     name="user-reviews-by-id",
+    # ),
 
     
     # GET reviews/<id>/ - Retrieve a specific review
@@ -46,7 +46,7 @@ urlpatterns = [
     # DELETE reviews/<id>/ - Delete a review
     
 
-    path("reviews/<int:pk>/", UserReviewDetailView.as_view(), name="review-modify"),
+    path("reviews/<int:pk>/", UserReviewHybridView.as_view(), name="user-reviews-hybrid"),
 
     # Like/unlike a review
     path(

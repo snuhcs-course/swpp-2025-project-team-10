@@ -55,6 +55,67 @@ def _build_book_card(book: BookCopy, request) -> dict:
         "coverUrl": cover_url,
     }
 
+
+# Custom view to handle both user reviews list (GET by user_id) and review detail (PATCH/PUT/DELETE by pk)
+class UserReviewHybridView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, pk):
+        """Get reviews written by a specific user (pk=user_id)."""
+        try:
+            reviewer = User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        queryset = (
+            BookReview.objects.filter(reviewer=reviewer)
+            .select_related("reviewer")
+            .prefetch_related("helpful_votes")
+        )
+        serializer = ReviewSerializer(queryset, many=True, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+    def patch(self, request, pk):
+        """
+        PATCH: treat pk as review pk and update if owner.
+        """
+        try:
+            review = BookReview.objects.get(pk=pk, reviewer=request.user)
+        except BookReview.DoesNotExist:
+            return Response({"error": "Review not found or no permission."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = CreateReviewSerializer(review, data=request.data, partial=True, context={"request": request})
+        if serializer.is_valid():
+            serializer.save(reviewer=request.user)
+            return Response(ReviewSerializer(review, context={"request": request}).data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+    def put(self, request, pk):
+        """
+        PUT: treat pk as review pk and update if owner.
+        """
+        try:
+            review = BookReview.objects.get(pk=pk, reviewer=request.user)
+        except BookReview.DoesNotExist:
+            return Response({"error": "Review not found or no permission."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = CreateReviewSerializer(review, data=request.data, partial=False, context={"request": request})
+        if serializer.is_valid():
+            serializer.save(reviewer=request.user)
+            return Response(ReviewSerializer(review, context={"request": request}).data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+    def delete(self, request, pk):
+        """
+        DELETE: treat pk as review pk and delete if owner.
+        """
+        try:
+            review = BookReview.objects.get(pk=pk, reviewer=request.user)
+        except BookReview.DoesNotExist:
+            return Response({"error": "Review not found or no permission."}, status=status.HTTP_404_NOT_FOUND)
+        review.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
 class UserReviewListCreateView(generics.ListCreateAPIView):
     """
     API endpoint for listing and creating user's book reviews.
@@ -72,9 +133,17 @@ class UserReviewListCreateView(generics.ListCreateAPIView):
         return ReviewSerializer
 
     def get_queryset(self):
-        """Return only the authenticated user's reviews."""
+        """Return reviews for a specific user if user_id is given, else for the authenticated user."""
+        user_id = self.request.query_params.get('user_id')
+        if user_id:
+            try:
+                user = User.objects.get(pk=user_id)
+            except User.DoesNotExist:
+                return BookReview.objects.none()
+        else:
+            user = self.request.user
         return (
-            BookReview.objects.filter(reviewer=self.request.user)
+            BookReview.objects.filter(reviewer=user)
             .select_related("reviewer")
             .prefetch_related("helpful_votes")
         )
@@ -504,7 +573,7 @@ def user_reviews_by_id(request, user_id: int):
     serializer = ReviewSerializer(
         queryset, many=True, context={"request": request}
     )
-    return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response({"results": serializer.data}, status=status.HTTP_200_OK)
 
 
 @api_view(["POST", "DELETE"])
