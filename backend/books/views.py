@@ -902,16 +902,31 @@ class OnboardingAuthorListView(generics.ListAPIView):
     """
     온보딩 과정에서 보여줄 작가 목록은 "is_onboarding_choice=True"인 항목들만 반환합니다.
     """
-    queryset = Author.objects.filter(is_onboarding_choice=True)
+    # queryset = Author.objects.filter(is_onboarding_choice=True)
+    # serializer_class = OnboardingAuthorSerializer
+    # permission_classes = [AllowAny]
+    # pagination_class = None # 페이지네이션 비활성화
+
     serializer_class = OnboardingAuthorSerializer
     permission_classes = [AllowAny]
-    pagination_class = None # 페이지네이션 비활성화
+    pagination_class = None
+    
+    def get_queryset(self):
+        return Author.objects.filter(is_onboarding_choice=True)
 
 class OnboardingGenreListView(generics.ListAPIView):
     """
     온보딩 과정에서 보여줄 장르 목록은 "is_onboarding_choice=True"인 항목들만 반환합니다.
     """
-    queryset = Genre.objects.filter(is_onboarding_choice=True)
+    # queryset = Genre.objects.filter(is_onboarding_choice=True)
+    # serializer_class = OnboardingGenreSerializer
+    # permission_classes = [AllowAny]
+    # pagination_class = None # 페이지네이션 비활성화
+
     serializer_class = OnboardingGenreSerializer
     permission_classes = [AllowAny]
-    pagination_class = None # 페이지네이션 비활성화
+    pagination_class = None
+    
+    def get_queryset(self):
+        return Genre.objects.filter(is_onboarding_choice=True)
+
