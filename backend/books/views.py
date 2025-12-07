@@ -886,10 +886,17 @@ class OnboardingBookListView(generics.ListAPIView):
     """
     온보딩 과정에서 보여줄 책 목록은 "is_onboarding_choice=True"인 항목들만 반환합니다.
     """
-    queryset = BookPublication.objects.filter(is_onboarding_choice=True)
+    # queryset = BookPublication.objects.filter(is_onboarding_choice=True)
+    # serializer_class = OnboardingBookSerializer
+    # permission_classes = [AllowAny]
+    # pagination_class = None # 페이지네이션 비활성화
+
     serializer_class = OnboardingBookSerializer
     permission_classes = [AllowAny]
-    pagination_class = None # 페이지네이션 비활성화
+    pagination_class = None  # 페이지네이션 비활성화
+    
+    def get_queryset(self):
+        return BookPublication.objects.filter(is_onboarding_choice=True)
 
 class OnboardingAuthorListView(generics.ListAPIView):
     """
