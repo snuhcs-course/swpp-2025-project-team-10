@@ -19,13 +19,13 @@ import com.example.librarytogether.feature.auth.data.AuthApi
 import com.example.librarytogether.feature.auth.data.GoogleAuthRequest
 import com.example.librarytogether.feature.auth.data.KakaoAuthRequest
 import com.example.librarytogether.feature.auth.data.LoginRequest
-import com.example.librarytogether.network.AuthManager
-import com.example.librarytogether.network.RetrofitClient
 import com.example.librarytogether.feature.main.MainActivity
 import com.example.librarytogether.feature.onboarding.OnboardingActivity
-import com.google.android.material.button.MaterialButton
+import com.example.librarytogether.network.AuthManager
+import com.example.librarytogether.network.RetrofitClient
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.google.android.material.button.MaterialButton
 import com.kakao.sdk.user.UserApiClient
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -76,6 +76,16 @@ class LoginActivity : AppCompatActivity() {
         btnGoogle.setOnClickListener { onClickGoogleLogin() }
     }
 
+    private fun saveLoginData(accessToken: String, refreshToken: String, username: String?) {
+        AuthManager.saveTokens(this, accessToken, refreshToken)
+
+        val sharedPrefs = getSharedPreferences("app_prefs", android.content.Context.MODE_PRIVATE)
+        with(sharedPrefs.edit()) {
+            putString("username", username)
+            apply()
+        }
+    }
+
     private fun onClickLogin() {
         val id = email.text.toString().trim()
         val pw = password.text.toString()
@@ -93,6 +103,7 @@ class LoginActivity : AppCompatActivity() {
                 if (resp.isSuccessful) {
                     val body = resp.body()
                     if (body?.ok == true) {
+                        saveLoginData(body.accessToken!!, body.refreshToken!!, body.user?.username)
                         AuthManager.saveTokens(
                             context = this@LoginActivity,
                             access = body.accessToken,

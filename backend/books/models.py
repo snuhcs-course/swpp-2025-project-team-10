@@ -20,9 +20,6 @@ class Genre(models.Model):
     name = models.CharField(max_length=50, unique=True)
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    is_onboarding_choice = models.BooleanField(
-        default=True, help_text="온보딩 설문 선택지에 포함할지 여부"
-    )
 
     class Meta:
         db_table = "books_genre"
@@ -44,9 +41,6 @@ class Author(models.Model):
     birth_date = models.DateField(null=True, blank=True)
     death_date = models.DateField(null=True, blank=True)
     nationality = models.CharField(max_length=50, blank=True)
-    is_onboarding_choice = models.BooleanField(
-        default=False, help_text="온보딩 설문 선택지에 포함할지 여부"
-    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -128,9 +122,6 @@ class BookPublication(models.Model):
     description = models.TextField(blank=True)
     genres = models.ManyToManyField(
         Genre, related_name="publications", blank=True
-    )
-    is_onboarding_choice = models.BooleanField(
-        default=False, help_text="온보딩 설문 선택지에 포함할지 여부"
     )
 
     cover_image = models.ImageField(
@@ -585,16 +576,10 @@ class ReadingStatus(models.Model):
 @receiver(post_save, sender=BookReview)
 def create_post_for_review(sender, instance, created, **kwargs):
     if created:
-        # Use the first image URL as book cover image if available
-        cover_image = instance.image_urls[0] if instance.image_urls else ""
-
         Post.objects.create(
             author=instance.reviewer,
             post_type="book_review",
             content=instance.content,
             related_book=instance.book,
             is_public=True,
-            book_title=instance.book_title,
-            author_name=instance.author_name,
-            book_cover_image = cover_image,
         )

@@ -1,6 +1,7 @@
 package com.example.librarytogether.feature.home.data
 
 import com.example.librarytogether.feature.comment.data.CommentDto
+import com.google.gson.annotations.SerializedName
 
 //data class ApiResponse<T>(
 //    val success: Boolean,
@@ -62,4 +63,8 @@ data class PostResponse(
 
 data class CommentLikeResponse(
     val comment: CommentDto
+)
+data class PostResponseContainer(
+    @SerializedName("post")
+    val post: Post
 )

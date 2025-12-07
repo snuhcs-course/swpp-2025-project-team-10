@@ -1,11 +1,11 @@
 package com.example.librarytogether.network
 
-import java.util.concurrent.TimeUnit
 import android.content.Context
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.util.concurrent.TimeUnit
 
 object MockConfig {
     // 필요할 때만 true로
