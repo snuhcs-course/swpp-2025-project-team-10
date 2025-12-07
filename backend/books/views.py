@@ -38,13 +38,6 @@ from .services.publication_categories import PublicationCategorizer
 
 User = get_user_model()
 
-# --- Onboarding Views ---
-from .models import Author, Genre, BookPublication
-from .serializers import OnboardingAuthorSerializer, OnboardingBookSerializer, OnboardingGenreSerializer
-from rest_framework.permissions import AllowAny
-
-
-
 def _build_book_card(book: BookCopy, request) -> dict:
     """Return a lightweight payload for library/wishlist endpoints."""
     cover_url = None
