@@ -6,6 +6,45 @@ from books.models import BookWishlist
 from rest_framework import serializers
 from social.models import Comment, Post, CommentLike
 
+class CommentSerializer(serializers.ModelSerializer):
+    authorName = serializers.CharField(source='author.username', read_only=True)
+    authorProfile = serializers.SerializerMethodField()
+    like_count = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Comment
+        fields = [
+            'id',
+            'author',
+            'authorName',
+            'content',
+            'replies',
+            'authorProfile',
+            'like_count',
+            'created_at',
+            'updated_at',
+        ]
+        read_only_fields = ['author', 'authorProfile', 'created_at', 'updated_at', 'like_count', 'replies']
+
+    def create(self, validated_data):
+        """Automatically assign the author from the request user."""
+        request = self.context.get('request')
+        if request and hasattr(request, 'user'):
+            validated_data['author'] = request.user
+        return super().create(validated_data)
+
+    def get_authorProfile(self, obj):
+        """Get author's profile picture URL."""
+        return {
+            "username": obj.author.username,
+            "profile_picture": obj.author.profile_picture.url
+            if getattr(obj.author, "profile_picture", None)
+            else None,
+        }
+    
+    def get_like_count(self, obj):
+        return obj.like_count  # calls your @property from the model
+
 
 class PostSerializer(serializers.ModelSerializer):
     """
@@ -21,7 +60,9 @@ class PostSerializer(serializers.ModelSerializer):
     )
     # Added: posterId and posterLocation for profile navigation
     posterId = serializers.IntegerField(source="author.id", read_only=True)
-    posterLocation = serializers.SerializerMethodField()
+    posterLocation = serializers.CharField(
+        source="author.location", read_only=True
+    )
     posterProfile = serializers.SerializerMethodField()
     bookTitle = serializers.SerializerMethodField()
     authorName = serializers.SerializerMethodField()
@@ -35,8 +76,10 @@ class PostSerializer(serializers.ModelSerializer):
     bookId = serializers.SerializerMethodField()
 
     # Engagement stats
-    likeCount = serializers.SerializerMethodField()
-    commentCount = serializers.SerializerMethodField()
+    likeCount = serializers.IntegerField(source="like_count", read_only=True)
+    commentCount = serializers.IntegerField(
+        source="comment_count", read_only=True
+    )
 
     # User-specific interaction states
     isLiked = serializers.SerializerMethodField()
@@ -96,16 +139,6 @@ class PostSerializer(serializers.ModelSerializer):
             return str(obj.related_book.id)
         return None
 
-    def get_posterLocation(self, obj):
-        prefs = getattr(obj.author, "preferences", None)
-        if prefs and getattr(prefs, "tradeLocation1", None):
-            return prefs.tradeLocation1
-
-        if getattr(obj.author, "location", None):
-            return obj.author.location
-
-        return ""
-
     def get_posterProfile(self, obj):
         """Get poster's profile picture URL."""
         if obj.author.profile_picture:
@@ -147,26 +180,6 @@ class PostSerializer(serializers.ModelSerializer):
             else:
                 image_urls.append(obj.image.url)
         return image_urls
-
-    def get_likeCount(self, obj):
-        """
-        get like count
-        """
-        like_count = getattr(obj, "like_count", None)
-        if like_count is not None:
-            return like_count
-
-        return obj.likes.count()
-
-    def get_commentCount(self, obj):
-        """
-        get comment count
-        """
-        comment_count = getattr(obj, "comment_count", None)
-        if comment_count is not None:
-            return comment_count
-
-        return obj.comments.count()
 
     def get_isLiked(self, obj):
         """Check if the current user has liked this post."""
@@ -247,47 +260,6 @@ class PostSerializer(serializers.ModelSerializer):
 #             if getattr(obj.author, "profile_picture", None)
 #             else None,
 #         }
-
-
-class CommentSerializer(serializers.ModelSerializer):
-    authorName = serializers.CharField(source='author.username', read_only=True)
-    authorProfile = serializers.SerializerMethodField()
-    like_count = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Comment
-        fields = [
-            'id',
-            'author',
-            'authorName',
-            'content',
-            'replies',
-            'authorProfile',
-            'like_count',
-            'created_at',
-            'updated_at',
-        ]
-        read_only_fields = ['author', 'authorProfile', 'created_at', 'updated_at', 'like_count', 'replies']
-
-    def create(self, validated_data):
-        """Automatically assign the author from the request user."""
-        request = self.context.get('request')
-        if request and hasattr(request, 'user'):
-            validated_data['author'] = request.user
-        return super().create(validated_data)
-
-    def get_authorProfile(self, obj):
-        """Get author's profile picture URL."""
-        return {
-            "username": obj.author.username,
-            "profile_picture": obj.author.profile_picture.url
-            if getattr(obj.author, "profile_picture", None)
-            else None,
-        }
-    
-    def get_like_count(self, obj):
-        return obj.like_count  # calls your @property from the model
-
 
 class FeedResponseSerializer(serializers.Serializer):
     """
