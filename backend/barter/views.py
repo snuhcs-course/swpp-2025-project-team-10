@@ -144,6 +144,19 @@ def create_barter_request(request):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
+    # Prepare requester's available books queryset and validate availability
+    requester_available_books_qs = BookCopy.objects.filter(
+        owner=request.user,
+        is_for_barter=True,
+        trade_status="available",
+    )
+
+    if not requester_available_books_qs.exists():
+        return Response(
+            {"error": "You must have at least one book available for barter"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
     # AI 추천을 사용하여 적합한 책들 선택
     recommendations = AIRecommendationService.recommend_books_for_barter(
         requester=request.user,
@@ -180,6 +193,13 @@ def create_barter_request(request):
             )
             .select_related("publication")
             .order_by("?")[:3]
+        )
+    
+    # Final validation: ensure we have at least one book to offer
+    if not offered_books:
+        return Response(
+            {"error": "Unable to find suitable books for barter"},
+            status=status.HTTP_400_BAD_REQUEST,
         )
 
     message_templates = [
