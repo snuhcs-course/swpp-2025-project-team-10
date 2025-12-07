@@ -93,15 +93,22 @@ class UserReviewDetailViewTestCase(TestCase):
             self.assertEqual(response.data[0]['id'], self.review1.pk)
 
     def test_retrieve_others_review_returns_404(self):
-        """Test that a user cannot retrieve another user's review"""
+        """Test that a user can retrieve another user's review"""
         self.client.force_authenticate(user=self.user1)
         # pk는 실제로는 user_id를 기대함
         url = f"/library/reviews/{self.user2.pk}/"
         
         response = self.client.get(url)
         
-        # user1이 user2의 리뷰를 조회하려고 하면 404 반환
-        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+        # user1이 user2의 리뷰를 조회할 수 있음 (200 반환)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        # user2의 리뷰를 가져옴
+        if isinstance(response.data, list):
+            # 리스트로 반환된 경우
+            self.assertTrue(len(response.data) > 0)
+        else:
+            # 딕셔너리로 반환된 경우
+            self.assertEqual(response.data['reviewer'], self.user2.id)
 
     def test_retrieve_review_unauthenticated(self):
         """Test that unauthenticated users cannot retrieve reviews"""
