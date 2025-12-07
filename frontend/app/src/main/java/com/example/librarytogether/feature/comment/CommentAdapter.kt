@@ -37,13 +37,13 @@ class CommentAdapter(
             tvCreatedAt.text = dto.createdAt.substringBefore("T")
 
             Glide.with(itemView.context)
-                .load(dto.authorProfile?.profile_picture)
+                .load(dto.authorProfile?.profilePicture)
                 .placeholder(R.drawable.person_icon)
                 .error(R.drawable.person_icon)
                 .circleCrop()
                 .into(ivProfile)
 
-            tvLikeCount.text = dto.like_count.toString()
+            tvLikeCount.text = dto.likeCount.toString()
             btnLike.setImageResource(
                 if (dto.isLiked) R.drawable.ic_heart_filled
                 else R.drawable.ic_heart_outline

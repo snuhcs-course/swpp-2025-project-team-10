@@ -89,7 +89,7 @@ class CommentViewModelTest {
         advanceUntilIdle()
 
         val result = vm.comments.getOrAwaitValue()
-        assertThat(result[1].like_count, equalTo(10))
+        assertThat(result[1].likeCount, equalTo(10))
         assertThat(result[1].isLiked, equalTo(true))
     }
 
@@ -104,7 +104,7 @@ class CommentViewModelTest {
         content = "test",
         createdAt = "2025",
         updatedAt = "2025",
-        like_count = like,
+        likeCount = like,
         isLiked = liked
     )
 

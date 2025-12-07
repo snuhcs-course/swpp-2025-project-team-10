@@ -8,15 +8,15 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.librarytogether.databinding.ItemOnboardingBubbleBinding
 
 class ChipSelectableAdapter(
-    private val onToggle: (id: String, isSelected: Boolean) -> Unit
+    private val onToggle: (id: Int, isSelected: Boolean) -> Unit
 ) : ListAdapter<ChipSelectableAdapter.Item, ChipSelectableAdapter.VH>(ItemDiffCallback()) {
 
     data class Item(
-        val id: String,
+        val id: Int,
         val label: String
     )
-    private var selectedIds = emptySet<String>()
-    fun updateSelection(newSelectedIds: Set<String>) {
+    private var selectedIds = emptySet<Int>()
+    fun updateSelection(newSelectedIds: Set<Int>) {
         val oldSelection = this.selectedIds
         this.selectedIds = newSelectedIds
 
