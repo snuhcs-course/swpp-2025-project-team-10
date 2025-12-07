@@ -135,6 +135,15 @@ def create_authors():
     ]
     
     authors = []
+    # Ensure requested authors exist
+    extra_authors = [
+        ("세이노", "한국의 작가", None, None, "한국"),
+        ("윤동주", "한국의 시인", "1917-12-30", "1945-02-16", "한국"),
+        ("알랭 드 보통", "스위스의 작가/철학자", "1969-12-20", None, "스위스"),
+    ]
+    for item in extra_authors:
+        if not any(a[0] == item[0] for a in authors_data):
+            authors_data.append(item)
     for name, bio, birth, death, nationality in authors_data:
         birth_date = datetime.strptime(birth, "%Y-%m-%d").date() if birth else None
         death_date = datetime.strptime(death, "%Y-%m-%d").date() if death else None
@@ -181,7 +190,7 @@ def create_publishers():
     print(f"  Created/Found {len(publishers)} publishers")
     return publishers
 
-def create_users(count=20):
+def create_users(count=40):
     """Create dummy users with profiles."""
     print(f"Creating {count} users...")
     
@@ -481,6 +490,9 @@ def create_books(users, genres, authors, publishers, count=50):
         {"title": "위대한 유산", "author": "찰스 디킨스"},
         {"title": "오페라의 유령", "author": "가스통 르루"},
         {"title": "레미제라블", "author": "빅토르 위고"},
+        {"title": "하늘과 바람과 별과 시", "author": "윤동주"},
+        {"title": "불안", "author": "알랭 드 보통"},
+        {"title": "세이노의 지혜", "author": "세이노"},
         # 필요시 더 추가
     ]
     
@@ -558,7 +570,6 @@ def create_books(users, genres, authors, publishers, count=50):
     }
     
     conditions = ["new", "like_new", "very_good", "good", "acceptable"]
-    trade_statuses = ["available", "available", "available", "available", "available", "available", "pending", "not_available"]
     
     book_copies = []
     publications = []
@@ -611,16 +622,16 @@ def create_books(users, genres, authors, publishers, count=50):
             publication=publication,
             owner=owner,
             condition=random.choice(conditions),
-            trade_status=random.choice(trade_statuses),
+            trade_status= "available",
             owner_notes=random.choice(["깨끗한 상태입니다", "밑줄 조금 있어요", "상태 좋아요", ""]),
-            is_for_barter=random.choice([True, True, True, True, True, False]),
+            is_for_barter= True,
         )
         book_copies.append(book_copy)
     
     print(f"  Created {len(publications)} unique publications and {len(book_copies)} book copies")
     return book_copies
 
-def create_book_reviews(users, books, count=30):
+def create_book_reviews(users, books, count=50):
     """Create book reviews."""
     print(f"Creating {count} book reviews...")
     
@@ -1080,16 +1091,16 @@ def main():
         publishers = create_publishers()
         
         # Create users and relationships
-        users = create_users(count=20)
+        users = create_users(count=40)
         create_user_tastes(users)
         create_user_preferences(users)
         create_follows(users)
         
         # Create books
-        books = create_books(users, genres, authors, publishers, count=50)
+        books = create_books(users, genres, authors, publishers, count=150)
         
         # Create reviews and social content
-        create_book_reviews(users, books, count=30)
+        create_book_reviews(users, books, count=100)
         # posts = create_posts(users, books, count=40)  # 제거됨
         # create_comments(users, posts, count=50)  # posts가 없으므로 comments도 제거
         

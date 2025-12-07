@@ -22,7 +22,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
-from books.models import BookCopy, Author as BookAuthor, BookPublication, Genre as BookGenre
+from books.models import BookCopy, Author as BookAuthor, Genre as BookGenre
 from .models import Follow, UserPreferences, UserTaste
 from .serializers import (
     CustomTokenObtainPairSerializer,
@@ -37,7 +37,6 @@ from .serializers import (
     UserRegistrationSerializer,
     UserSerializer,
     UserTasteSerializer,
-    OnboardingSerializer,
 )
 
 User = get_user_model()
@@ -67,18 +66,15 @@ class UserTasteView(APIView):
         except UserTaste.DoesNotExist:
             # Create new taste profile if it doesn't exist
             taste = UserTaste.objects.create(user=request.user)
-            serializer = UserTasteSerializer(taste)
+            return Response(
+                {
+                    "ok": True,
+                    "taste": UserTasteSerializer(taste).data,
+                    "step": 1,
+                    "is_complete": False,
+                }
+            )
 
-        is_complete = taste.favorite_genres and taste.favorite_authors and taste.favorite_books
-
-        return Response(
-            {
-                "ok": True,
-                "taste": serializer.data,
-                "step": taste.current_step,
-                "is_complete": is_complete,
-            }
-        )
     def post(self, request):
         """Handle each step of the taste categorization process."""
         try:
@@ -86,19 +82,36 @@ class UserTasteView(APIView):
         except UserTaste.DoesNotExist:
             taste = UserTaste.objects.create(user=request.user)
 
+        # Get current step from the taste profile
+        current_step = taste.current_step
+
         # Validate and update based on current step
         serializer = UserTasteSerializer(
             taste, data=request.data, partial=True
         )
         if serializer.is_valid():
+            # Validate minimum selections based on current step
+            try:
+                self._validate_step_data(
+                    current_step, serializer.validated_data
+                )
+            except serializers.ValidationError as e:
+                return Response(
+                    {"ok": False, "message": str(e)},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+
             # Update the taste profile
             taste = serializer.save()
 
-            # Mark categorization as complete if all fields are populated
-            if taste.favorite_genres and taste.favorite_authors and taste.favorite_books:
-                if not request.user.has_initial_taste:
-                    request.user.has_initial_taste = True
-                    request.user.save(update_fields=["has_initial_taste"])
+            # Move to next step or complete the process (now 7 steps)
+            if current_step < 7:
+                taste.current_step += 1
+                taste.save()
+            else:
+                # Mark categorization as complete
+                request.user.has_initial_taste = True
+                request.user.save()
 
             return Response(
                 {
@@ -113,6 +126,42 @@ class UserTasteView(APIView):
             {"ok": False, "errors": serializer.errors},
             status=status.HTTP_400_BAD_REQUEST,
         )
+
+    def _validate_step_data(self, step, data):
+        """Validate data for each categorization step."""
+        if step == 1 and "favorite_genres" in data:
+            if len(data["favorite_genres"]) < 3:
+                raise serializers.ValidationError(
+                    "최소 3개 이상의 장르를 선택해주세요"
+                )
+        elif step == 2 and "favorite_authors" in data:
+            if len(data["favorite_authors"]) < 3:
+                raise serializers.ValidationError(
+                    "최소 3명 이상의 작가를 선택해주세요"
+                )
+        elif step == 3 and "favorite_books" in data:
+            if len(data["favorite_books"]) < 3:
+                raise serializers.ValidationError(
+                    "최소 3권 이상의 책을 선택해주세요"
+                )
+        elif step == 4 and "preferred_length" in data:
+            if not data["preferred_length"]:
+                raise serializers.ValidationError("책 분량을 선택해주세요")
+        elif step == 5 and "preferred_moods" in data:
+            if len(data["preferred_moods"]) < 3:
+                raise serializers.ValidationError(
+                    "최소 3개 이상의 분위기를 선택해주세요"
+                )
+        elif step == 6 and "reading_purposes" in data:
+            if len(data["reading_purposes"]) < 3:
+                raise serializers.ValidationError(
+                    "최소 3개 이상의 목적을 선택해주세요"
+                )
+        elif step == 7:
+            # Trade style step is optional; if provided, accept without strict min checks
+            # Fields: trade_place_name, trade_address
+            # No additional validation required here.
+            return
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
@@ -648,21 +697,15 @@ class UserProfileMeView(APIView):
         if trade_spot1 is not None:
             taste.trade_address = trade_spot1
         if favorite_genres is not None and isinstance(favorite_genres, list):
-            # Convert genre names to IDs
-            genre_ids = list(BookGenre.objects.filter(name__in=favorite_genres).values_list('id', flat=True))
-            taste.favorite_genres = genre_ids
+            taste.favorite_genres = favorite_genres
         if fav_books is not None:
             if isinstance(fav_books, list):
-                # Convert book titles to UUIDs
-                book_ids = list(BookPublication.objects.filter(title__in=fav_books).values_list('id', flat=True))
-                taste.favorite_books = [str(bid) for bid in book_ids]
+                taste.favorite_books = fav_books
             elif isinstance(fav_books, str):
                 taste.favorite_books = [fav_books] if fav_books else []
         if fav_authors is not None:
             if isinstance(fav_authors, list):
-                # Convert author names to IDs
-                author_ids = list(BookAuthor.objects.filter(name__in=fav_authors).values_list('id', flat=True))
-                taste.favorite_authors = author_ids
+                taste.favorite_authors = fav_authors
             elif isinstance(fav_authors, str):
                 taste.favorite_authors = [fav_authors] if fav_authors else []
         taste.save()
@@ -750,42 +793,32 @@ class UserProfileMeView(APIView):
         trade_spot1 = None
         try:
             taste = user.taste
-            genre_ids = taste.favorite_genres or []
-            book_ids = taste.favorite_books or []
-            author_ids = taste.favorite_authors or []
-
-            # ID 목록을 이름 목록으로 변환
-            favorite_genres = list(BookGenre.objects.filter(pk__in=genre_ids).values_list("name", flat=True))
-            favorite_books = list(BookPublication.objects.filter(pk__in=book_ids).values_list("title", flat=True))
-            favorite_authors = list(BookAuthor.objects.filter(pk__in=author_ids).values_list("name", flat=True))
-
+            favorite_genres = taste.favorite_genres or []
+            favorite_books = taste.favorite_books or []
+            favorite_authors = taste.favorite_authors or []
             trade_location1 = taste.trade_place_name or None
             trade_spot1 = taste.trade_address or None
-        except UserTaste.DoesNotExist:
-            favorite_genres = []
-            favorite_books = []
-            favorite_authors = []
+        except Exception:
+            pass
 
         # Additional preferences & metadata (only notes & meeting locations; favorites from taste)
         trade_location2 = None
         trade_spot2 = None
+        fav_books = favorite_books
         fav_book_notes = []
+        fav_authors = favorite_authors
         fav_author_notes = []
         reading_habit = None
-
         try:
             import json
             user_prefs = user.preferences
             if user_prefs.preferred_meeting_locations:
-                try:
-                    metadata = json.loads(user_prefs.preferred_meeting_locations)
-                    trade_location2 = metadata.get("tradeLocation2")
-                    trade_spot2 = metadata.get("tradeSpot2")
-                    fav_book_notes = metadata.get("favBookNotes", [])
-                    fav_author_notes = metadata.get("favAuthorNotes", [])
-                    reading_habit = metadata.get("readingHabit")
-                except (json.JSONDecodeError, TypeError):
-                    pass # JSON 파싱 오류가 나도 무시하고 진행
+                metadata = json.loads(user_prefs.preferred_meeting_locations)
+                trade_location2 = metadata.get("tradeLocation2")
+                trade_spot2 = metadata.get("tradeSpot2")
+                fav_book_notes = metadata.get("favBookNotes", [])
+                fav_author_notes = metadata.get("favAuthorNotes", [])
+                reading_habit = metadata.get("readingHabit")
         except Exception:
             pass
 
@@ -793,8 +826,12 @@ class UserProfileMeView(APIView):
         from books.models import BookReview
 
         review_count = BookReview.objects.filter(reviewer=user).count()
-        follower_count = user.follower_relationships.count()
-        following_count = user.following_relationships.count()
+        follower_count = getattr(user, "follower_count", None)
+        following_count = getattr(user, "following_count", None)
+        if follower_count is None:
+            follower_count = user.follower_relationships.count()
+        if following_count is None:
+            following_count = user.following_relationships.count()
 
         return {
             "username": user.username,
@@ -803,17 +840,17 @@ class UserProfileMeView(APIView):
             "reviewCount": review_count,
             "followerCount": follower_count,
             "followingCount": following_count,
+            "favoriteGenres": favorite_genres or [],
             "preferences": {
                 "tradeLocation1": trade_location1,
                 "tradeLocation2": trade_location2,
                 "tradeSpot1": trade_spot1,
                 "tradeSpot2": trade_spot2,
-                "favBooks": favorite_books or [],
+                "favBooks": fav_books or [],
                 "favBookNotes": fav_book_notes or [],
-                "favAuthors": favorite_authors or [],
+                "favAuthors": fav_authors or [],
                 "favAuthorNotes": fav_author_notes or [],
                 "readingHabit": reading_habit,
-                "favoriteGenres": favorite_genres,
             },
         }
 
@@ -1179,11 +1216,11 @@ def onboarding_submit(request):
         frontend_books = {
             1: "채식주의자",
             2: "사피엔스",
-            3: "데미안",
-            4: "코스모스",
-            5: "총균쇠",
+            3: "생각의 탄생",
+            4: "연금술사",
+            5: "백년의 고독",
             6: "82년생 김지영",
-            7: "우리들의 일그러진 영웅",
+            7: "해리포터와 마법사의 돌",
             8: "살인자의 기억법",
             9: "미움받을 용기",
         }
@@ -1193,10 +1230,10 @@ def onboarding_submit(request):
             3: "김영하",
             4: "유발 하라리",
             5: "베르나르 베르베르",
-            6: "마이클 샌델",
-            7: "톨스토이",
-            8: "정재승",
-            9: "유시민",
+            6: "알랭 드 보통",
+            7: "움베르트 에코",
+            8: "세이노",
+            9: "윤동주",
         }
         frontend_genres = {
             1: "현대소설",
@@ -1284,10 +1321,11 @@ def onboarding_submit(request):
             status=status.HTTP_200_OK,
         )
 
-    return Response(
-        {"ok": False, "message": "Invalid data provided", "errors": serializer.errors},
-        status=status.HTTP_400_BAD_REQUEST,
-    )
+    except Exception as e:
+        return Response(
+            {"ok": False, "message": str(e)},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
 
 @api_view(["POST", "DELETE"])

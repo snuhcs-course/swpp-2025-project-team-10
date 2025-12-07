@@ -1,5 +1,6 @@
 package com.example.librarytogether.feature.comment
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,7 +14,7 @@ import com.example.librarytogether.feature.comment.data.CommentDto
 
 class CommentAdapter(
     private val items: MutableList<CommentDto>,
-    private val currentUserName: String,
+    private var currentUserName: String,
     private val onLike: (CommentDto) -> Unit,
     private val onDelete: (CommentDto) -> Unit,
     private val onEdit: (CommentDto) -> Unit,
@@ -26,31 +27,33 @@ class CommentAdapter(
         private val ivProfile = v.findViewById<ImageView>(R.id.imgProfile)
         private val btnMore = v.findViewById<ImageView>(R.id.btnMore)
 
-        // 좋아요 UI
         private val btnLike = v.findViewById<ImageView>(R.id.btnLike)
         private val tvLikeCount = v.findViewById<TextView>(R.id.tvLikeCount)
 
         fun bind(dto: CommentDto) {
-
             tvAuthor.text = dto.authorName
             tvComment.text = dto.content
-            tvCreatedAt.text = dto.createdAt.substringBefore("T")
 
+            // 날짜 포맷팅
+            tvCreatedAt.text = dto.createdAt.take(10)
+
+            val profileUrl = dto.authorProfile?.profilePicture
             Glide.with(itemView.context)
-                .load(dto.authorProfile?.profile_picture)
+                .load(profileUrl)
                 .placeholder(R.drawable.person_icon)
                 .error(R.drawable.person_icon)
                 .circleCrop()
                 .into(ivProfile)
 
-            tvLikeCount.text = dto.like_count.toString()
+            // 좋아요 UI 설정
+            tvLikeCount.text = dto.likeCount.toString()
             btnLike.setImageResource(
                 if (dto.isLiked) R.drawable.ic_heart_filled
                 else R.drawable.ic_heart_outline
             )
-
             btnLike.setOnClickListener { onLike(dto) }
 
+            // [본인 확인 로직] 이름이 같을 때만 더보기 버튼 표시
             if (dto.authorName == currentUserName) {
                 btnMore.visibility = View.VISIBLE
                 btnMore.setOnClickListener { showMenu(dto, btnMore) }
@@ -85,9 +88,16 @@ class CommentAdapter(
 
     override fun getItemCount() = items.size
 
-    fun updateComments(list: List<CommentDto>) {
+    fun updateComments(newItems: List<CommentDto>) {
         items.clear()
-        items.addAll(list)
+        items.addAll(newItems)
+        notifyDataSetChanged()
+    }
+
+    // 내 이름이 업데이트되었을 때 호출
+    fun updateMyName(name: String) {
+        Log.d("CommentAdapter", "이름 업데이트: $name")
+        this.currentUserName = name
         notifyDataSetChanged()
     }
 }

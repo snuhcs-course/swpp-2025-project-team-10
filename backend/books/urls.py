@@ -12,6 +12,7 @@ from .views import (
     OnboardingAuthorListView,
     OnboardingGenreListView,
     UserReviewListCreateView,
+    UserReviewDetailView,
     book_detail,
     book_list,
     collection_list_view,
@@ -36,10 +37,20 @@ urlpatterns = [
     path("reviews/", UserReviewListCreateView.as_view(), name="user-reviews"),
     # Other user's book reviews by ID
     path(
-        "reviews/<int:user_id>/",
+        "users/reviews/<int:user_id>/",
         user_reviews_by_id,
         name="user-reviews-by-id",
     ),
+
+    
+    # GET reviews/<id>/ - Retrieve a specific review
+    # PATCH reviews/<id>/ - Partially update a review
+    # PUT reviews/<id>/ - Fully update a review
+    # DELETE reviews/<id>/ - Delete a review
+    
+
+    path("reviews/<int:pk>/", UserReviewDetailView.as_view(), name="review-modify"),
+
     # Like/unlike a review
     path(
         "reviews/<int:pk>/like/",

@@ -3,6 +3,7 @@ Serializers for the books app.
 Handles book reviews and related data serialization.
 """
 
+import re
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
@@ -14,6 +15,8 @@ from .models import (
     BookPublication,
     BookReview,
     ReadingStatus,
+    Author,
+    Publisher,
 )
 
 User = get_user_model()
@@ -33,6 +36,7 @@ class ReviewSerializer(serializers.ModelSerializer):
     userName = serializers.CharField(
         source="reviewer.username", read_only=True
     )
+    rating = serializers.IntegerField(min_value=1, max_value=5, required=False)
     userId = serializers.IntegerField(source="reviewer.id", read_only=True)
     userProfile = serializers.SerializerMethodField()
     content = serializers.CharField(read_only=True)
@@ -58,6 +62,7 @@ class ReviewSerializer(serializers.ModelSerializer):
             "likeCount",
             "createdAt",
             "isLiked",
+            "rating", # Added rating field
         ]
 
     def get_bookId(self, obj):
@@ -116,6 +121,27 @@ class CreateReviewSerializer(serializers.Serializer):
     imageUrls = serializers.ListField(
         child=serializers.URLField(), required=False, default=list
     )
+    rating = serializers.IntegerField(min_value=1, max_value=5, required=False, default=3)
+
+    def update(self, instance, validated_data):
+        """Update an existing review."""
+        instance.book_title = validated_data.get("bookTitle", instance.book_title)
+        instance.author_name = validated_data.get("authorName", instance.author_name)
+        instance.content = validated_data.get("content", instance.content)
+        instance.image_urls = validated_data.get("imageUrls", instance.image_urls)
+        instance.rating = validated_data.get("rating", instance.rating)
+
+        # Book ID (bookId) is optional
+        book_id = validated_data.get("bookId")
+        if book_id:
+            try:
+                instance.book = BookCopy.objects.get(pk=book_id)
+            except BookCopy.DoesNotExist:
+                pass  # ignore invalid bookId — keeps existing book
+
+        instance.save()
+        return instance
+
 
     def create(self, validated_data):
         """Create a new BookReview instance."""
@@ -137,6 +163,7 @@ class CreateReviewSerializer(serializers.Serializer):
             author_name=validated_data.get("authorName", ""),
             content=validated_data["content"],
             image_urls=validated_data.get("imageUrls", []),
+            rating=validated_data["rating"],
         )
         return review
 
@@ -185,11 +212,16 @@ class BookSerializer(serializers.ModelSerializer):
         write_only=True,
         required=False,
     )
-    publicationId = serializers.UUIDField(
-        source="publication.id",
-        read_only=True,
+    # Fields for creating a new BookPublication if needed
+    book_isbn_10 = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    book_isbn_13 = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    book_publisher = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    book_published_date = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    book_description = serializers.CharField(write_only=True, required=False, allow_blank=True)
+    book_title = serializers.CharField(write_only=True, required=False, allow_blank=True)  # ADD THIS
+    book_authors = serializers.ListField(
+        child=serializers.CharField(), write_only=True, required=False
     )
-
     class Meta:
         model = BookCopy
         fields = [
@@ -211,8 +243,17 @@ class BookSerializer(serializers.ModelSerializer):
             "ownerId",
             #post
             "publication",
-            #get
-            "publicationId",
+            #When a user adds a book that does not exist in BookPublication,
+            #these fields are used to create a new BookPublication.
+            "book_title",
+            "book_authors",
+            "book_isbn_10",
+            "book_isbn_13",
+            "book_publisher",
+            "book_published_date",
+            "book_description",
+
+
         ]
         read_only_fields = [
             "id",
@@ -243,22 +284,77 @@ class BookSerializer(serializers.ModelSerializer):
         publisher = obj.publication.publisher
         return publisher.name if publisher else None
 
+
     def get_cover_image(self, obj):
-        if not obj.cover_image:
+        publication = obj.publication
+
+        if not publication.cover_image:
             return None
         request = self.context.get("request")
-        url = obj.cover_image.url
+        url = publication.cover_image.url
         return request.build_absolute_uri(url) if request else url
 
     def get_coverUrl(self, obj):
         return self.get_cover_image(obj)
 
     def create(self, validated_data):
+        # Check if publication is provided directly
         publication = validated_data.pop("publication", None)
+
+        # Extract fields for creating new publication
+        book_title = validated_data.pop("book_title", None)
+        book_authors = validated_data.pop("book_authors", [])
+        book_isbn_10 = validated_data.pop("book_isbn_10", "").strip()
+        book_isbn_13 = validated_data.pop("book_isbn_13", "").strip()
+        book_publisher = validated_data.pop("book_publisher", "").strip()
+        book_published_date = validated_data.pop("book_published_date", "").strip()
+        book_description = validated_data.pop("book_description", "").strip()
+
+        # If no publication provided, try to find or create one
         if publication is None:
-            raise serializers.ValidationError(
-                {"publication": "This field is required."}
-            )
+            if not book_title:
+                raise serializers.ValidationError({"book_title": "Either 'publication' or 'book_title' must be provided"})
+            
+            # Try to find existing BookPublication by ISBN
+            if book_isbn_13:
+                publication = BookPublication.objects.filter(isbn_13=book_isbn_13).first()
+            
+            if not publication and book_isbn_10:
+                publication = BookPublication.objects.filter(isbn_10=book_isbn_10).first()
+
+            # If not found by ISBN, try by title (case-insensitive)
+            if not publication:
+                publication = BookPublication.objects.filter(
+                    title__iexact=book_title
+                ).first()
+
+            # If still not found, create new BookPublication
+            if not publication:
+                # Handle publisher
+                publisher_obj = None
+                if book_publisher:
+                    publisher_obj, _ = Publisher.objects.get_or_create(
+                        name=book_publisher
+                    )
+
+                # Create publication
+                publication = BookPublication.objects.create(
+                    title=book_title,
+                    isbn_10=book_isbn_10 or None,
+                    isbn_13=book_isbn_13 or None,
+                    publisher=publisher_obj,
+                    publication_date=book_published_date or None,
+                    description=book_description,
+                )
+
+                # Create and link authors
+                if book_authors:
+                    for author_name in book_authors:
+                        author, _ = Author.objects.get_or_create(
+                            name=author_name.strip()
+                        )
+                        publication.authors.add(author)
+
         return BookCopy.objects.create(
             publication=publication,
             **validated_data,

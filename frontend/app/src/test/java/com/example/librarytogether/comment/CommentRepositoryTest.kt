@@ -96,7 +96,7 @@ class CommentRepositoryTest {
 
         val result = repo.toggleCommentLike(1, "c1")
 
-        assertThat(result.like_count, equalTo(5))
+        assertThat(result.likeCount, equalTo(5))
         assertThat(result.isLiked, equalTo(true))
     }
 
@@ -131,7 +131,7 @@ class CommentRepositoryTest {
         content = content,
         createdAt = "2025",
         updatedAt = "2025",
-        like_count = likeCount,
+        likeCount = likeCount,
         isLiked = isLiked
     )
 }

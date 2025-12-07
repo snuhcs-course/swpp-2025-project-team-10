@@ -129,7 +129,6 @@ def test_comment_post_with_empty_content():
 
     assert res.status_code == 400
 
-
 @pytest.mark.django_db
 def test_comment_nonexistent_post():
     """Test commenting on a nonexistent post."""

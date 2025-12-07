@@ -2,7 +2,6 @@ package com.example.librarytogether.feature.onboarding.data
 
 import android.util.Log
 import javax.inject.Inject
-import javax.inject.Singleton
 
 class OnboardingRepository @Inject constructor(
     private val api: OnboardingApi
@@ -33,7 +32,7 @@ class OnboardingRepository @Inject constructor(
         LabelId(6, "알랭 드 보통"),
         LabelId(7, "움베르트 에코"),
         LabelId(8,"세이노"),
-        LabelId(9, "운동주")
+        LabelId(9, "윤동주")
     )
 
     fun getGenres() = listOf(

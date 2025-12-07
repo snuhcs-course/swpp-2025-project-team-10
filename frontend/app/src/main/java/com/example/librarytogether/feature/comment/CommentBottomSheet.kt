@@ -2,17 +2,18 @@ package com.example.librarytogether.feature.comment
 
 import android.app.Dialog
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
-import androidx.core.os.bundleOf
+import androidx.core.view.isVisible
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.librarytogether.databinding.CommentBinding
 import com.example.librarytogether.feature.comment.data.CommentDto
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
@@ -22,7 +23,6 @@ class CommentBottomSheet : BottomSheetDialogFragment() {
 
     private var _binding: CommentBinding? = null
     private val binding get() = _binding!!
-
     private val vm: CommentViewModel by activityViewModels()
     private lateinit var adapter: CommentAdapter
 
@@ -31,36 +31,34 @@ class CommentBottomSheet : BottomSheetDialogFragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        postId = requireArguments().getInt("postId")
-        @Suppress("UNCHECKED_CAST")
-        initialComments = requireArguments().getSerializable("comments") as ArrayList<CommentDto>
-
-        vm.initialize(postId, initialComments)
+        arguments?.let { args ->
+            postId = args.getInt(ARG_POST_ID, -1)
+            @Suppress("UNCHECKED_CAST")
+            initialComments = (args.getSerializable(ARG_COMMENTS) as? ArrayList<CommentDto>) ?: emptyList()
+        }
     }
 
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog =
-        BottomSheetDialog(requireContext()).apply {
-            setOnShowListener {
-                val sheet = findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
-                sheet?.let {
-                    it.layoutParams.height =
-                        (resources.displayMetrics.heightPixels * 0.85).toInt()
-                }
-            }
-        }
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         _binding = CommentBinding.inflate(inflater, container, false)
-        dialog?.window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        vm.initialize(postId, initialComments)
+
+        val sharedPrefs = requireContext().getSharedPreferences("app_prefs", android.content.Context.MODE_PRIVATE)
+        val myName = sharedPrefs.getString("username", "") ?: ""
+
+        Log.d("CommentSheet", "내 이름 확인: $myName")
 
         adapter = CommentAdapter(
             items = mutableListOf(),
-            currentUserName = "You", // TODO
+            currentUserName = myName,
             onLike = { dto -> vm.toggleLike(dto) },
             onDelete = { dto -> showDeleteDialog(dto) },
             onEdit = { dto -> showEditDialog(dto) }
@@ -71,20 +69,48 @@ class CommentBottomSheet : BottomSheetDialogFragment() {
 
         vm.comments.observe(viewLifecycleOwner) { list ->
             adapter.updateComments(list)
-        }
 
-        binding.btnSend.setOnClickListener {
-            val txt = binding.etComment.text.toString().trim()
-            if (txt.isNotEmpty()) {
-                vm.writeComment(txt)
+            // 댓글 없을 때 UI
+            binding.emptyMessage.isVisible = list.isEmpty()
+            binding.recyclerComments.isVisible = list.isNotEmpty()
+
+            if (list.size > initialComments.size) {
                 binding.etComment.setText("")
             }
         }
+
+        // 전송 버튼
+        binding.btnSend.setOnClickListener {
+            val content = binding.etComment.text.toString().trim()
+            if (content.isNotEmpty()) vm.writeComment(content)
+        }
+    }
+    // 다이얼로그: 창 크기를 화면의 90%로 설정
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        val dialog = BottomSheetDialog(requireContext(), theme)
+        dialog.setOnShowListener {
+            val bottomSheet = (it as BottomSheetDialog)
+                .findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
+            bottomSheet?.let { sheet ->
+                val behavior = BottomSheetBehavior.from(sheet)
+                val displayMetrics = resources.displayMetrics
+                val screenHeight = displayMetrics.heightPixels
+
+                val layoutParams = sheet.layoutParams
+                layoutParams.height = (screenHeight * 0.90).toInt()
+                sheet.layoutParams = layoutParams
+
+                behavior.state = BottomSheetBehavior.STATE_EXPANDED
+                behavior.skipCollapsed = true
+            }
+        }
+        return dialog
     }
 
     private fun showDeleteDialog(dto: CommentDto) {
         AlertDialog.Builder(requireContext())
-            .setMessage("댓글을 삭제할까요?")
+            .setTitle("댓글 삭제")
+            .setMessage("정말 삭제하시겠습니까?")
             .setPositiveButton("삭제") { _, _ -> vm.deleteComment(dto) }
             .setNegativeButton("취소", null)
             .show()
@@ -93,31 +119,46 @@ class CommentBottomSheet : BottomSheetDialogFragment() {
     private fun showEditDialog(dto: CommentDto) {
         val edit = EditText(requireContext())
         edit.setText(dto.content)
+        val container = android.widget.FrameLayout(requireContext())
+        val params = android.widget.FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+        params.leftMargin = 50; params.rightMargin = 50
+        edit.layoutParams = params
+        container.addView(edit)
 
         AlertDialog.Builder(requireContext())
             .setTitle("댓글 수정")
-            .setView(edit)
+            .setView(container)
             .setPositiveButton("저장") { _, _ ->
-                val new = edit.text.toString().trim()
-                if (new.isNotEmpty()) vm.editComment(dto.id, new)
+                val newContent = edit.text.toString().trim()
+                if (newContent.isNotEmpty()) {
+                    vm.editComment(dto.id, newContent)
+                }
             }
             .setNegativeButton("취소", null)
             .show()
     }
 
-    companion object {
-        fun newInstance(postId: Int, comments: List<CommentDto>) =
-            CommentBottomSheet().apply {
-                arguments = bundleOf(
-                    "postId" to postId,
-                    "comments" to ArrayList(comments)
-                )
-            }
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
-}
 
-private fun CommentBottomSheet.initializeWithArgsForTest(
-    i: Int,
-    initial: kotlin.collections.List<com.example.librarytogether.feature.comment.data.CommentDto>
-) {
+    companion object {
+        private const val ARG_POST_ID = "arg_post_id"
+        private const val ARG_COMMENTS = "arg_comments"
+
+        fun newInstance(postId: Int, comments: List<CommentDto>?): CommentBottomSheet {
+            val fragment = CommentBottomSheet()
+            val args = Bundle().apply {
+                putInt(ARG_POST_ID, postId)
+                val commentsArrayList = if (comments != null) ArrayList(comments) else ArrayList()
+                putSerializable(ARG_COMMENTS, commentsArrayList)
+            }
+            fragment.arguments = args
+            return fragment
+        }
+    }
 }

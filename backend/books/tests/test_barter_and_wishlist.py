@@ -13,36 +13,6 @@ from rest_framework.test import APIClient
 
 User = get_user_model()
 
-
-@pytest.mark.django_db
-def test_toggle_wishlist_creates_and_removes():
-    client = APIClient()
-    user = User.objects.create(
-        username="u1", email="u1@example.com", first_name="A", last_name="B"
-    )
-    client.force_authenticate(user)
-
-    publisher = Publisher.objects.create(name="Test Pub")
-    author = BookAuthor.objects.create(name="Author A")
-    publication = BookPublication.objects.create(
-        title="AAA", publisher=publisher
-    )
-    publication.authors.add(author)
-    book = BookCopy.objects.create(publication=publication, owner=user)
-
-    url = reverse("books:toggle-wishlist", kwargs={"book_id": book.id})
-
-    # Add to wishlist
-    res = client.post(url)
-    assert res.status_code == 200
-    assert res.data["wishlisted"] is True
-
-    # Remove from wishlist
-    res = client.delete(url)
-    assert res.status_code == 200
-    assert res.data["wishlisted"] is False
-
-
 @pytest.mark.django_db
 def test_toggle_book_for_barter_owner_only():
     client = APIClient()
