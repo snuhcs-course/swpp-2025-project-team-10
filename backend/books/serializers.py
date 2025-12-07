@@ -398,25 +398,3 @@ class ReadingStatusSerializer(serializers.ModelSerializer):
             "personal_rating",
             "notes",
         ]
-
-
-# --- Onboarding Serializers ---
-
-class OnboardingBookSerializer(serializers.ModelSerializer):
-    name = serializers.CharField(source="title")
-
-    class Meta:
-        model = BookPublication
-        fields = ["id", "name"]
-
-
-class OnboardingAuthorSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Author
-        fields = ["id", "name"]
-
-
-class OnboardingGenreSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Genre
-        fields = ["id", "name"]
