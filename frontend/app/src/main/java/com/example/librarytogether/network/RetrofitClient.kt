@@ -19,7 +19,7 @@ object RetrofitClient {
     // Use 192.0.0.2 for physical device on same network
     // Use 10.0.2.2 for emulator
     // Use 43.203.213.203 for AWS server
-   private const val BASE_URL = "http://43.203.213.203:80/"
+   private const val BASE_URL = "http://43.203.213.203/"
 
     @Volatile
     private var retrofit: Retrofit? = null
