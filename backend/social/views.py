@@ -208,7 +208,12 @@ def comment_edit(request, post_id, comment_id):
     """
     Edit a comment on a post. Only the comment author can edit.
     """
-    comment = get_object_or_404(Comment, pk=comment_id, post_id=post_id)
+    try:
+        comment = Comment.objects.select_related("post").get(pk=comment_id, post_id=post_id)
+    except Comment.DoesNotExist:
+        return Response(
+            {"error": "Comment not found"}, status=status.HTTP_404_NOT_FOUND
+        )
 
     if comment.author_id != request.user.id:
         return Response(
@@ -223,25 +228,13 @@ def comment_edit(request, post_id, comment_id):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    try:
-        comment = Comment.objects.select_related("post").get(pk=comment_id)
-    except Comment.DoesNotExist:
-        return Response(
-            {"error": "Comment not found"}, status=status.HTTP_404_NOT_FOUND
-        )
-
-    if comment.author_id != request.user.id:
-        return Response(
-            {"error": "You do not have permission to edit this comment."},
-            status=status.HTTP_403_FORBIDDEN,
-        )
-
     comment.content = content
     comment.save()
 
     post = comment.post
     serializer = PostSerializer(post, context={"request": request})
     return Response({"post": serializer.data}, status=status.HTTP_200_OK)
+
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
