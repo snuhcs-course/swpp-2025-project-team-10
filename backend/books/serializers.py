@@ -189,7 +189,8 @@ class BookSerializer(serializers.ModelSerializer):
     """
     Serializer for user-owned book copies exposed via profile/library APIs.
     """
-
+    
+    publicationId = serializers.SerializerMethodField(read_only=True)
     owner = serializers.ReadOnlyField(source="owner.username")
     ownerId = serializers.IntegerField(source="owner.id", read_only=True)
     title = serializers.CharField(read_only=True)
@@ -242,6 +243,7 @@ class BookSerializer(serializers.ModelSerializer):
             "trade_status",
             "owner",
             "ownerId",
+            "publicationId",
             #post
             "publication",
             #When a user adds a book that does not exist in BookPublication,
@@ -294,6 +296,10 @@ class BookSerializer(serializers.ModelSerializer):
         request = self.context.get("request")
         url = publication.cover_image.url
         return request.build_absolute_uri(url) if request else url
+    
+    def get_publicationId(self, obj):
+        return obj.publication.id if obj.publication else None
+
 
     def get_coverUrl(self, obj):
         return self.get_cover_image(obj)

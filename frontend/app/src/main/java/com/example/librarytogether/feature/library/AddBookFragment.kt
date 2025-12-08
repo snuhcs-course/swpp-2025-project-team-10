@@ -72,6 +72,11 @@ class AddBookFragment : Fragment(R.layout.fragment_add_book) {
     }
 
     private fun saveToBookshelf() {
+        val publicationId = selectedPublicationId
+        if (publicationId.isNullOrBlank()) {
+            Snackbar.make(requireView(), "먼저 검색 결과에서 책을 선택해 주세요.", Snackbar.LENGTH_SHORT).show()
+            return
+        }
         val title = binding.etTitle.text.toString()
         val authors = binding.etAuthor.text.toString()
         val publisher = binding.etPublisher.text.toString()
@@ -83,31 +88,18 @@ class AddBookFragment : Fragment(R.layout.fragment_add_book) {
             return
         }
 
-        val publicationId = selectedPublicationId
+        val postBook = PostBook(
+            publication = publicationId,
+            title = title,
+            authors = authors,
+            publisher = publisher.takeIf { it.isNotBlank() },
+            isbn = isbn.takeIf { it.isNotBlank() },
+            is_for_barter = isBarterAvailable,
+            //coverUrl =
+        )
 
-        val postBook = if (publicationId.isNullOrBlank()) {
-            // No existing publication - send fields to create new publication
-            Log.d("BookDebug", "Creating new publication for: $title")
-            PostBook(
-                publication = null,
-                book_title = title,
-                book_authors = authors.split(",").map { it.trim() }, // Convert string to list
-                book_publisher = publisher.takeIf { it.isNotBlank() },
-                book_isbn_13 = isbn.takeIf { it.isNotBlank() },
-                is_for_barter = isBarterAvailable
-            )
-        } else {
-            // Existing publication - just send publication ID
-            Log.d("BookDebug", "Using existing publication: $publicationId")
-            PostBook(
-                publication = publicationId,
-                is_for_barter = isBarterAvailable
-            )
-        }
-        Log.d("BookDebug", "PostBook data: $postBook")
         viewModel.addNewBook(postBook)
     }
-
     private fun setupSearchHandler() {
         binding.toolbarAddBook.setNavigationOnClickListener {
             findNavController().popBackStack()
