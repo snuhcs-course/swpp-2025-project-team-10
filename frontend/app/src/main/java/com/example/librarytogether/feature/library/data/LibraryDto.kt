@@ -56,15 +56,36 @@ data class Book(
     val publicationId: String?
 )
 
+//data class PostBook(
+//    val publication: String,
+//    val title: String,
+//    val authors: String,
+//    val publisher: String?,
+//    val isbn: String?,
+//    val is_for_barter: Boolean,
+//    val cover_image: String? = null
+//)
+
 data class PostBook(
-    val publication: String,
-    val title: String,
-    val authors: String,
-    val publisher: String?,
-    val isbn: String?,
-    val is_for_barter: Boolean,
-    val cover_image: String? = null
+    val publication: String? = null,
+    // Fields for existing publication (read-only on backend)
+    val title: String? = null,
+    val authors: String? = null,
+    val publisher: String? = null,
+    val isbn: String? = null,
+    // Fields for creating new publication
+    val book_title: String? = null,
+    val book_authors: List<String>? = null,
+    val book_publisher: String? = null,
+    val book_isbn_10: String? = null,
+    val book_isbn_13: String? = null,
+    val book_published_date: String? = null,
+    val book_description: String? = null,
+    // Common fields
+    val is_for_barter: Boolean = false,
+    val owner_notes: String? = null
 )
+
 
 data class UserProfile(
     val username: String,

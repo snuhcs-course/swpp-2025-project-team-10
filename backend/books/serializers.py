@@ -211,6 +211,7 @@ class BookSerializer(serializers.ModelSerializer):
         queryset=BookPublication.objects.all(),
         write_only=True,
         required=False,
+        allow_null=True
     )
     # Fields for creating a new BookPublication if needed
     book_isbn_10 = serializers.CharField(write_only=True, required=False, allow_blank=True)
