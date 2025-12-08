@@ -30,6 +30,8 @@ class Post(models.Model):
 
     # Content
     content = models.TextField(help_text="Share your thoughts about books!")
+    # Denormalized author name for book-related posts to satisfy NOT NULL DB constraint
+    author_name = models.CharField(max_length=200, blank=True, default="")
     book_title = models.CharField(max_length=200, blank=True, help_text="Title of the book for review posts")
 
     # Related Objects

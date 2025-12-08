@@ -583,4 +583,5 @@ def create_post_for_review(sender, instance, created, **kwargs):
             related_book=instance.book,
             is_public=True,
             book_title=instance.book_title,
+            author_name=instance.author_name or "",
         )
