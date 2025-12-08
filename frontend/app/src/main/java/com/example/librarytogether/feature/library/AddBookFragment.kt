@@ -72,13 +72,20 @@ class AddBookFragment : Fragment(R.layout.fragment_add_book) {
     }
 
     private fun saveToBookshelf() {
+        Log.d("BookDebug", "saveToBookshelf() called")
+        Log.d("BookDebug", "selectedPublicationId BEFORE CHECK = $selectedPublicationId")
+
         val publicationId = selectedPublicationId
         if (publicationId.isNullOrBlank()) {
             Snackbar.make(requireView(), "먼저 검색 결과에서 책을 선택해 주세요.", Snackbar.LENGTH_SHORT).show()
+            Log.d("BookDebug", "publicationId = $publicationId")
+
             return
         }
         val title = binding.etTitle.text.toString()
         val authors = binding.etAuthor.text.toString()
+        Log.d("BookDebug", "title='$title', authors='$authors'")
+
         val publisher = binding.etPublisher.text.toString()
         val isbn = binding.etIsbn.text.toString()
         val isBarterAvailable = binding.switchBarterAvailable.isChecked
@@ -97,6 +104,7 @@ class AddBookFragment : Fragment(R.layout.fragment_add_book) {
             is_for_barter = isBarterAvailable,
             //coverUrl =
         )
+        Log.d("BookDebug", "Adding book: $title")
 
         viewModel.addNewBook(postBook)
     }
@@ -160,7 +168,14 @@ class AddBookFragment : Fragment(R.layout.fragment_add_book) {
     }
 
     private fun onBookSearchResultClicked(book: Book) {
+        Log.d("BookDebug", "Clicked book: $book")
+        Log.d("BookDebug", "book.publicationId = ${book.publicationId}")
+
+
         selectedPublicationId = book.publicationId
+        //selectedPublicationId = book.id
+        Log.d("BookDebug", "selectedPublicationId set to: $selectedPublicationId")
+
 
         binding.etTitle.setText(book.title)
         binding.etAuthor.setText(book.authors?.joinToString(", ") ?: "")

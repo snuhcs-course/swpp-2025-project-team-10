@@ -92,8 +92,11 @@ open class LibraryRepository @Inject constructor(
         return try {
             val response = libraryApi.searchBooks(query) // Api 호출
             if (response.isSuccessful) {
-                response.body()
+                val body = response.body()
+                Log.d("LibraryRepository", "Response body: $body")
+                body
             } else {
+                Log.e("LibraryRepository", "searchBooks failed: ${response.code()}")
                 Log.e("LibraryRepository", "searchBooks failed: ${response.code()}")
                 emptyList()
             }

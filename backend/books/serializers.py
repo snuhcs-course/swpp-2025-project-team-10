@@ -190,7 +190,7 @@ class BookSerializer(serializers.ModelSerializer):
     Serializer for user-owned book copies exposed via profile/library APIs.
     """
     
-    publicationId = serializers.SerializerMethodField(read_only=True)
+    publicationId = serializers.UUIDField(source='publication.id', read_only=True)
     owner = serializers.ReadOnlyField(source="owner.username")
     ownerId = serializers.IntegerField(source="owner.id", read_only=True)
     title = serializers.CharField(read_only=True)
