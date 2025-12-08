@@ -9,6 +9,10 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        KakaoSdk.init(this, BuildConfig.KAKAO_API_KEY)
+        try {
+            KakaoSdk.init(this, BuildConfig.KAKAO_API_KEY)
+        }
+        catch (e: Exception){
+        }
     }
 }

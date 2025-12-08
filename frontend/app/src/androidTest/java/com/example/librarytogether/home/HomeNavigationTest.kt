@@ -24,7 +24,7 @@ import dagger.hilt.android.testing.BindValue
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import kotlinx.coroutines.runBlocking
-import org.hamcrest.Matchers.equalTo
+import org.hamcrest.CoreMatchers.equalTo
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test

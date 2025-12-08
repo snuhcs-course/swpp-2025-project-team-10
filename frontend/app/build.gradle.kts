@@ -62,6 +62,12 @@ android {
     testOptions {
         unitTests.isReturnDefaultValues = true
         unitTests.isIncludeAndroidResources = true
+        unitTests.all {
+            it.maxHeapSize = "2g"
+            it.maxParallelForks = 1
+            it.forkEvery = 100
+            it.jvmArgs("-XX:+HeapDumpOnOutOfMemoryError")
+        }
     }
     packaging {
         resources {
@@ -77,6 +83,8 @@ android {
 
 dependencies {
 
+    androidTestImplementation("androidx.test.espresso:espresso-intents:3.5.1")
+    testImplementation("androidx.test.espresso:espresso-intents:3.5.1")
     testImplementation(libs.androidx.espresso.core)
     testImplementation(libs.androidx.espresso.contrib)
     testImplementation(libs.androidx.fragment.testing)

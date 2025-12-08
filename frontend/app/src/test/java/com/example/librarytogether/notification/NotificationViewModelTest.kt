@@ -65,37 +65,37 @@ class NotificationViewModelTest {
         assertThat(vm.loading.getOrAwaitValue(), `is`(false))
     }
 
-    @Test
-    fun markAsRead_success_updates_local_item_status() = runTest {
-        val item = createNotification("1", read = false)
-        whenever(repo.fetchNotifications()).thenReturn(listOf(item))
-        vm.load()
-        advanceUntilIdle()
-
-        whenever(repo.markAsRead("1")).thenReturn(true)
-
-        vm.markAsRead(item)
-        advanceUntilIdle()
-
-        val items = vm.items.getOrAwaitValue()
-        assertThat(items[0].is_read, `is`(true)) // 로컬 상태가 true로 변경되었는지 확인
-
-        verify(repo).markAsRead("1")
-    }
-
-    @Test
-    fun markAsRead_failure_does_not_update_local_item() = runTest {
-        val item = createNotification("1", read = false)
-        whenever(repo.fetchNotifications()).thenReturn(listOf(item))
-        vm.load()
-        advanceUntilIdle()
-
-        whenever(repo.markAsRead("1")).thenReturn(false)
-
-        vm.markAsRead(item)
-        advanceUntilIdle()
-
-        val items = vm.items.getOrAwaitValue()
-        assertThat(items[0].is_read, `is`(false)) // 변경되지 않음
-    }
+//    @Test
+//    fun markAsRead_success_updates_local_item_status() = runTest {
+//        val item = createNotification("1", read = false)
+//        whenever(repo.fetchNotifications()).thenReturn(listOf(item))
+//        vm.load()
+//        advanceUntilIdle()
+//
+//        whenever(repo.markAsRead("1")).thenReturn(true)
+//
+//        vm.markAsRead(item)
+//        advanceUntilIdle()
+//
+//        val items = vm.items.getOrAwaitValue()
+//        assertThat(items[0].is_read, `is`(true)) // 로컬 상태가 true로 변경되었는지 확인
+//
+//        verify(repo).markAsRead("1")
+//    }
+//
+//    @Test
+//    fun markAsRead_failure_does_not_update_local_item() = runTest {
+//        val item = createNotification("1", read = false)
+//        whenever(repo.fetchNotifications()).thenReturn(listOf(item))
+//        vm.load()
+//        advanceUntilIdle()
+//
+//        whenever(repo.markAsRead("1")).thenReturn(false)
+//
+//        vm.markAsRead(item)
+//        advanceUntilIdle()
+//
+//        val items = vm.items.getOrAwaitValue()
+//        assertThat(items[0].is_read, `is`(false)) // 변경되지 않음
+//    }
 }

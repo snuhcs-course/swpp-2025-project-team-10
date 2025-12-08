@@ -6,6 +6,18 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="탐색"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="12dp"/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/listRecommendations"
         android:layout_width="0dp"
@@ -15,7 +27,7 @@
         android:paddingTop="12dp"
         android:paddingBottom="12dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvTitle"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

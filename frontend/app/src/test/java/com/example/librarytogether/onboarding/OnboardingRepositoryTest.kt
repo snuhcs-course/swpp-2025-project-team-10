@@ -48,21 +48,21 @@ class OnboardingRepositoryTest {
     @Test
     fun getBooks_returns_fixed_list() {
         val books = repo.getBooks()
-        assertThat(books, hasSize(5))
-        assertThat(books[0].name, equalTo("해리포터"))
+        assertThat(books, hasSize(9))
+        assertThat(books[0].name, equalTo("채식주의자"))
     }
 
     @Test
     fun getAuthors_returns_fixed_list() {
         val authors = repo.getAuthors()
-        assertThat(authors, hasSize(5))
-        assertThat(authors[0].name, equalTo("J.K. 롤링"))
+        assertThat(authors, hasSize(9))
+        assertThat(authors[0].name, equalTo("한강"))
     }
 
     @Test
     fun getGenres_returns_fixed_list() {
         val genres = repo.getGenres()
-        assertThat(genres, hasSize(8))
+        assertThat(genres, hasSize(9))
         assertThat(genres[0].name, equalTo("현대소설"))
     }
 

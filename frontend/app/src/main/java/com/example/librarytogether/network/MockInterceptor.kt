@@ -105,6 +105,22 @@ class MockInterceptor(
             return makeResponse(req, 200, body)
         }
 
+        if (path.endsWith("/explore/recommendations/") && method == "GET") {
+            val body = readJson(R.raw.explore)
+            return makeResponse(req, 200, body)
+        }
+
+        if (path.endsWith("/notifications/") && method == "GET") {
+            val body = readJson(R.raw.notification)
+            return makeResponse(req, 200, body)
+        }
+
+        if (path.contains("/barter/requests/") && method == "GET") {
+            // 상세 조회 (수락/거절 URL과 겹치지 않게 주의)
+            val body = readJson(R.raw.barter_approval)
+            return makeResponse(req, 200, body)
+        }
+
         val notMocked = """{ "success": false, "error": { "code": "NOT_MOCKED", "message": "모킹 없음: $path" } }"""
         return makeResponse(req, 404, notMocked)
     }

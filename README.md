@@ -246,17 +246,13 @@ coverage html  # Generate HTML report in htmlcov/
 # Navigate to frontend directory
 cd frontend
 
-# Run instrumented tests (requires emulator or device)
-./gradlew clean connectedDebugAndroidTest
+./gradlew clean
 
-# Run unit tests
-./gradlew testDebugUnitTest       
-
-# Jacoco Report (Generate HTML report)
-./gradlew jacocoTestReport
+# Kover Report (Generate HTML report)
+./gradlew koverHtmlReportDebug
 
 # HTML report path:
-# frontend/app/build/reports/jacoco/jacocoTestReport/html/index.html
+# frontend/app/build/reports/kover/index.html
 ```
 
 ## 🎯 API Endpoints

@@ -18,6 +18,7 @@ import com.example.librarytogether.feature.library.BookAdapter
 import com.example.librarytogether.feature.library.BookClicks
 import com.example.librarytogether.feature.library.BookListMode
 import com.example.librarytogether.feature.library.data.Book
+import com.example.librarytogether.util.TimeUtils
 import com.example.librarytogether.util.loadAvatar
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -123,7 +124,7 @@ class BarterApprovalFragment : Fragment(R.layout.fragment_barter_approval) {
         currentDetail = detail
 
         tvRequesterName.text = detail.requesterName
-        tvCreatedAt.text = detail.createdAt
+        tvCreatedAt.text = TimeUtils.relativeTime(tvCreatedAt.context, detail.createdAt)
         tvMessage.text = getString(R.string.barter_message_to_user, detail.requesterName)
         binding.imgAvatar.loadAvatar(detail.requesterAvatarUrl)
 
