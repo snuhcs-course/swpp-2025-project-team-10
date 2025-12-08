@@ -71,35 +71,6 @@ class AddBookFragment : Fragment(R.layout.fragment_add_book) {
         }
     }
 
-//    private fun saveToBookshelf() {
-//        val publicationId = selectedPublicationId
-//        if (publicationId.isNullOrBlank()) {
-//            Snackbar.make(requireView(), "먼저 검색 결과에서 책을 선택해 주세요.", Snackbar.LENGTH_SHORT).show()
-//            return
-//        }
-//        val title = binding.etTitle.text.toString()
-//        val authors = binding.etAuthor.text.toString()
-//        val publisher = binding.etPublisher.text.toString()
-//        val isbn = binding.etIsbn.text.toString()
-//        val isBarterAvailable = binding.switchBarterAvailable.isChecked
-//
-//        if (title.isBlank() || authors.isBlank()) {
-//            Snackbar.make(requireView(), "책 제목과 저자는 필수입니다.", Snackbar.LENGTH_SHORT).show()
-//            return
-//        }
-//
-//        val postBook = PostBook(
-//            publication = publicationId,
-//            title = title,
-//            authors = authors,
-//            publisher = publisher.takeIf { it.isNotBlank() },
-//            isbn = isbn.takeIf { it.isNotBlank() },
-//            is_for_barter = isBarterAvailable,
-//            //coverUrl =
-//        )
-//        viewModel.addNewBook(postBook)
-//    }
-
     private fun saveToBookshelf() {
         val title = binding.etTitle.text.toString()
         val authors = binding.etAuthor.text.toString()

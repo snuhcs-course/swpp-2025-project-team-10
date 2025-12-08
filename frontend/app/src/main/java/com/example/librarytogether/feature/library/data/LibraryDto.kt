@@ -55,17 +55,6 @@ data class Book(
     val isbn: String?,
     val publicationId: String?
 )
-
-//data class PostBook(
-//    val publication: String,
-//    val title: String,
-//    val authors: String,
-//    val publisher: String?,
-//    val isbn: String?,
-//    val is_for_barter: Boolean,
-//    val cover_image: String? = null
-//)
-
 data class PostBook(
     val publication: String? = null,
     // Fields for existing publication (read-only on backend)
