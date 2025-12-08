@@ -297,6 +297,21 @@ class BookSerializer(serializers.ModelSerializer):
 
     def get_coverUrl(self, obj):
         return self.get_cover_image(obj)
+    
+    def validate(self, data):
+        """
+        Custom validation to check that either publication or book_title is provided
+        """
+        publication = data.get('publication')
+        book_title = data.get('book_title')
+        
+        if not publication and not book_title:
+            raise serializers.ValidationError(
+                "Either 'publication' or 'book_title' must be provided"
+            )
+    
+        return data
+
 
     def create(self, validated_data):
         # Check if publication is provided directly
