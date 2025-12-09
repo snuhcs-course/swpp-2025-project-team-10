@@ -38,18 +38,10 @@ from .services.publication_categories import PublicationCategorizer
 
 User = get_user_model()
 
-# --- Onboarding Views ---
-from .models import Author, Genre, BookPublication
-from .serializers import OnboardingAuthorSerializer, OnboardingBookSerializer, OnboardingGenreSerializer
-from rest_framework.permissions import AllowAny
-
-
-
 def _build_book_card(book: BookCopy, request) -> dict:
     """Return a lightweight payload for library/wishlist endpoints."""
     cover_url = None
-    cover_image = getattr(book, "cover_image", None)
-    if cover_image and hasattr(cover_image, "url"):
+    if book.cover_image:
         cover_url = (
             request.build_absolute_uri(book.cover_image.url)
             if request
@@ -61,6 +53,67 @@ def _build_book_card(book: BookCopy, request) -> dict:
         "author": book.author_names,
         "coverUrl": cover_url,
     }
+
+
+# Custom view to handle both user reviews list (GET by user_id) and review detail (PATCH/PUT/DELETE by pk)
+class UserReviewHybridView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, pk):
+        """Get reviews written by a specific user (pk=user_id)."""
+        try:
+            reviewer = User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        queryset = (
+            BookReview.objects.filter(reviewer=reviewer)
+            .select_related("reviewer")
+            .prefetch_related("helpful_votes")
+        )
+        serializer = ReviewSerializer(queryset, many=True, context={"request": request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+    def patch(self, request, pk):
+        """
+        PATCH: treat pk as review pk and update if owner.
+        """
+        try:
+            review = BookReview.objects.get(pk=pk, reviewer=request.user)
+        except BookReview.DoesNotExist:
+            return Response({"error": "Review not found or no permission."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = CreateReviewSerializer(review, data=request.data, partial=True, context={"request": request})
+        if serializer.is_valid():
+            serializer.save(reviewer=request.user)
+            return Response(ReviewSerializer(review, context={"request": request}).data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+    def put(self, request, pk):
+        """
+        PUT: treat pk as review pk and update if owner.
+        """
+        try:
+            review = BookReview.objects.get(pk=pk, reviewer=request.user)
+        except BookReview.DoesNotExist:
+            return Response({"error": "Review not found or no permission."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = CreateReviewSerializer(review, data=request.data, partial=False, context={"request": request})
+        if serializer.is_valid():
+            serializer.save(reviewer=request.user)
+            return Response(ReviewSerializer(review, context={"request": request}).data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+    def delete(self, request, pk):
+        """
+        DELETE: treat pk as review pk and delete if owner.
+        """
+        try:
+            review = BookReview.objects.get(pk=pk, reviewer=request.user)
+        except BookReview.DoesNotExist:
+            return Response({"error": "Review not found or no permission."}, status=status.HTTP_404_NOT_FOUND)
+        review.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 class UserReviewListCreateView(generics.ListCreateAPIView):
     """
@@ -79,9 +132,17 @@ class UserReviewListCreateView(generics.ListCreateAPIView):
         return ReviewSerializer
 
     def get_queryset(self):
-        """Return only the authenticated user's reviews."""
+        """Return reviews for a specific user if user_id is given, else for the authenticated user."""
+        user_id = self.request.query_params.get('user_id')
+        if user_id:
+            try:
+                user = User.objects.get(pk=user_id)
+            except User.DoesNotExist:
+                return BookReview.objects.none()
+        else:
+            user = self.request.user
         return (
-            BookReview.objects.filter(reviewer=self.request.user)
+            BookReview.objects.filter(reviewer=user)
             .select_related("reviewer")
             .prefetch_related("helpful_votes")
         )
@@ -511,7 +572,7 @@ def user_reviews_by_id(request, user_id: int):
     serializer = ReviewSerializer(
         queryset, many=True, context={"request": request}
     )
-    return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response({"results": serializer.data}, status=status.HTTP_200_OK)
 
 
 @api_view(["POST", "DELETE"])
@@ -880,53 +941,3 @@ def publication_recommendations(request):
         )
 
     return Response({"results": results}, status=status.HTTP_200_OK)
-
-
-class OnboardingBookListView(generics.ListAPIView):
-    """
-    온보딩 과정에서 보여줄 책 목록은 "is_onboarding_choice=True"인 항목들만 반환합니다.
-    """
-    # queryset = BookPublication.objects.filter(is_onboarding_choice=True)
-    # serializer_class = OnboardingBookSerializer
-    # permission_classes = [AllowAny]
-    # pagination_class = None # 페이지네이션 비활성화
-
-    serializer_class = OnboardingBookSerializer
-    permission_classes = [AllowAny]
-    pagination_class = None  # 페이지네이션 비활성화
-    
-    def get_queryset(self):
-        return BookPublication.objects.filter(is_onboarding_choice=True)
-
-class OnboardingAuthorListView(generics.ListAPIView):
-    """
-    온보딩 과정에서 보여줄 작가 목록은 "is_onboarding_choice=True"인 항목들만 반환합니다.
-    """
-    # queryset = Author.objects.filter(is_onboarding_choice=True)
-    # serializer_class = OnboardingAuthorSerializer
-    # permission_classes = [AllowAny]
-    # pagination_class = None # 페이지네이션 비활성화
-
-    serializer_class = OnboardingAuthorSerializer
-    permission_classes = [AllowAny]
-    pagination_class = None
-    
-    def get_queryset(self):
-        return Author.objects.filter(is_onboarding_choice=True)
-
-class OnboardingGenreListView(generics.ListAPIView):
-    """
-    온보딩 과정에서 보여줄 장르 목록은 "is_onboarding_choice=True"인 항목들만 반환합니다.
-    """
-    # queryset = Genre.objects.filter(is_onboarding_choice=True)
-    # serializer_class = OnboardingGenreSerializer
-    # permission_classes = [AllowAny]
-    # pagination_class = None # 페이지네이션 비활성화
-
-    serializer_class = OnboardingGenreSerializer
-    permission_classes = [AllowAny]
-    pagination_class = None
-    
-    def get_queryset(self):
-        return Genre.objects.filter(is_onboarding_choice=True)
-

@@ -10,7 +10,18 @@ from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from .models import User, UserPreferences, UserTaste
+
+from .models import (
+    Author,
+    Book,
+    BookGenre,
+    BookLength,
+    BookMood,
+    ReadingPurpose,
+    User,
+    UserPreferences,
+    UserTaste,
+)
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -521,15 +532,25 @@ class UserTasteSerializer(serializers.ModelSerializer):
     Serializer for user's book preferences and taste information.
     """
 
-    # TextChoices가 아닌 실제 모델의 ID 리스트를 받도록 수정
     favorite_genres = serializers.ListField(
-        child=serializers.IntegerField(), required=False
+        child=serializers.ChoiceField(choices=BookGenre.choices),
+        required=False,
     )
     favorite_authors = serializers.ListField(
-        child=serializers.IntegerField(), required=False
+        child=serializers.ChoiceField(choices=Author.choices), required=False
     )
     favorite_books = serializers.ListField(
-        child=serializers.UUIDField(), required=False
+        child=serializers.ChoiceField(choices=Book.choices), required=False
+    )
+    preferred_length = serializers.ChoiceField(
+        choices=BookLength.choices, required=False, allow_null=True
+    )
+    preferred_moods = serializers.ListField(
+        child=serializers.ChoiceField(choices=BookMood.choices), required=False
+    )
+    reading_purposes = serializers.ListField(
+        child=serializers.ChoiceField(choices=ReadingPurpose.choices),
+        required=False,
     )
     # Trade style fields (optional, can be set later from profile)
     trade_place_name = serializers.CharField(
@@ -545,6 +566,9 @@ class UserTasteSerializer(serializers.ModelSerializer):
             "favorite_genres",
             "favorite_authors",
             "favorite_books",
+            "preferred_length",
+            "preferred_moods",
+            "reading_purposes",
             "trade_place_name",
             "trade_address",
             "current_step",
@@ -552,21 +576,41 @@ class UserTasteSerializer(serializers.ModelSerializer):
         read_only_fields = ("current_step",)
 
     def validate_favorite_genres(self, value):
-        # 실제 Genre 모델 ID가 존재하는지 검증 (선택 사항)
+        """Validate favorite genres."""
+        if value is not None and len(value) < 3:
+            raise serializers.ValidationError(
+                "최소 3개 이상의 장르를 선택해주세요"
+            )
         return value
 
     def validate_favorite_authors(self, value):
-        # 실제 Author 모델 ID가 존재하는지 검증 (선택 사항)
+        """Validate favorite authors."""
+        if value is not None and len(value) < 3:
+            raise serializers.ValidationError(
+                "최소 3명 이상의 작가를 선택해주세요"
+            )
         return value
 
     def validate_favorite_books(self, value):
-        # 실제 BookPublication 모델 ID(UUID)가 존재하는지 검증 (선택 사항)
+        """Validate favorite books."""
+        if value is not None and len(value) < 3:
+            raise serializers.ValidationError(
+                "최소 3권 이상의 책을 선택해주세요"
+            )
         return value
 
+    def validate_preferred_moods(self, value):
+        """Validate preferred moods."""
+        if value is not None and len(value) < 3:
+            raise serializers.ValidationError(
+                "최소 3개 이상의 분위기를 선택해주세요"
+            )
+        return value
 
-class OnboardingSerializer(serializers.Serializer):
-    """Serializer for onboarding data submission."""
-
-    book_ids = serializers.ListField(child=serializers.CharField(), required=False)
-    author_ids = serializers.ListField(child=serializers.IntegerField(), required=False)
-    genre_ids = serializers.ListField(child=serializers.IntegerField(), required=False)
+    def validate_reading_purposes(self, value):
+        """Validate reading purposes."""
+        if value is not None and len(value) < 3:
+            raise serializers.ValidationError(
+                "최소 3개 이상의 목적을 선택해주세요"
+            )
+        return value

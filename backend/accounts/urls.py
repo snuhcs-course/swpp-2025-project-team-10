@@ -19,6 +19,12 @@ urlpatterns = [
         views.CustomTokenRefreshView.as_view(),
         name="token_refresh",
     ),
+    # Alias for frontend compatibility
+    path(
+        "refresh/",
+        views.CustomTokenRefreshView.as_view(),
+        name="token_refresh_alias",
+    ),
     # Password reset endpoints
     path(
         "forgot/start/",

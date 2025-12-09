@@ -34,6 +34,14 @@ def test_barter_create_accept_reject_flow():
     book = BookCopy.objects.create(
         publication=publication,
         owner=recipient,
+        is_for_barter=True,
+    )
+    
+    # requester도 barter할 책이 필요
+    requester_book = BookCopy.objects.create(
+        publication=publication,
+        owner=requester,
+        is_for_barter=True,
     )
 
     # Create
@@ -42,7 +50,7 @@ def test_barter_create_accept_reject_flow():
         reverse("barter:create-request"),
         {
             "recipient_id": recipient.id,
-            "requested_book_id": str(book.id),
+            "requested_book_id": book.id,
         },
         format="json",
     )

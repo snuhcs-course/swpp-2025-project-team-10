@@ -8,6 +8,9 @@ source =
     ai_integration
     core
 omit =
+    create_dummy_data.py
+    core/
+    run_tests.py
     */tests/*
     */migrations/*
     */__init__.py

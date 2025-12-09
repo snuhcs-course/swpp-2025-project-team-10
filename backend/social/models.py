@@ -30,6 +30,9 @@ class Post(models.Model):
 
     # Content
     content = models.TextField(help_text="Share your thoughts about books!")
+    # Denormalized author name for book-related posts to satisfy NOT NULL DB constraint
+    author_name = models.CharField(max_length=200, blank=True, default="")
+    book_title = models.CharField(max_length=200, blank=True, help_text="Title of the book for review posts")
 
     # Related Objects
     related_book = models.ForeignKey(
@@ -51,10 +54,6 @@ class Post(models.Model):
 
     # Visibility
     is_public = models.BooleanField(default=True)
-
-    book_title = models.CharField(max_length=200, blank=True)
-    author_name = models.CharField(max_length=200, blank=True)
-    book_cover_image = models.URLField(blank=True)
 
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
