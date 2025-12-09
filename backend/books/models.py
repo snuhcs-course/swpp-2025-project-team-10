@@ -216,8 +216,8 @@ class BookCopy(models.Model):
         BookPublication,
         on_delete=models.CASCADE,
         related_name="copies",
-        null=True,
-        blank=True,
+        # null=True,
+        # blank=True,
     )
     owner = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="book_copies"
