@@ -236,13 +236,6 @@ class BookSerializer(serializers.ModelSerializer):
     )
     publicationId = serializers.UUIDField(source="publication.id", read_only=True,)
 
-
-    # Fields for creating a new BookPublication if needed
-    book_isbn_10 = serializers.CharField(write_only=True, required=False, allow_blank=True)
-    book_isbn_13 = serializers.CharField(write_only=True, required=False, allow_blank=True)
-    book_publisher = serializers.CharField(write_only=True, required=False, allow_blank=True)
-    book_published_date = serializers.CharField(write_only=True, required=False, allow_blank=True)
-    book_description = serializers.CharField(write_only=True, required=False, allow_blank=True)
     class Meta:
         model = BookCopy
         fields = [
@@ -265,15 +258,6 @@ class BookSerializer(serializers.ModelSerializer):
             #post
             "publication",
             "publicationId",
-            #When a user adds a book that does not exist in BookPublication,
-            #these fields are used to create a new BookPublication.
-            "book_isbn_10",
-            "book_isbn_13",
-            "book_publisher",
-            "book_published_date",
-            "book_description",
-
-
         ]
         read_only_fields = [
             "id",
@@ -293,7 +277,8 @@ class BookSerializer(serializers.ModelSerializer):
             "publicationId",
         ]
         extra_kwargs = {"publication": {"write_only": True}}
-
+    def get_publicationId(self, obj):
+        return obj.publication.id if obj.publication else None
     def get_authors(self, obj):
         return list(obj.publication.authors.values_list("name", flat=True))
 
@@ -306,12 +291,10 @@ class BookSerializer(serializers.ModelSerializer):
 
 
     def get_cover_image(self, obj):
-        publication = obj.publication
-
-        if not publication.cover_image:
+        if not obj.cover_image:
             return None
         request = self.context.get("request")
-        url = publication.cover_image.url
+        url = obj.cover_image.url
         return request.build_absolute_uri(url) if request else url
 
     def get_coverUrl(self, obj):
