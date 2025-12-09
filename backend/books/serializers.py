@@ -190,6 +190,7 @@ class BookSerializer(serializers.ModelSerializer):
     Serializer for user-owned book copies exposed via profile/library APIs.
     """
 
+    publicationId = serializers.UUIDField(source='publication.id', read_only=True)
     owner = serializers.ReadOnlyField(source="owner.username")
     ownerId = serializers.IntegerField(source="owner.id", read_only=True)
     title = serializers.CharField(read_only=True)
@@ -274,6 +275,9 @@ class BookSerializer(serializers.ModelSerializer):
             "publicationId",
         ]
         extra_kwargs = {"publication": {"write_only": True}}
+
+    def get_publicationId(self, obj):
+        return obj.publication.id if obj.publication else None
 
     def get_authors(self, obj):
         return list(obj.publication.authors.values_list("name", flat=True))
