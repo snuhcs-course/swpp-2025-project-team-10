@@ -96,7 +96,8 @@ class BookSummarySerializer(serializers.ModelSerializer):
     """
 
     authorNames = serializers.CharField(source="author_names", read_only=True)
-
+    publicationId = serializers.UUIDField(source="publication.id", read_only=True)
+    
     class Meta:
         model = BookCopy
         fields = [
@@ -105,6 +106,8 @@ class BookSummarySerializer(serializers.ModelSerializer):
             "authorNames",
             "trade_status",
             "is_for_barter",
+            "publicationId",
+
         ]
 
 
