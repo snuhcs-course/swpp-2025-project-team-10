@@ -79,40 +79,6 @@
         app:layout_constraintTop_toBottomOf="@id/LogInButton"
         app:layout_constraintHorizontal_bias="1"/>
 
-    <View
-        android:id="@+id/DivideLeft"
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:background="#E0E0E0"
-        android:layout_marginEnd="10dp"
-        app:layout_constraintStart_toStartOf="@id/LogInButton"
-        app:layout_constraintEnd_toStartOf="@id/DivideText"
-        app:layout_constraintTop_toTopOf="@id/DivideText"
-        app:layout_constraintBottom_toBottomOf="@id/DivideText" />
-
-    <TextView
-        android:id="@+id/DivideText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/text_or"
-        android:textSize="12sp"
-        android:textColor="#9E9E9E"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/ForgotPasswordButton"
-        app:layout_constraintBottom_toTopOf="@id/GoogleLoginButton"/>
-
-    <View
-        android:id="@+id/DivideRight"
-        android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:background="#E0E0E0"
-        android:layout_marginStart="10dp"
-        app:layout_constraintStart_toEndOf="@id/DivideText"
-        app:layout_constraintEnd_toEndOf="@id/LogInButton"
-        app:layout_constraintTop_toTopOf="@id/DivideText"
-        app:layout_constraintBottom_toBottomOf="@id/DivideText" />
-
     <com.google.android.material.button.MaterialButton
         android:id="@+id/GoogleLoginButton"
         style="@style/Widget.Material3.Button.ElevatedButton"

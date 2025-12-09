@@ -196,24 +196,11 @@ class FeedAdapter(
                 btnLike.setIconResource(R.drawable.like_icon)
             }
 
-            val likeText = if (post.likeCount > 0) {
-                itemView.context.getString(
-                    R.string.like_with_count,
-                    formatCount(post.likeCount)
-                )
-            } else {
-                itemView.context.getString(R.string.like)
-            }
+            val likeText = itemView.context.getString(R.string.like)
             btnLike.text = likeText
 
-            val commentText = if (post.commentCount > 0) {
-                itemView.context.getString(
-                    R.string.comment_with_count,
-                    formatCount(post.commentCount)
-                )
-            } else {
-                itemView.context.getString(R.string.comment)
-            }
+            val commentText = itemView.context.getString(R.string.comment)
+
             btnBookReview.text = commentText
 
 

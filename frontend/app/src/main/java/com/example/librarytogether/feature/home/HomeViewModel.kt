@@ -58,42 +58,17 @@ class HomeViewModel @Inject constructor(
 
     fun applySort(type: SortType) {
         currentSort = type
-
         val allPosts: List<Post> = originalPosts.orEmpty()
+        val sorter = PostSorterFactory.create(type)
+        val sortedPosts = sorter.sort(allPosts, userRegion)
 
-        val baseList = when (type) {
-            SortType.NEARBY -> {
-                val region = userRegion
-                    ?.trim()
-                    ?.takeIf { it.length >= 2 }
-                    ?.take(2)
-                if (region.isNullOrBlank()) {
-                    allPosts
-                } else {
-                    allPosts.filter { post ->
-                        val posterRegion = post.posterLocation
-                            ?.trim()
-                            ?.takeIf { it.length >= 2 }
-                            ?.take(2)
-
-                        posterRegion == region
-                    }
-                }
-            }
-            else -> allPosts
-        }
-        val sorted = when (type) {
-            SortType.LATEST -> allPosts.sortedByDescending { it.createdAt }
-            SortType.POPULAR -> allPosts.sortedByDescending { it.likeCount }
-            SortType.NEARBY -> baseList.sortedByDescending { it.createdAt }
-        }
-        if (type == SortType.NEARBY && sorted.isEmpty() && originalPosts.isNotEmpty()) {
+        if (type == SortType.NEARBY && sortedPosts.isEmpty() && originalPosts.isNotEmpty()) {
             _error.value = "현재 지역 근처에는 게시글이 없습니다."
 
             _posts.value = allPosts.sortedByDescending { it.createdAt }.toList()
             currentSort = SortType.LATEST
         } else {
-            _posts.value = sorted.toList()
+            _posts.value = sortedPosts.toList()
         }
     }
 

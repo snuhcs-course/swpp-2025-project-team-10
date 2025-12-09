@@ -11,6 +11,8 @@ import com.example.librarytogether.R
 import com.example.librarytogether.databinding.FragmentOnboardingBinding
 import com.example.librarytogether.feature.main.MainActivity
 import com.example.librarytogether.util.GridSpacingItemDecoration
+import com.google.android.flexbox.FlexWrap
+import com.google.android.flexbox.JustifyContent
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 

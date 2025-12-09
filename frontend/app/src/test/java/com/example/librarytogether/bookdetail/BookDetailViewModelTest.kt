@@ -49,7 +49,7 @@ class BookDetailViewModelTest {
         id = "target-id",
         title = "Title",
         authors = listOf("Author"),
-        publisher = null,
+        publisher_name = null,
         isbn = null,
         description = "Desc",
         cover_image = null,

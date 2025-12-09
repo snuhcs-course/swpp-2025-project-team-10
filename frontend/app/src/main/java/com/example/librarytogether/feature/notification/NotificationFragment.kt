@@ -33,7 +33,7 @@ class NotificationFragment : Fragment(R.layout.fragment_notification) {
         adapter = NotificationAdapter(
             NotificationClicks(
                 onClickItem = { item ->
-                    vm.markAsRead(item)
+                    //vm.markAsRead(item)
                     item.deepLink?.let { link ->
                         runCatching {
                             startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, Uri.parse(link)))
@@ -41,7 +41,7 @@ class NotificationFragment : Fragment(R.layout.fragment_notification) {
                     }
                 },
                 onClickAction = { item ->
-                    vm.markAsRead(item)
+                    //vm.markAsRead(item)
                     Log.d("NotificationFragment", "onClickAction called. item = $item")
 
                     when (item.type){

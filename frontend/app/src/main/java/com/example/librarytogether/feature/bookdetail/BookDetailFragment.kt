@@ -18,6 +18,8 @@ import com.example.librarytogether.feature.bookdetail.data.BookDetail
 import com.example.librarytogether.feature.home.HomeViewModel
 import com.example.librarytogether.feature.library.LibraryViewModel
 import com.example.librarytogether.util.loadCover
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 
 enum class EntrySource {SEARCH, WISHLIST, EXPLORE, BOOKSHELF, MYBOOKSHELF, BARTERAPPROVAL}
@@ -69,14 +71,19 @@ class BookDetailFragment : Fragment(R.layout.fragment_book_detail) {
                 EntrySource.MYBOOKSHELF -> {
                 }
                 else -> {
-                    homeViewModel.requestBarter(
-                        ownerId = book.ownerId,
-                        bookId = bookId
-                    )
-                    findNavController().popBackStack(
-                        R.id.nav_notification,
-                        false
-                    )
+                    val title = getString(R.string.barter_title_to_user, book.owner)
+
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(title)
+                        .setMessage(getString(R.string.barter_confirm_msg))
+                        .setNegativeButton(getString(R.string.cancel), null)
+                        .setPositiveButton(getString(R.string.barter_apply)) { _, _ ->
+                            homeViewModel.requestBarter(
+                                ownerId = book.ownerId,
+                                bookId = bookId
+                            )
+                        }
+                        .show()
                 }
             }
         }
@@ -102,6 +109,20 @@ class BookDetailFragment : Fragment(R.layout.fragment_book_detail) {
                 if (isWish) getString(R.string.status_wishlist)
                 else getString(R.string.action_add_wishlist)
         }
+
+        homeViewModel.barterError.observe(viewLifecycleOwner) { msg ->
+            if (!msg.isNullOrBlank()) {
+                Snackbar.make(requireView(), msg, Snackbar.LENGTH_SHORT).show()
+                homeViewModel.clearBarterResult()
+            }
+        }
+
+        homeViewModel.barterSuccess.observe(viewLifecycleOwner) { ok ->
+            if (ok == true) {
+                Snackbar.make(requireView(), "교환 신청을 보냈습니다.", Snackbar.LENGTH_SHORT).show()
+                homeViewModel.clearBarterResult()
+            }
+        }
     }
 
     private fun renderLoading(loading: Boolean) {
@@ -124,7 +145,7 @@ class BookDetailFragment : Fragment(R.layout.fragment_book_detail) {
         val book = state.book
         binding.tvTitle.text = book.title
         binding.tvAuthor.text = book.authors?.joinToString(", ") ?: ""
-        binding.tvPublisher.text = book.publisher.orEmpty()
+        binding.tvPublisher.text = book.publisher_name.orEmpty()
         binding.tvIsbn.text = book.isbn.orEmpty()
         binding.tvDescription.apply {
             isVisible = !book.description.isNullOrBlank()

@@ -3,6 +3,7 @@ package com.example.librarytogether.feature.auth
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -72,8 +73,13 @@ class LoginActivity : AppCompatActivity() {
         btnLogin.setOnClickListener { onClickLogin() }
         btnForgot.setOnClickListener { onClickForgotPassword() }
         btnSignUp.setOnClickListener { onClickSignUp() }
-        btnKakao.setOnClickListener { onClickKakaoLogin() }
-        btnGoogle.setOnClickListener { onClickGoogleLogin() }
+        //btnKakao.setOnClickListener { onClickKakaoLogin() }
+        //btnGoogle.setOnClickListener { onClickGoogleLogin() }
+
+        btnKakao.visibility = View.GONE
+        btnKakao.isEnabled = false
+        btnGoogle.visibility = View.GONE
+        btnGoogle.isEnabled = false
     }
 
     private fun saveLoginData(accessToken: String, refreshToken: String, username: String?) {

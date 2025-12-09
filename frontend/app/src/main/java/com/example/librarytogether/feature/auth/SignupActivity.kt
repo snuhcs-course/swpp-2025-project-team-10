@@ -2,6 +2,7 @@ package com.example.librarytogether.feature.auth
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -69,9 +70,14 @@ class SignupActivity : AppCompatActivity() {
 
         // Button click handler
         btnSignUp.setOnClickListener { onClickSignUp() }
-        btnGoogle.setOnClickListener { onClickGoogleSignUp() }
-        btnKakao.setOnClickListener { onClickKakaoSignUp() }
         btnLogin.setOnClickListener { onClickGoToLogin() }
+        //btnGoogle.setOnClickListener { onClickGoogleSignUp() }
+        //btnKakao.setOnClickListener { onClickKakaoSignUp() }
+
+        btnKakao.visibility = View.GONE
+        btnKakao.isEnabled = false
+        btnGoogle.visibility = View.GONE
+        btnGoogle.isEnabled = false
     }
 
     private fun onClickSignUp() {
