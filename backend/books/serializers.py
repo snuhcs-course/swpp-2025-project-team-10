@@ -234,6 +234,9 @@ class BookSerializer(serializers.ModelSerializer):
         write_only=True,
         required=False,
     )
+    publicationId = serializers.UUIDField(source="publication.id", read_only=True,)
+
+
     # Fields for creating a new BookPublication if needed
     book_isbn_10 = serializers.CharField(write_only=True, required=False, allow_blank=True)
     book_isbn_13 = serializers.CharField(write_only=True, required=False, allow_blank=True)
@@ -261,6 +264,7 @@ class BookSerializer(serializers.ModelSerializer):
             "ownerId",
             #post
             "publication",
+            "publicationId",
             #When a user adds a book that does not exist in BookPublication,
             #these fields are used to create a new BookPublication.
             "book_isbn_10",
