@@ -211,8 +211,7 @@ class BookSerializer(serializers.ModelSerializer):
     publication = serializers.PrimaryKeyRelatedField(
         queryset=BookPublication.objects.all(),
         write_only=True,
-        required=False,
-        allow_null=True
+        required=True,
     )
     # Fields for creating a new BookPublication if needed
     book_isbn_10 = serializers.CharField(write_only=True, required=False, allow_blank=True)
@@ -289,6 +288,17 @@ class BookSerializer(serializers.ModelSerializer):
     def get_publisher_name(self, obj):
         publisher = obj.publication.publisher
         return publisher.name if publisher else None
+
+    def validate(self, data):
+        publication = data.get('publication')
+        book_title = data.get('book_title')
+        
+        if not publication and not book_title:
+            raise serializers.ValidationError(
+                "Either 'publication' or 'book_title' must be provided"
+            )
+        
+        return data
 
 
     def get_cover_image(self, obj):
