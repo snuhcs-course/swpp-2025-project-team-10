@@ -243,6 +243,7 @@ class BookSerializer(serializers.ModelSerializer):
             "trade_status",
             "owner",
             "ownerId",
+            "publicationId",
             #post
             "publication",
             #When a user adds a book that does not exist in BookPublication,
