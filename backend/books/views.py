@@ -41,8 +41,7 @@ User = get_user_model()
 def _build_book_card(book: BookCopy, request) -> dict:
     """Return a lightweight payload for library/wishlist endpoints."""
     cover_url = None
-    cover_image = getattr(book, "cover_image", None)
-    if cover_image and hasattr(cover_image, "url"):
+    if book.cover_image:
         cover_url = (
             request.build_absolute_uri(book.cover_image.url)
             if request

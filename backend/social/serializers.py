@@ -162,10 +162,6 @@ class PostSerializer(serializers.ModelSerializer):
         """Get image URLs for the post."""
         image_urls = []
 
-        #Check for book cover image first
-        if obj.book_cover_image:
-            image_urls.append(obj.book_cover_image)
-
         if obj.image:
             request = self.context.get("request")
             if request:
